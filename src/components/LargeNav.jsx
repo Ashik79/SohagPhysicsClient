@@ -1,0 +1,33 @@
+import React, { useContext } from 'react'
+import { NavLink } from 'react-router-dom'
+import { AuthContext } from '../Provider'
+
+function LargeNav() {
+    const { role } = useContext(AuthContext)
+    return (
+        <div className='w-full hidden lg:block'>
+            <ul className="w-full flex flex-col pl-4 gap-3 font-semibold mt-10">
+            <NavLink to={'/overview'}><li className='pl-2 hover:bg-gray-200 '>Overview</li></NavLink>
+                <NavLink to={'/finder'}><li className='pl-2 hover:bg-gray-200 '>Finder</li></NavLink>
+                <NavLink to={'/attendance'}><li className='pl-2 hover:bg-gray-200'>Attendance</li></NavLink>
+                <NavLink to={'/exams'}><li className='pl-2 hover:bg-gray-200'>Exams</li></NavLink>
+                {
+                    role == 'CEO' ? <NavLink to={'/download'}><li className='pl-2 hover:bg-gray-200'>Download</li></NavLink> : ''
+                }
+                {
+                    role == 'CEO' ? <NavLink to={'/message'}><li className='pl-2 hover:bg-gray-200'>Message</li></NavLink> : ''
+                }
+
+                <NavLink to={'/payment'}><li className='pl-2 hover:bg-gray-200'>Payment Entry</li></NavLink>
+                <NavLink to={'/register'}><li className='pl-2 hover:bg-gray-200'>Register</li></NavLink>
+                <NavLink to={'/programentry'}><li className='pl-2 hover:bg-gray-200'>Program Entry</li></NavLink>
+                {
+                    role == 'CEO' ? <NavLink to={'/adduser'}><li className='pl-2 hover:bg-gray-200'>Add Role</li></NavLink> : ''
+                }
+
+            </ul>
+        </div>
+    )
+}
+
+export default LargeNav
