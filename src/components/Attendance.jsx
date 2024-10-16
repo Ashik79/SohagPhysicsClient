@@ -92,7 +92,7 @@ const Attendance = () => {
         <div className='flex mt-2 flex-col lg:flex-row'>
           <h1 className='font-bold text-lg lg:w-1/4'></h1>
           <div className='lg:w-2/3 text-center'>
-            <input className="font-semibold w-full bg-blue-100 border-2 rounded-xl btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Next"}`} />
+            <input className="font-semibold w-full bg-blue-100 border-2 rounded-xl h-11 btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Next"}`} />
             <p className={`flex items-center gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}> <span className="loading loading-dots loading-sm"></span> Loading</p>
           </div>
         </div>

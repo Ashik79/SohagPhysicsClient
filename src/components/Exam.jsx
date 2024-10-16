@@ -427,7 +427,7 @@ const tarikh =`${day} ${getMonth(month)}, ${year}`
                 </div>
                 <div className='flex gap-1 flex-col lg:flex-row items-center '>
                     <div>
-                        <button className='btn border-2 hover:border-sky-600 hover:text-sky-600 text-sm font-bold rounded-xl border-black text-black py-1 px-2' onClick={() => handlePublish()}>{loading ? "" : "Publish Result"}</button>
+                        <button className='btn border-2 hover:border-sky-600 hover:text-sky-600 text-sm font-bold rounded-xl h-11 border-black text-black py-1 px-2' onClick={() => handlePublish()}>{loading ? "" : "Publish Result"}</button>
                         <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
                     </div>
                     <button className='btn border-2 hover:border-sky-600 hover:text-sky-600 text-sm font-bold rounded-xl border-black text-black py-1 px-5' onClick={() => document.getElementById('my_modal_1').showModal()} >Add Single Result</button>
@@ -550,7 +550,7 @@ const tarikh =`${day} ${getMonth(month)}, ${year}`
                         <div className='flex mt-10 flex-col lg:flex-row'>
                             <h1 className='font-bold text-lg lg:w-1/4'></h1>
                             <div className='lg:w-2/3 text-center'>
-                                <input className=" text-lg font-semibold  w-full bg-blue-100  border-2 rounded-xl    btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Add Result"}`} />
+                                <input className=" text-lg font-semibold  w-full bg-blue-100  border-2 rounded-xl h-11   btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Add Result"}`} />
                                 <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
                             </div>
                         </div>

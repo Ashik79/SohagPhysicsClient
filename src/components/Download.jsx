@@ -386,7 +386,7 @@ function Download() {
                 <div className='flex mt-10 flex-col w-full lg:flex-row'>
                     <h1 className='font-bold text-lg lg:w-1/4'></h1>
                     <div className='lg:w-2/3 text-center'>
-                        <input className=" text-lg font-semibold  w-full bg-blue-100  border-2 rounded-xl    btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Find Info"}`} />
+                        <input className=" text-lg font-semibold h-11 w-full bg-blue-100  border-2 rounded-xl    btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Find Info"}`} />
                         <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
                     </div>
                 </div>

@@ -11,6 +11,7 @@ import Swal from 'sweetalert2';
 import AttendanceCalendar from './AttendanceComponent';
 import ExamsList from './ExamsList';
 import ProgramList from './ProgramList';
+import DisplayNotes from './DisplayNotes';
 
 const StudentDetails = () => {
   const { role, notifySuccess } = useContext(AuthContext)
@@ -64,8 +65,8 @@ const StudentDetails = () => {
         return <div><StudentDetailsPart student={student}></StudentDetailsPart></div>;
       case 'programs':
         return <div><ProgramList student={student}></ProgramList></div>;
-      case 'payments':
-        return <div>Payments Component</div>;
+      case 'notes':
+        return <div><DisplayNotes notes={student.notes ||[]} id={student.id}></DisplayNotes></div>;
       case 'results':
         return <div><ExamsList student={student}></ExamsList></div>;
       case 'attendance':
@@ -107,6 +108,12 @@ const StudentDetails = () => {
        className={`px-2 py-1 whitespace-nowrap ${activeTab === 'programs' ? 'bg-sky-600 text-white' : 'bg-gray-200'} rounded hover:bg-sky-700`}
      >
        Programs
+     </button>
+     <button
+       onClick={() => setActiveTab('notes')}
+       className={`px-2 py-1 whitespace-nowrap ${activeTab === 'notes' ? 'bg-sky-600 text-white' : 'bg-gray-200'} rounded hover:bg-sky-700`}
+     >
+       Notes
      </button>
      <button
        onClick={() => setActiveTab('attendance')}

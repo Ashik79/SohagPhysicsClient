@@ -31,6 +31,9 @@ import ProgramEntry from './components/ProgramEntry';
 import Programs from './components/Programs';
 import Coupons from './components/Coupons';
 
+import Note from './components/Note';
+import EditNote from './components/EditNote';
+
 
 const fetchStudent = async ({ params }) => {
   const response = await fetch(`https://spoffice-server.vercel.app/student/${params.id}`);
@@ -93,6 +96,11 @@ const router = createBrowserRouter([
       }
       ,
       {
+        path:'/note',
+        element:<PrivateRoute><Note></Note></PrivateRoute>
+      }
+      ,
+      {
         path:'/programentry',
         element:<PrivateRoute><Programs></Programs></PrivateRoute>
       }
@@ -105,6 +113,12 @@ const router = createBrowserRouter([
       {
         path:'/payment/:id',
         element:<PrivateRoute><AddPayment></AddPayment></PrivateRoute>,
+        loader:fetchStudent,
+      }
+      ,
+      {
+        path:'/note/:id',
+        element:<PrivateRoute><EditNote></EditNote></PrivateRoute>,
         loader:fetchStudent,
       }
       ,
@@ -162,6 +176,7 @@ const router = createBrowserRouter([
         element:<PrivateRoute><Message></Message></PrivateRoute>,
             
       },
+     
       {
         path:'/download',
         element:<PrivateRoute><Download></Download></PrivateRoute>,

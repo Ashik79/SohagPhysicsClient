@@ -188,7 +188,7 @@ const PaymentComponent = () => {
         </div>
         <button
           type="submit"
-          className="bg-blue-500 w-full hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          className="bg-blue-500 h-11 w-full hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
           {loading ? "" : "Submit"}
         </button>
@@ -201,7 +201,7 @@ const PaymentComponent = () => {
           <div className='w-full py-2 flex flex-col items-center justify-center gap-3  lg:w-1/4 border-2 border-sky-900 rounded-xl shadow-xl bg-gray-200'>
             <p>Monthly Payments : {data.monthlyCount}</p>
             <p className='flex items-center gap-2'> Total : <span className='font-bold flex items-center gap-1  text-sky-800'>{data.monthly} <TbCurrencyTaka /></span></p>
-            <button className='text-blue-700' onClick={() => handleDownload("Monthly")}>{!mloading?<FaDownload />:""}</button>
+            <button className='text-blue-700 h-11' onClick={() => handleDownload("Monthly")}>{!mloading?<FaDownload />:""}</button>
             <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${mloading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> </p>
           </div>
           <div className='w-full py-2 flex flex-col border-2 border-sky-900 rounded-xl shadow-xl bg-gray-200   justify-center gap-3  px-2  lg:w-1/2'>
@@ -209,14 +209,14 @@ const PaymentComponent = () => {
             <div className='flex flex-col items-center '>
               <p className='lg:w-1/2 flex items-center gap-2'>Exam Fee : <span className='font-bold flex items-center gap-1  text-sky-800'>{data.exam} <TbCurrencyTaka /></span></p>
               <p className='lg:w-1/2 flex items-center gap-2'>Note Fee : <span className='font-bold  flex items-center gap-1 text-sky-800'>{data.note} <TbCurrencyTaka /></span></p>
-              <button className='text-blue-700' onClick={() => handleDownload("Exam Fee")}>{!ploading?<FaDownload />:""}</button>
+              <button className='text-blue-700 h-11' onClick={() => handleDownload("Exam Fee")}>{!ploading?<FaDownload />:""}</button>
               <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${ploading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> </p>
 
             </div>
           </div>
           <div className='w-full py-2 flex flex-col justify-center border-2 border-sky-900 rounded-xl shadow-xl bg-gray-200 items-center  gap-3 lg:w-1/4'>
             <p>Other : <span className='font-bold flex items-center gap-1  text-sky-800'>{data.other} <TbCurrencyTaka /></span></p>
-            <button className='text-blue-700' onClick={() => handleDownload("other")}>{!oloading?<FaDownload />:""}</button>
+            <button className='text-blue-700 h-11' onClick={() => handleDownload("other")}>{!oloading?<FaDownload />:""}</button>
             <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${oloading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> </p>
           </div>
         </div></> : <></>}

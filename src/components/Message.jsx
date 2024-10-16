@@ -14,7 +14,7 @@ function Message() {
     const [attendancedate, setAttendancedate] = useState(date)
     const [loading, setLoading] = useState(false)
     const [selectedOption, setSelectedOption] = useState('bangla');
-    const [divisor, setDivisor] = useState(70)
+    const [divisor, setDivisor] = useState(65)
     const handleOptionChange = e => {
         const value = e.target.value;
         setSelectedOption(value)
@@ -22,7 +22,7 @@ function Message() {
             setDivisor(70)
         }
         else if (value == 'english') {
-            setDivisor(160)
+            setDivisor(155)
         }
     }
     const [messageText, setMessageText] = useState("")
@@ -128,6 +128,7 @@ function Message() {
 
             if (filteredStudents.length) {
                 notifySuccess(`Found ${filteredStudents.length} students`);
+                console.log(filteredStudents)
                 setLoading(false)
             } else {
                 notifyFailed('Sorry, no student is found');
@@ -168,9 +169,8 @@ function Message() {
 
             const numbers = data.map(d => d.phone)
             const numbersString = numbers.join(',');
-
+console.log(numbersString)
             
-
             const response2 = await fetch('https://bulksmsbd.net/api/smsapi', {
                 method: 'POST',
                 headers: {
@@ -194,7 +194,7 @@ function Message() {
 
             }
             else if (result2.response_code != 202) {
-                notifyFailed("Error in SMS Server")
+                notifyFailed(result2.error_message)
 
                 setLoading(false)
 
@@ -423,7 +423,7 @@ function Message() {
                 <div className='flex mt-10 flex-col w-full lg:flex-row'>
                     <h1 className='font-bold text-lg lg:w-1/4'></h1>
                     <div className='lg:w-2/3 text-center'>
-                        <input className=" text-lg font-semibold  w-full bg-blue-100  border-2 rounded-xl    btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Find Students"}`} />
+                        <input className=" text-lg font-semibold h-11  w-full bg-blue-100  border-2 rounded-xl    btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Find Students"}`} />
                         <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
                     </div>
                 </div>
@@ -479,7 +479,7 @@ function Message() {
 
                             </div>
                             <div className='h-10 border-2 font-bold text-sky-600 hover:bg-slate-400 hover:text-white w-full rounded-lg border-sky-600 text-center '>
-                                <button className='my-1' onClick={handleSend} >{loading ? "" : "Send SMS"}</button>
+                                <button className='my-1 h-11' onClick={handleSend} >{loading ? "" : "Send SMS"}</button>
                                 <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
                             </div>
                         </div>

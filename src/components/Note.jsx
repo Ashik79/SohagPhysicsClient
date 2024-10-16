@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../Provider';
 
-const Payment = () => {
+const Note = () => {
 const {notifyFailed}=useContext(AuthContext)
   const [id, setId] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -31,7 +31,7 @@ const {notifyFailed}=useContext(AuthContext)
 
         {/* students part */}
         <div className='flex mt-2 flex-col lg:flex-row'>
-          <h1 className='font-bold text-lg lg:w-1/4'>Take Payment :</h1>
+          <h1 className='font-bold text-lg lg:w-1/4'>Note Management :</h1>
           <div className='grid grid-cols-1 lg:w-2/3  gap-3'>
 
 
@@ -50,15 +50,15 @@ const {notifyFailed}=useContext(AuthContext)
         <div className='flex mt-2 flex-col lg:flex-row'>
           <h1 className='font-bold text-lg lg:w-1/4'></h1>
           <div className='lg:w-2/3 text-center'>
-            <input className="font-semibold w-full bg-blue-100  border-2 rounded-xl   btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ?"":"Next"}`} />
+            <input className="font-semibold w-full bg-blue-100  border-2 rounded-xl  h-11 btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ?"":"Next"}`} />
             <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
           </div>
         </div>
 
       </form>
-      {id && <Navigate to={`/payment/${id}`}></Navigate>}
+      {id && <Navigate to={`/note/${id}`}></Navigate>}
     </div>
   );
 };
 
-export default Payment;
+export default Note;

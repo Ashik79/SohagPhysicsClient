@@ -83,7 +83,7 @@ function Login() {
             </div>
             <input
               type="submit"
-              className="w-full cursor-pointer bg-cyan-100 text-cyan-700 p-2 rounded-md font-bold hover:bg-cyan-200 transition duration-200"
+              className="w-full h-11 cursor-pointer bg-cyan-100 text-cyan-700 p-2 rounded-md font-bold hover:bg-cyan-200 transition duration-200"
 
               value={`${loading ? '' : "Login"}`}
             />

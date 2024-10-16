@@ -65,7 +65,7 @@ function AddUsers() {
                 </label>
                 <label className="input input-bordered border-orange-500 flex flex-col items-center gap-2">
 
-                    <input type='submit' className='w-full cursor-pointer bg-orange-100 text-orange-700 p-2 rounded-md font-bold hover:bg-orange-200 transition duration-200' value={`${loading?'':'Set'}`} />
+                    <input type='submit' className='w-full h-11 cursor-pointer bg-orange-100 text-orange-700 p-2 rounded-md font-bold hover:bg-orange-200 transition duration-200' value={`${loading?'':'Set'}`} />
                     <p className={`flex items-center gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ?"":'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
                 </label>
 
