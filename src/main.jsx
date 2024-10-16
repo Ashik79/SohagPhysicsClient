@@ -29,6 +29,7 @@ import Message from './components/Message';
 import Download from './components/Download';
 import ProgramEntry from './components/ProgramEntry';
 import Programs from './components/Programs';
+import Coupons from './components/Coupons';
 
 
 const fetchStudent = async ({ params }) => {
@@ -148,6 +149,12 @@ const router = createBrowserRouter([
         path:'/exams',
         element:<PrivateRoute><Exams></Exams></PrivateRoute>,
         loader:()=>fetch('https://spoffice-server.vercel.app/getexams')
+        
+      },
+      {
+        path:'/coupons',
+        element:<PrivateRoute><Coupons></Coupons></PrivateRoute>,
+        loader:()=>fetch('https://spoffice-server.vercel.app/getcoupons')
         
       },
       {

@@ -13,13 +13,13 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 
 function AddPayment() {
     const user = useLoaderData()
-    const { month, date, year, loggedUser, getMonth, notifySuccess,notifyFailed } = useContext(AuthContext)
+    const { month, date, year, loggedUser, getMonth, notifySuccess, notifyFailed } = useContext(AuthContext)
 
     const [loading, setLoading] = useState(false)
 
     const [navigate, setNavigate] = useState(false)
 
-
+    const [displayCoupon, setCoupon] = useState(null)
 
     console.log(user)
     const { monthlyAmount, name, id, payments, phone } = user;
@@ -35,93 +35,117 @@ function AddPayment() {
     }
 
     console.log(user.programs.length)
-    const handlePayment = (event) => {
+    const handlePayment = async (event) => {
         event.preventDefault();
-        if (user.programs.length == 0) {
-            console.log("paisi")
-            notifyFailed("Student must be in a program!")
+        if (user.programs.length === 0) {
+            notifyFailed("Student must be in a program!");
             return;
         }
-        setLoading(true)
+    
+        setLoading(true);
         const id = user.id;
         const name = user.name;
         const type = event.target.type.value;
         const pmonth = event.target.pmonth.value;
         const pyear = event.target.pyear.value;
-        const pamount = event.target.pamount.value;
+        let pamount = event.target.pamount.value;
         const payDate = `${date}-${month}-${year}`;
         const ptaken = loggedUser;
-        if(!ptaken){
+        const coupon = event.target.coupon.value;
+    
+        if (coupon) {
+            console.log("Checking coupon...");
+            try {
+                const response = await fetch(`https://spoffice-server.vercel.app/getcoupon/${coupon}`);
+                const data = await response.json();
+                if (!data.amount) {
+                    notifyFailed("Invalid Coupon");
+                    setLoading(false);
+                    return; // Stop the function here
+                } else {
+                    pamount -= data.amount;
+                    console.log(pamount);
+                    setCoupon(data);
+                    if (data.month !== pmonth) {
+                        notifyFailed("Coupon is not for this month");
+                        setLoading(false);
+                        return; // Stop the function here
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching coupon:", error);
+                notifyFailed("Error checking coupon");
+                setLoading(false);
+                return; // Stop the function here
+            }
+        }
+    
+        if (!ptaken) {
             notifyFailed("Taker name not Loaded, Please refresh!");
+            setLoading(false);
             return;
         }
-        const alreadyPaid = user.payments.some(payment => 
-            payment.type === "Monthly" && 
-            payment.pmonth == pmonth && 
+    
+        const alreadyPaid = user.payments.some(payment =>
+            payment.type === type &&
+            payment.pmonth == pmonth &&
             payment.pyear == pyear
         );
     
         if (alreadyPaid) {
-            notifyFailed("Already paid for selected month !");
+            notifyFailed("Already paid for selected month!");
             setLoading(false);
-            return; // Stop the function here if payment is already done
+            return; // Stop the function here
         }
+    
         const pdata = {
             id, type, pmonth, pyear, pamount, payDate, ptaken, date, month, year, name
+        };
+    
+        user.payments.push(pdata);
+        console.log(user);
+    
+        try {
+            const response = await fetch(`https://spoffice-server.vercel.app/addpayment/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify(user)
+            });
+            const data = await response.json();
+    
+            if (data.modifiedCount) {
+                notifySuccess("Payment Successful!");
+                    setNavigate(true);
+
+                // const smsResponse = await fetch('https://bulksmsbd.net/api/smsapi', {
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json',
+                //     },
+                //     body: JSON.stringify({
+                //         api_key: 'CUOP72nJJHahM30djaQG',
+                //         senderid: '8809617642567',
+                //         number: phone,
+                //         message: `${type} payment for ${getMonth(pmonth)} is successful\nId: ${id}\nName: ${name}\nPaid: ${pamount} TK\n${coupon ? `Discount: ${displayCoupon.amount} (${displayCoupon.title})` : ''}\nAssigned by: ${ptaken}\n SOHAG PHYSICS`
+                //     }),
+                // });
+    
+                // const smsData = await smsResponse.json();
+                // if (smsData.response_code === 202) {
+                //     notifySuccess("Payment Successful!");
+                //     setNavigate(true);
+                // }
+            }
+        } catch (error) {
+            console.error("Error processing payment:", error);
+            notifyFailed("Error processing payment");
+        } finally {
+            setLoading(false);
         }
-
-        user.payments.push(pdata)
-        console.log(user)
-
-        fetch(`https://spoffice-server.vercel.app/addpayment/${id}`, {
-            method: 'PUT',
-            headers: {
-                'content-type': 'application/json'
-            },
-            body: JSON.stringify(user)
-
-        })
-            .then(res => res.json())
-            .then(data => {
-
-                if (data.modifiedCount) {
-                    
-
-                    fetch('https://bulksmsbd.net/api/smsapi', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            api_key: 'CUOP72nJJHahM30djaQG',
-                            senderid: '8809617642567',
-                            number:phone,
-                            message: `${type} payment for ${getMonth(pmonth)} is successful\nId: ${id}\nName: ${name}\nAssigned by: ${ptaken}\n SOHAG PHYSICS`
-                                
-
-                            
-                        }),
-                    })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.response_code == 202) {
-
-                                notifySuccess("Payment Successful !")
-                                setLoading(false)
-                                setNavigate(true)
-                            }
-                        })
-                       
-
-
-                }
-            })
-
-
-
-
-
     };
+    
 
 
     //Last month status
@@ -156,13 +180,13 @@ function AddPayment() {
                         <div className='flex py-3 px-2 items-center my-2 justify-between'>
                             <p className='font-bold text-3xl'>{name} <span className='bg-sky-100 text-sky-500 font-semibold text-xl px-4 rounded-xl py-1'>{id}</span></p>
                             <div className="dropdown dropdown-end">
-                            <div tabIndex={0} role="button" className="rounded-full p-1 bg-sky-200  font-semibold"><BsThreeDotsVertical /></div>
-                            <ul onClick={() => { handleSelect() }} tabIndex={0} className={`dropdown-content ${disabled ? 'hidden' : ''} menu bg-sky-100 text-sky-600 font-semibold rounded-box z-[1] w-52 p-2 shadow `}>
-                                <li><Link to={`/students/${user.id}`}><CgProfile /> Profile</Link></li>
-                                <li className=''><Link to={`/attendance/${user.id}`}> <FaMoneyBillTransfer /> Attendance</Link></li>
+                                <div tabIndex={0} role="button" className="rounded-full p-1 bg-sky-200  font-semibold"><BsThreeDotsVertical /></div>
+                                <ul onClick={() => { handleSelect() }} tabIndex={0} className={`dropdown-content ${disabled ? 'hidden' : ''} menu bg-sky-100 text-sky-600 font-semibold rounded-box z-[1] w-52 p-2 shadow `}>
+                                    <li><Link to={`/students/${user.id}`}><CgProfile /> Profile</Link></li>
+                                    <li className=''><Link to={`/attendance/${user.id}`}> <FaMoneyBillTransfer /> Attendance</Link></li>
 
-                            </ul>
-                        </div>
+                                </ul>
+                            </div>
                         </div>
                         <div className='flex flex-col items-center my-2 justify-center rounded-lg py-3  border-sky-400 border'>
                             <p className='text-3xl text-sky-500 font-semibold flex gap-1 items-center '>{monthlyAmount} <span className='text-3xl'><TbCurrencyTaka /></span></p>
@@ -233,6 +257,16 @@ function AddPayment() {
 
 
                                 </select>
+                            </div>
+                            <div>
+                                <p className='font-semibold'>Coupon  </p>
+                                <input
+                                   
+                                    name='coupon'
+
+                                    type="text"
+
+                                    className="input text-lg font-semibold  input-bordered input-info w-full " />
                             </div>
 
                         </div>

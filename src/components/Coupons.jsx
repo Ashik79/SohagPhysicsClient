@@ -1,0 +1,269 @@
+import React, { useContext, useEffect, useState } from 'react'
+import { AuthContext } from '../Provider'
+import { Link, Navigate, useLoaderData } from 'react-router-dom'
+import { IoMdClose } from "react-icons/io";
+import { MdDeleteForever } from "react-icons/md";
+import Swal from 'sweetalert2';
+
+function Coupons() {
+const loaded =useLoaderData()
+    const { month, year, date, getMonth, notifySuccess } = useContext(AuthContext)
+    const [loading, setLoading] = useState(false)
+
+    const [displayCoupons, setDisplayCoupon] = useState(loaded);
+
+    
+
+
+    const handleAddCoupon = e => {
+        setLoading(true)
+        e.preventDefault()
+        const title = e.target.title.value
+     
+        const month = e.target.month.value
+        const year = e.target.year.value
+        const code = e.target.code.value
+     
+        const amount = e.target.amount.value
+       
+      
+
+        const details = {
+            title,  month, year ,code,amount
+        }
+
+        fetch('https://spoffice-server.vercel.app/addcoupon', {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(details)
+        })
+            .then(res => res.json())
+            .then(data => {
+                console.log(data)
+                if (data.insertedId) {
+                    notifySuccess("Coupon added Successfully")
+                    const newDisplay = [...displayCoupons, details]
+                    setDisplayCoupon(newDisplay)
+                    setLoading(false)
+                    document.getElementById('my_modal_1').close()
+                 
+                }
+            })
+        e.target.reset()
+    }
+    console.log(displayCoupons)
+
+    
+
+
+    const handleDelete = (id) => {
+
+        Swal.fire({
+            title: 'Are You Sure?',
+            text: 'Do you want to delete the Coupon?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Delete',
+            cancelButtonText: 'Cancel',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                console.log(id)
+                fetch(`https://spoffice-server.vercel.app/coupon/delete/${id}`, {
+                    method: "DELETE"
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.deletedCount) {
+                            notifySuccess("Successfully Deleted Coupon")
+                            setDisplayCoupon(prevExams => prevExams.filter(exam => exam._id !== id));
+
+                        }
+                    })
+            } else if (result.isDismissed) {
+                return
+            }
+        })
+
+
+
+
+    }
+
+    return (
+        <div>
+            {/* Open the modal using document.getElementById('ID').showModal() method */}
+            <div className='flex justify-between items-center'>
+                <p className=' font-bold text-xl text-cyan-600 underline lg:text-2xl'>Coupon Management</p>
+                <button className="btn border-2 border-cyan-600 text-cyan-600 font-bold hover:border-black  hover:text-black" onClick={() => document.getElementById('my_modal_1').showModal()}>Add Coupon</button>
+            </div>
+            {/* add korar modal edit */}
+            <dialog id="my_modal_1" className="modal ">
+                <div className="modal-box ">
+                    <div className="modal-action">
+                        <form method="dialog">
+                            {/* if there is a button in form, it will close the modal */}
+                            <button className="text-red-600 px-1 lg:text-lg"><IoMdClose /></button>
+                        </form>
+                    </div>
+                    <form className='mx-auto  w-full' onSubmit={handleAddCoupon} >
+
+
+
+                        <div className='flex  flex-col '>
+                            <h1 className='font-bold text-center underline mb-2 text-xl '>Coupon Details </h1>
+                            <div className='grid grid-cols-1   gap-3'>
+
+
+                                <div>
+                                    <p className='font-semibold'>Title <span className='text-red-700'>*</span> </p>
+                                    <input
+                                        required
+                                        name='title'
+                                        type="text"
+
+                                        className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                </div>
+                                <div>
+                                    <p className='font-semibold'>Code <span className='text-red-700'>*</span> </p>
+                                    <input
+                                        required
+                                        name='code'
+                                        type="text"
+
+                                        className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                </div>
+                                <div>
+                                    <p className='font-semibold'>Amount <span className='text-red-700'>*</span> </p>
+                                    <input
+                                        onWheel={(e) => e.target.blur()}
+                                        required
+                                        name='amount'
+                                        type="number"
+
+                                        className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                </div>
+                                <div>
+                                    <p className='font-semibold'>Month <span className='text-red-700'>*</span> </p>
+                                    <div className='flex justify-between gap-2'>
+
+
+                                        <div className="mb-4 w-1/2">
+
+                                            <select
+                                                defaultValue={month}
+                                                name='month'
+
+                                                className="block w-full bg-white border border-gray-300 rounded py-2 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                            >
+
+                                                <option value="1">January</option>
+                                                <option value="2">February</option>
+                                                <option value="3">March</option>
+                                                <option value="4">April</option>
+                                                <option value="5">May</option>
+                                                <option value="6">June</option>
+                                                <option value="7">July</option>
+                                                <option value="8">August</option>
+                                                <option value="9">September</option>
+                                                <option value="10">October</option>
+                                                <option value="11">November</option>
+                                                <option value="12">December</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="mb-4 w-1/2">
+
+                                            <select
+                                                name='year'
+                                                defaultValue={year}
+                                                className="p-2 border border-gray-300 rounded w-full"
+                                            >
+                                                {[2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030].map(year => (
+                                                    <option key={year} value={year}>{year}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+                        </div>
+
+
+                        <div className='flex mt-10 flex-col lg:flex-row'>
+                            <h1 className='font-bold text-lg lg:w-1/4'></h1>
+                            <div className='lg:w-2/3 text-center'>
+                                <input className=" text-lg font-semibold  w-full bg-blue-100  border-2 rounded-xl    btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? '' : "Add"}`} />
+                                <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
+                            </div>
+                        </div>
+
+                    </form>
+
+
+
+
+
+
+
+
+
+
+                </div>
+            </dialog>
+
+
+
+
+            {/* Uporer dialog ta modal er part */}
+
+
+
+            {/* Sob Coupon dekhai */}
+
+            <div className='flex text-gray-500 font-semibold mt-8 mb-2 w-full'>
+                <div className='w-3/5'>
+                    <p>NAME</p>
+                </div>
+
+                <div className='w-2/5 flex'>
+                    <p className='w-1/2'>Code</p>
+                    <p className='w-1/2'>Amount</p>
+                </div>
+            </div>
+
+            {
+                displayCoupons.map((exam, index) => <>
+                    <div key={index} className='flex w-full cursor-pointer items-center border-b  p-1 border-sky-600 '>
+
+                        <div className='w-3/5' >
+                            <p className='font-semibold'>{exam.title}</p>
+                         
+                        </div>
+
+
+
+                        <div className='  flex w-2/5 text-gray-500 font-semibold'>
+                            <p className='w-1/2 ml-6'>{exam.code}</p>
+                            <p className='w-1/2 ml-10'>{exam.amount}</p>
+                        </div>
+
+
+                        <a onClick={() => handleDelete(exam._id)} className='flex items-center text-lg gap-1 text-red-600'><MdDeleteForever /></a>
+
+
+                    </div>
+                </>)
+            }
+
+
+            
+        </div>
+    )
+}
+
+export default Coupons
