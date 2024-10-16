@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+
+
+
 .active{
     border-left: 3px solid rgb(38, 180, 216);
     color: rgb(38, 180, 216);

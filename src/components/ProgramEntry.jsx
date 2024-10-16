@@ -9,7 +9,7 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 
 function ProgramEntry() {
     const user = useLoaderData()
-    const { month, date, year, loggedUser, notifySuccess, role,notifyFailed } = useContext(AuthContext)
+    const { month, date, year, loggedUser, notifySuccess, role, notifyFailed } = useContext(AuthContext)
 
     const [displayUser, setDisplayUser] = useState(user)
     const [loading, setLoading] = useState(false)
@@ -71,8 +71,8 @@ function ProgramEntry() {
 
         try {
             if (programStatus == 'regular') {
-                const noteFee = parseInt(event.target.noteFee.value)
-                const examFee = parseInt(event.target.examFee.value)
+                const noteFee = parseInt(event.target.noteFee.value) || 0;
+                const examFee = parseInt(event.target.examFee.value) || 0;
 
                 const notePayment =
                 {
@@ -136,7 +136,7 @@ function ProgramEntry() {
 
             else if (programStatus == 'admission') {
                 const type = 'Program Fee'
-                const pamount = parseInt(event.target.programFee.value)
+                const pamount = parseInt(event.target.programFee.value) || 0;
                 const pdata = {
                     id, type, pamount, payDate, ptaken, date, month, year, program, name
                 }
@@ -188,7 +188,7 @@ function ProgramEntry() {
             }
             else if (programStatus == 'due') {
                 const type = 'Program Fee Due'
-                const pamount = parseInt(event.target.duePaid.value)
+                const pamount = parseInt(event.target.duePaid.value) || 0;
                 const pdata = {
                     id, type, pamount, payDate, ptaken, date, month, year, program, name
                 }
@@ -306,9 +306,10 @@ function ProgramEntry() {
                                 role == 'CEO' ? <div>
                                     <p className='font-semibold'>Monthly Amount <span className='text-red-700'>*</span> </p>
                                     <input
+                                        onWheel={(e) => e.target.blur()}
                                         required
                                         name='monthlyAmount'
-                                        type="text"
+                                        type="number"
                                         defaultValue={800}
                                         className="input text-lg font-semibold  input-bordered input-info w-full " />
                                 </div>
@@ -316,6 +317,7 @@ function ProgramEntry() {
                                     <div>
                                         <p className='font-semibold'>Monthly Amount <span className='text-red-700'>*</span> </p>
                                         <input
+                                        onWheel={(e) => e.target.blur()}
                                             required
                                             name='monthlyAmount'
                                             type="text"
@@ -331,7 +333,7 @@ function ProgramEntry() {
                                 <input
                                     required
                                     name='programFee'
-                                    type="text"
+                                    type="number"
 
                                     className="input text-lg font-semibold  input-bordered input-info w-full " />
                             </div> : <></>
@@ -340,9 +342,10 @@ function ProgramEntry() {
                             programStatus == "regular" ? <div>
                                 <p className='font-semibold'>Note Fee <span className='text-red-700'>*</span> </p>
                                 <input
+                                onWheel={(e) => e.target.blur()}
                                     required
                                     name='noteFee'
-                                    type="text"
+                                    type="number"
 
                                     className="input text-lg font-semibold  input-bordered input-info w-full " />
                             </div> : <></>
@@ -351,9 +354,10 @@ function ProgramEntry() {
                             programStatus == "regular" ? <div>
                                 <p className='font-semibold'>Exam Fee <span className='text-red-700'>*</span> </p>
                                 <input
+                                onWheel={(e) => e.target.blur()}
                                     required
                                     name='examFee'
-                                    type="text"
+                                    type="number"
 
                                     className="input text-lg font-semibold  input-bordered input-info w-full " />
                             </div> : <></>
@@ -362,9 +366,10 @@ function ProgramEntry() {
                             programStatus == "due" ? <div>
                                 <p className='font-semibold'>Paid Amount <span className='text-red-700'>*</span> </p>
                                 <input
+                                onWheel={(e) => e.target.blur()}
                                     required
                                     name='duePaid'
-                                    type="text"
+                                    type="number"
 
                                     className="input text-lg font-semibold  input-bordered input-info w-full " />
                             </div> : <></>
@@ -373,9 +378,10 @@ function ProgramEntry() {
                             programStatus == "due" ? <div>
                                 <p className='font-semibold'>Due Amount <span className='text-red-700'>*</span> </p>
                                 <input
+                                onWheel={(e) => e.target.blur()}
                                     required
                                     name='due'
-                                    type="text"
+                                    type="number"
 
                                     className="input text-lg font-semibold  input-bordered input-info w-full " />
                             </div> : <></>

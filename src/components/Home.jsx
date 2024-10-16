@@ -2,6 +2,7 @@ import React, { useContext } from 'react'
 import { AuthContext } from '../Provider'
 import { useNavigate } from 'react-router-dom';
 
+
 function Home() {
   const { user } = useContext(AuthContext)
   const navigate = useNavigate()
@@ -9,8 +10,10 @@ function Home() {
   return (
     <div className='w-full'>
       <div className="max-w-7xl mx-auto flex flex-col  items-center">
+        
         <div className='w-3/4 mb-10 mx-auto rounded-lg'>
           <img className='rounded-lg' src={`/banner.jpg`} alt="" />
+          
         </div>
         <div className="w-full  mb-8 md:mb-0">
           <h1 className="text-4xl font-bold mb-4">Welcome to <span className='text-cyan-700'>Sohag Physics</span></h1>
