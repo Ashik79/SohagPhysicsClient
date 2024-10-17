@@ -41,7 +41,7 @@ function AddPayment() {
             notifyFailed("Student must be in a program!");
             return;
         }
-    
+
         setLoading(true);
         const id = user.id;
         const name = user.name;
@@ -52,7 +52,7 @@ function AddPayment() {
         const payDate = `${date}-${month}-${year}`;
         const ptaken = loggedUser;
         const coupon = event.target.coupon.value;
-    
+
         if (coupon) {
             console.log("Checking coupon...");
             try {
@@ -79,32 +79,32 @@ function AddPayment() {
                 return; // Stop the function here
             }
         }
-    
+
         if (!ptaken) {
             notifyFailed("Taker name not Loaded, Please refresh!");
             setLoading(false);
             return;
         }
-    
+
         const alreadyPaid = user.payments.some(payment =>
             payment.type === type &&
             payment.pmonth == pmonth &&
             payment.pyear == pyear
         );
-    
+
         if (alreadyPaid) {
             notifyFailed("Already paid for selected month!");
             setLoading(false);
             return; // Stop the function here
         }
-    
+
         const pdata = {
             id, type, pmonth, pyear, pamount, payDate, ptaken, date, month, year, name
         };
-    
+
         user.payments.push(pdata);
         console.log(user);
-    
+
         try {
             const response = await fetch(`https://spoffice-server.vercel.app/addpayment/${id}`, {
                 method: 'PUT',
@@ -114,10 +114,10 @@ function AddPayment() {
                 body: JSON.stringify(user)
             });
             const data = await response.json();
-    
+
             if (data.modifiedCount) {
                 notifySuccess("Payment Successful!");
-                    setNavigate(true);
+                setNavigate(true);
 
                 // const smsResponse = await fetch('https://bulksmsbd.net/api/smsapi', {
                 //     method: 'POST',
@@ -131,7 +131,7 @@ function AddPayment() {
                 //         message: `${type} payment for ${getMonth(pmonth)} is successful\nId: ${id}\nName: ${name}\nPaid: ${pamount} TK\n${coupon ? `Discount: ${displayCoupon.amount} (${displayCoupon.title})` : ''}\nAssigned by: ${ptaken}\n SOHAG PHYSICS`
                 //     }),
                 // });
-    
+
                 // const smsData = await smsResponse.json();
                 // if (smsData.response_code === 202) {
                 //     notifySuccess("Payment Successful!");
@@ -145,7 +145,7 @@ function AddPayment() {
             setLoading(false);
         }
     };
-    
+
 
 
     //Last month status
@@ -211,16 +211,27 @@ function AddPayment() {
 
                             </select>
                         </div>
-                        <div>
-                            <p className='font-semibold'>Amount <span className='text-red-700'>*</span> </p>
-                            <input
-                                required
-                                name='pamount'
-                                value={monthlyAmount}
-                                type="number"
-                                onWheel={(e) => e.target.blur()}
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
-                        </div>
+                        {
+                            role == "CEO" ? <div>
+                                <p className='font-semibold'>Amount <span className='text-red-700'>*</span> </p>
+                                <input
+                                    required
+                                    name='pamount'
+                                    defaultValue={monthlyAmount}
+                                    type="number"
+                                    onWheel={(e) => e.target.blur()}
+                                    className="input text-lg font-semibold  input-bordered input-info w-full " />
+                            </div> : <div>
+                                <p className='font-semibold'>Amount <span className='text-red-700'>*</span> </p>
+                                <input
+                                    required
+                                    name='pamount'
+                                    value={monthlyAmount}
+                                    type="number"
+                                    onWheel={(e) => e.target.blur()}
+                                    className="input text-lg font-semibold  input-bordered input-info w-full " />
+                            </div>
+                        }
                         <div className='flex flex-col lg:flex-row gap-2 justify-between'>
                             <div className='w-full lg:w-1/2'>
                                 <p className='font-semibold'>Month <span className='text-red-700'>*</span> </p>
@@ -261,7 +272,7 @@ function AddPayment() {
                             <div>
                                 <p className='font-semibold'>Coupon  </p>
                                 <input
-                                   
+
                                     name='coupon'
 
                                     type="text"
