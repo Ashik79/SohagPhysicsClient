@@ -13,7 +13,7 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 
 function AddPayment() {
     const user = useLoaderData()
-    const { month, date, year, loggedUser, getMonth, notifySuccess, notifyFailed } = useContext(AuthContext)
+    const { month, date, year, loggedUser, getMonth, notifySuccess, notifyFailed,role } = useContext(AuthContext)
 
     const [loading, setLoading] = useState(false)
 
