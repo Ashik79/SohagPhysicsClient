@@ -19,7 +19,11 @@ function Message() {
         const value = e.target.value;
         setSelectedOption(value)
         if (value == 'bangla') {
+<<<<<<< HEAD
             setDivisor(70)
+=======
+            setDivisor(65)
+>>>>>>> 933b704 (Reinitialized git and added updated code)
         }
         else if (value == 'english') {
             setDivisor(155)
@@ -62,6 +66,10 @@ function Message() {
         setLoading(true)
         e.preventDefault();
         const query = {};
+<<<<<<< HEAD
+=======
+        const id = e.target.id.value;
+>>>>>>> 933b704 (Reinitialized git and added updated code)
         const batch = e.target.batch.value;
 
         const program = e.target.program.value;
@@ -69,6 +77,10 @@ function Message() {
 
 
         if (batch) query.batch = batch;
+<<<<<<< HEAD
+=======
+        if (id) query.id = batch;
+>>>>>>> 933b704 (Reinitialized git and added updated code)
         if (session) query.session = session;
 
         try {
@@ -169,8 +181,13 @@ function Message() {
 
             const numbers = data.map(d => d.phone)
             const numbersString = numbers.join(',');
+<<<<<<< HEAD
 console.log(numbersString)
             
+=======
+            console.log(numbersString)
+
+>>>>>>> 933b704 (Reinitialized git and added updated code)
             const response2 = await fetch('https://bulksmsbd.net/api/smsapi', {
                 method: 'POST',
                 headers: {
@@ -179,9 +196,15 @@ console.log(numbersString)
                 body: JSON.stringify({
                     api_key: 'CUOP72nJJHahM30djaQG',
                     senderid: '8809617642567',
+<<<<<<< HEAD
                     number:numbersString,
                     message: messageText
                     
+=======
+                    number: numbersString,
+                    message: messageText
+
+>>>>>>> 933b704 (Reinitialized git and added updated code)
                 }),
             })
             const result2 = await response2.json();
@@ -213,6 +236,18 @@ console.log(numbersString)
                 <div className='flex mt-2 flex-col lg:flex-row'>
                     <h1 className='font-bold text-lg lg:w-1/4'>Searching Options :</h1>
                     <div className='grid grid-cols-1 lg:w-2/3 lg:grid-cols-2 gap-3'>
+<<<<<<< HEAD
+=======
+                        <div>
+                            <p className='font-semibold'>ID</p>
+                            <input
+                                onWheel={(e) => e.target.blur()}
+
+                                name='id'
+                                type="number"
+                                className="input text-lg font-semibold  input-bordered input-info w-full " />
+                        </div>
+>>>>>>> 933b704 (Reinitialized git and added updated code)
 
 
                         <div>
