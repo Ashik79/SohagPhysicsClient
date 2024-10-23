@@ -19,11 +19,8 @@ function Message() {
         const value = e.target.value;
         setSelectedOption(value)
         if (value == 'bangla') {
-<<<<<<< HEAD
-            setDivisor(70)
-=======
+            
             setDivisor(65)
->>>>>>> 933b704 (Reinitialized git and added updated code)
         }
         else if (value == 'english') {
             setDivisor(155)
@@ -66,10 +63,7 @@ function Message() {
         setLoading(true)
         e.preventDefault();
         const query = {};
-<<<<<<< HEAD
-=======
         const id = e.target.id.value;
->>>>>>> 933b704 (Reinitialized git and added updated code)
         const batch = e.target.batch.value;
 
         const program = e.target.program.value;
@@ -77,10 +71,7 @@ function Message() {
 
 
         if (batch) query.batch = batch;
-<<<<<<< HEAD
-=======
-        if (id) query.id = batch;
->>>>>>> 933b704 (Reinitialized git and added updated code)
+        if (id) query.id = id;
         if (session) query.session = session;
 
         try {
@@ -181,13 +172,8 @@ function Message() {
 
             const numbers = data.map(d => d.phone)
             const numbersString = numbers.join(',');
-<<<<<<< HEAD
-console.log(numbersString)
-            
-=======
             console.log(numbersString)
 
->>>>>>> 933b704 (Reinitialized git and added updated code)
             const response2 = await fetch('https://bulksmsbd.net/api/smsapi', {
                 method: 'POST',
                 headers: {
@@ -196,15 +182,9 @@ console.log(numbersString)
                 body: JSON.stringify({
                     api_key: 'CUOP72nJJHahM30djaQG',
                     senderid: '8809617642567',
-<<<<<<< HEAD
-                    number:numbersString,
-                    message: messageText
-                    
-=======
                     number: numbersString,
                     message: messageText
 
->>>>>>> 933b704 (Reinitialized git and added updated code)
                 }),
             })
             const result2 = await response2.json();
@@ -228,7 +208,7 @@ console.log(numbersString)
         }
     }
     //just checking
-    
+
     return (
         role == 'CEO' ? <div className=''>
             <h1 className=' text-center lg:text-left md:text-center font-semibold text-2xl text-cyan-500 underline mt-10'>Messaging</h1>
@@ -238,8 +218,6 @@ console.log(numbersString)
                 <div className='flex mt-2 flex-col lg:flex-row'>
                     <h1 className='font-bold text-lg lg:w-1/4'>Searching Options :</h1>
                     <div className='grid grid-cols-1 lg:w-2/3 lg:grid-cols-2 gap-3'>
-<<<<<<< HEAD
-=======
                         <div>
                             <p className='font-semibold'>ID</p>
                             <input
@@ -249,7 +227,6 @@ console.log(numbersString)
                                 type="number"
                                 className="input text-lg font-semibold  input-bordered input-info w-full " />
                         </div>
->>>>>>> 933b704 (Reinitialized git and added updated code)
 
 
                         <div>
@@ -339,42 +316,42 @@ console.log(numbersString)
                             </select>
                         </div>
 
-                        {
-                            paymentStatus != 'All' && <div>
-                                <p className='font-semibold'>Month  </p>
-                                <select
-                                    onChange={handleMonthChange}
-                                    defaultValue={month}
-                                    name='month'
+    {
+        paymentStatus != 'All' && <div>
+            <p className='font-semibold'>Month  </p>
+            <select
+                onChange={handleMonthChange}
+                defaultValue={month}
+                name='month'
 
-                                    className="select text-lg font-semibold  select-info w-full"
-                                >
-                                    <option value="">All</option>
-                                    <option value="1">January</option>
-                                    <option value="2">February</option>
-                                    <option value="3">March</option>
-                                    <option value="4">April</option>
-                                    <option value="5">May</option>
-                                    <option value="6">June</option>
-                                    <option value="7">July</option>
-                                    <option value="8">August</option>
-                                    <option value="9">September</option>
-                                    <option value="10">October</option>
-                                    <option value="11">November</option>
-                                    <option value="12">December</option>
-                                </select>
-                            </div>
-                        }
-                        {
-                            paymentStatus != 'All' && <div>
-                                <p className='font-semibold'>Year  </p>
-                                <select onChange={handleYearChange} defaultValue={year} name='year' className="select text-lg font-semibold  select-info w-full ">
-                                    <option>2024</option>
-                                    <option>2025</option>
-                                    <option>2026</option>
-                                </select>
-                            </div>
-                        }
+                className="select text-lg font-semibold  select-info w-full"
+            >
+                <option value="">All</option>
+                <option value="1">January</option>
+                <option value="2">February</option>
+                <option value="3">March</option>
+                <option value="4">April</option>
+                <option value="5">May</option>
+                <option value="6">June</option>
+                <option value="7">July</option>
+                <option value="8">August</option>
+                <option value="9">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+            </select>
+        </div>
+    }
+    {
+        paymentStatus != 'All' && <div>
+            <p className='font-semibold'>Year  </p>
+            <select onChange={handleYearChange} defaultValue={year} name='year' className="select text-lg font-semibold  select-info w-full ">
+                <option>2024</option>
+                <option>2025</option>
+                <option>2026</option>
+            </select>
+        </div>
+    }
 
                         <div className='lg:col-span-2'>
                             <p className='font-semibold'>Attendance  </p>
@@ -454,78 +431,78 @@ console.log(numbersString)
                             }
                         </div>
 
+                    </div >
+                </div >
+
+        <div className='flex mt-10 flex-col w-full lg:flex-row'>
+            <h1 className='font-bold text-lg lg:w-1/4'></h1>
+            <div className='lg:w-2/3 text-center'>
+                <input className=" text-lg font-semibold h-11  w-full bg-blue-100  border-2 rounded-xl    btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Find Students"}`} />
+                <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
+            </div>
+        </div>
+
+
+
+            </form >
+    {
+        students.length ? <>
+            <div className='mt-10 flex flex-col lg:flex-row gap-5'>
+                <div className='w-full lg:w-2/3'>
+                    <textarea onKeyUp={handleKeyUp} className='w-full p-2 h-40 rounded-lg border-2 border-sky-600' name="text" ></textarea>
+                    <div className='relative -mt-9 text-end pr-4  '>
+                        char : <span className='font-semibold text-sky-600'>{messageText.length}</span> || word : <span className='font-semibold text-sky-600'>{getWordCount(messageText)}</span>
                     </div>
                 </div>
+                <div className='w-full lg:w-1/3 flex justify-center flex-col items-start gap-2'>
+                    <div className='text-red-600 font-semibold border-2 border-red-600 rounded-lg w-full h-20 lg:h-28 flex flex-col items-center justify-center'>
+                        <div className='flex items-center gap-2'>
+                            <p className='text-2xl font-bold text-center border border-sky-600 rounded-full p-2 py-0'>{students.length}</p>
+                            <p>Students will get the SMS</p>
+                        </div>
+                        <p className='text-sky-600 flex gap-2 items-center text-sm'>Calculation for
+                            <div>
+                                <label>
+                                    <input
+                                        type="radio"
+                                        value="bangla"
+                                        checked={selectedOption === 'bangla'} // Bind the checked property to state
+                                        onChange={handleOptionChange}
+                                    />
+                                    বাংলা
+                                </label>
+                            </div>
+                            <div>
+                                <label>
+                                    <input
+                                        type="radio"
+                                        value="english"
+                                        checked={selectedOption === 'english'} // Bind the checked property to state
+                                        onChange={handleOptionChange}
+                                    />
+                                    English
+                                </label>
+                            </div>
+                        </p>
+                        <div className='flex items-center gap-3'>
+                            <p>Cost: {(Math.ceil(messageText.length / divisor) * 0.35 * students.length).toFixed(2)} TK</p>
+                            <p>Sms Part: {Math.ceil(messageText.length / divisor)} </p>
+                        </div>
 
-                <div className='flex mt-10 flex-col w-full lg:flex-row'>
-                    <h1 className='font-bold text-lg lg:w-1/4'></h1>
-                    <div className='lg:w-2/3 text-center'>
-                        <input className=" text-lg font-semibold h-11  w-full bg-blue-100  border-2 rounded-xl    btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Find Students"}`} />
+
+
+                    </div>
+                    <div className='h-10 border-2 font-bold text-sky-600 hover:bg-slate-400 hover:text-white w-full rounded-lg border-sky-600 text-center '>
+                        <button className='my-1 h-11' onClick={handleSend} >{loading ? "" : "Send SMS"}</button>
                         <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
                     </div>
                 </div>
 
+            </div>
+        </> : <></>
+    }
 
-
-            </form>
-            {
-                students.length ? <>
-                    <div className='mt-10 flex flex-col lg:flex-row gap-5'>
-                        <div className='w-full lg:w-2/3'>
-                            <textarea onKeyUp={handleKeyUp} className='w-full p-2 h-40 rounded-lg border-2 border-sky-600' name="text" ></textarea>
-                            <div className='relative -mt-9 text-end pr-4  '>
-                                char : <span className='font-semibold text-sky-600'>{messageText.length}</span> || word : <span className='font-semibold text-sky-600'>{getWordCount(messageText)}</span>
-                            </div>
-                        </div>
-                        <div className='w-full lg:w-1/3 flex justify-center flex-col items-start gap-2'>
-                            <div className='text-red-600 font-semibold border-2 border-red-600 rounded-lg w-full h-20 lg:h-28 flex flex-col items-center justify-center'>
-                                <div className='flex items-center gap-2'>
-                                    <p className='text-2xl font-bold text-center border border-sky-600 rounded-full p-2 py-0'>{students.length}</p>
-                                    <p>Students will get the SMS</p>
-                                </div>
-                                <p className='text-sky-600 flex gap-2 items-center text-sm'>Calculation for
-                                    <div>
-                                        <label>
-                                            <input
-                                                type="radio"
-                                                value="bangla"
-                                                checked={selectedOption === 'bangla'} // Bind the checked property to state
-                                                onChange={handleOptionChange}
-                                            />
-                                            বাংলা
-                                        </label>
-                                    </div>
-                                    <div>
-                                        <label>
-                                            <input
-                                                type="radio"
-                                                value="english"
-                                                checked={selectedOption === 'english'} // Bind the checked property to state
-                                                onChange={handleOptionChange}
-                                            />
-                                            English
-                                        </label>
-                                    </div>
-                                </p>
-                                <div className='flex items-center gap-3'>
-                                    <p>Cost: {(Math.ceil(messageText.length / divisor) * 0.35 * students.length).toFixed(2)} TK</p>
-                                    <p>Sms Part: {Math.ceil(messageText.length / divisor)} </p>
-                                </div>
-
-
-
-                            </div>
-                            <div className='h-10 border-2 font-bold text-sky-600 hover:bg-slate-400 hover:text-white w-full rounded-lg border-sky-600 text-center '>
-                                <button className='my-1 h-11' onClick={handleSend} >{loading ? "" : "Send SMS"}</button>
-                                <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
-                            </div>
-                        </div>
-
-                    </div>
-                </> : <></>
-            }
-
-        </div> : <div className='text-red-600'> You Don't Have Permission</div>
+        </div > : <div className='text-red-600'> You Don't Have Permission</div>
     )
 }
 
