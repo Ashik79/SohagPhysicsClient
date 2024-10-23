@@ -81,15 +81,11 @@ const StudentDetails = () => {
   })
   const otherPaymentsReversed = otherPayments.reverse()
   const handleSend = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    console.log('send', messageText)
-
+    e.preventDefault();  // Prevent the default form submission
+    setLoading(true);
+    console.log('send', messageText);
+  
     try {
-
-
-
-
       const response2 = await fetch('https://bulksmsbd.net/api/smsapi', {
         method: 'POST',
         headers: {
@@ -100,29 +96,26 @@ const StudentDetails = () => {
           senderid: '8809617642567',
           number: student.phone,
           message: messageText
-
         }),
-      })
+      });
+  
       const result2 = await response2.json();
       console.log(result2);
-      if (result2.response_code == 202) {
-
-        notifySuccess("SMS Sent Successfully !")
-
-        setLoading(false)
-
+  
+      if (result2.response_code === 202) {
+        notifySuccess("SMS Sent Successfully !");
+        e.target.reset();  // Reset the form here
+        setLoading(false);
+      } else {
+        notifyFailed(result2.error_message);
+        setLoading(false);
       }
-      else if (result2.response_code != 202) {
-        notifyFailed(result2.error_message)
-
-        setLoading(false)
-
-      }
+    } catch (err) {
+      console.log(err);
+      setLoading(false);
     }
-    catch (err) {
-      console.log(err)
-    }
-  }
+  };
+  
   const handleKeyUp = e => {
     const text = e.target.value
     setMessageText(text)
@@ -269,8 +262,8 @@ const StudentDetails = () => {
 
 
                 </div>
-                <div className='h-10 border-2 font-bold text-sky-600 hover:bg-slate-400 hover:text-white w-full rounded-lg border-sky-600 text-center '>
-                  <button className='my-1 h-11' onClick={handleSend} >{loading ? "" : "Send SMS"}</button>
+                <div onClick={handleSend} className='h-10 border-2  font-bold text-sky-600 hover:bg-slate-400 hover:text-white w-full rounded-lg border-sky-600 text-center '>
+                  <button className='my-1 h-11'  >{loading ? "" : "Send SMS"}</button>
                   <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
                 </div>
               </div>
