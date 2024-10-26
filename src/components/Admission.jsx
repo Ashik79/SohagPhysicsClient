@@ -89,7 +89,7 @@ console.log(result)
                         api_key: 'CUOP72nJJHahM30djaQG',
                         senderid: '8809617642567',
                         number:phone,
-                        message: `Welcome to Sohag Physics\nStudent ID: ${id}\nName: ${name}\nRegistered by: ${admittedBy}`
+                        message: `Welcome to Sohag Physics\nStudent ID: ${id}\nName: ${name}\nRegistered by: ${admittedBy}\nContact:\n 01789539292\n 01780719371\nFB Group:\nhttps://facebook.com/groups/351973371171795\nFB Page:\nhttps://facebook.com/sohagphysics\nWebsite: https://sohagphysics.fun`
                         
                     }),
                 })
