@@ -31,7 +31,7 @@ function ProgramEntry() {
         if (program == 'HscPhy' || program == 'SscPhy') {
             setProgramStatus('regular')
         }
-        else if (program == 'Exam' || program == 'Others') {
+        else if (program == 'Exam' || program == 'Others' || program == 'PBC') {
             setProgramStatus('admission')
         }
         else if (program == 'ExamDue' || program == 'OthersDue' || program == 'HscPhyDue' || program == 'SscPhyDue' || program == 'MonthlyDue') {
@@ -296,6 +296,7 @@ function ProgramEntry() {
 
                                 <option value={'HscPhy'}>HSC Physics</option>
                                 <option value={'HscPhyDue'}>HSC Physics Due</option>
+                                <option value={'PBC'}>PBC</option>
                                 <option value={'SscPhy'}>SSC Physics</option>
                                 <option value={'MonthlyDue'}>Monthly Payment Due</option>
 
@@ -339,6 +340,7 @@ function ProgramEntry() {
                                     required
                                     name='programFee'
                                     type="number"
+                                    defaultValue={0}
 
                                     className="input text-lg font-semibold  input-bordered input-info w-full " />
                             </div> : <></>

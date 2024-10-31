@@ -19,7 +19,7 @@ function Nav() {
             }
         }
     }, [loggedPhoto]);
-console.log(photo)
+    console.log(photo)
     const [disabled, setDisabled] = useState(false);
 
     const handleSelect = e => {
@@ -28,7 +28,7 @@ console.log(photo)
             setDisabled(false);
         }, 500);
     };
-    
+
 
     return (
         <div>
@@ -52,7 +52,8 @@ console.log(photo)
                         <ul onClick={() => handleSelect()}
                             tabIndex={0}
                             className={`menu menu-lg gap-2 text-lg bg-gray-100 dropdown-content rounded-box z-[1] mt-3 w-52 p-2 shadow ${disabled ? 'hidden' : ''}`}>
-                           <NavLink to={'/overview'}><li className='pl-2 hover:bg-gray-200 '>Overview</li></NavLink>
+                            <NavLink to={'/overview'}><li className='pl-2 hover:bg-gray-200 '>Payment Overview</li></NavLink>
+                            {role === 'CEO' && <NavLink to={'/studentoverview'}><li className='pl-2 hover:bg-gray-200 '>Student Overview</li></NavLink>}
                             <NavLink to={'/finder'}><li className='pl-2 hover:bg-gray-200 '>Finder</li></NavLink>
                             <NavLink to={'/attendance'}><li className='pl-2 hover:bg-gray-200'>Attendance</li></NavLink>
                             <NavLink to={'/exams'}><li className='pl-2 hover:bg-gray-200'>Exams</li></NavLink>
@@ -67,16 +68,16 @@ console.log(photo)
                         </ul>
                     </div>
                     <Link to={'/'}><img className='w-24 rounded-full lg:w-36' src={`/logo.png`} alt="Logo" /></Link>
-                   
+
                 </div>
                 <div className='navbar-end flex gap-4 justify-end items-center'>
                     <div className=' justify-end gap-1 lg:gap-3 flex items-center'>
                         {/* Fallback to a default image if photo is not available */}
-                        <img className='w-12 h-12 rounded-full border-2 border-sky-600 ' src={`${photo?photo:'profile.jpg'} `} alt="Profile" />
+                        <img className='w-12 h-12 rounded-full border-2 border-sky-600 ' src={`${photo ? photo : 'profile.jpg'} `} alt="Profile" />
                         <div className='flex flex-col items-end'>
                             <h1 className='font-semibold lg:text-xl text-right '>{loggedUser}</h1>
                             <p className='text-sm text-gray-600'>{role}</p>
-                    
+
                         </div>
                     </div>
                     <div>

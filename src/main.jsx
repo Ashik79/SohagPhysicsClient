@@ -33,6 +33,7 @@ import Coupons from './components/Coupons';
 
 import Note from './components/Note';
 import EditNote from './components/EditNote';
+import StudentOverview from './components/StudentOverview';
 
 
 const fetchStudent = async ({ params }) => {
@@ -98,6 +99,11 @@ const router = createBrowserRouter([
       {
         path:'/note',
         element:<PrivateRoute><Note></Note></PrivateRoute>
+      }
+      ,
+      {
+        path:'/studentoverview',
+        element:<PrivateRoute><StudentOverview></StudentOverview></PrivateRoute>
       }
       ,
       {

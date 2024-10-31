@@ -20,6 +20,7 @@ function AddPayment() {
     const [navigate, setNavigate] = useState(false)
 
     const [displayCoupon, setCoupon] = useState(null)
+    const [newStudent, setNewStudent] = useState(false)
 
     console.log(user)
     const { monthlyAmount, name, id, payments, phone } = user;
@@ -98,6 +99,12 @@ function AddPayment() {
             return; // Stop the function here
         }
 
+        if (!lastMonthPaid && !newStudent && pmonth!=lastMonth) {
+            notifyFailed(`Did not paid for ${lastMonthText}`)
+            setLoading(false)
+            return;
+        }
+
         const pdata = {
             id, type, pmonth, pyear, pamount, payDate, ptaken, date, month, year, name
         };
@@ -150,9 +157,11 @@ function AddPayment() {
 
     //Last month status
     const [lastMonthPaid, setLastMonthPaid] = useState(false)
+    let lastYear = year
     var lastMonth = month - 1;
     if (lastMonth == 0) {
         lastMonth += 12;
+        lastYear--;
     }
     const lastMonthText = getMonth(lastMonth)
     console.log(lastMonthText);
@@ -160,10 +169,14 @@ function AddPayment() {
     useEffect(() => {
         const lastMonth = month - 1;
         user.payments.forEach(payment => {
-            if (payment.type == "Monthly" && payment.pmonth == lastMonth) {
+            if (payment.type == "Monthly" && payment.pmonth == lastMonth && payment.pyear == lastYear) {
                 setLastMonthPaid(true);
             }
         });
+        if (!lastMonthPaid) {
+            const haveMonthly = payments.some(payment => payment.type == "Monthly")
+            if (!haveMonthly) { setNewStudent(true) }
+        }
     }, [user.payments, month]);
 
 
@@ -194,7 +207,7 @@ function AddPayment() {
                         </div>
 
                         <p className='font-semibold my-2'>Last month status</p>
-                        {lastMonthPaid ? <><p className='text-sky-600 flex items-center border rounded-xl border-sky-600 gap-2 py-1 px-5 font-semibold text-lg'><span className='text-green-700 font-bold'><FiCheckCircle /></span> Paid for {lastMonthText}</p></> : <><p className='text-red-600 border border-red-600 rounded-xl flex items-center gap-2 py-1 px-5 font-semibold text-lg'><ImCross /> Not paid for {lastMonthText}</p></>}
+                        {lastMonthPaid ? <><p className='text-sky-600 flex items-center border rounded-xl border-sky-600 gap-2 py-1 px-5 font-semibold text-lg'><span className='text-green-700 font-bold'><FiCheckCircle /></span> Paid for {lastMonthText}</p></> : newStudent ? <p className='text-blue-600 border border-blue-600 rounded-xl flex items-center gap-2 py-1 px-5 font-semibold text-lg'>New Student</p> : <><p className='text-red-600 border border-red-600 rounded-xl flex items-center gap-2 py-1 px-5 font-semibold text-lg'><ImCross /> Not paid for {lastMonthText}</p></>}
                     </div>
                     <div className='grid grid-cols-1  lg:w-3/5  gap-3'>
 
