@@ -34,6 +34,7 @@ import Coupons from './components/Coupons';
 import Note from './components/Note';
 import EditNote from './components/EditNote';
 import StudentOverview from './components/StudentOverview';
+import Batch from './components/Batch';
 
 
 const fetchStudent = async ({ params }) => {
@@ -109,6 +110,12 @@ const router = createBrowserRouter([
       {
         path:'/programentry',
         element:<PrivateRoute><Programs></Programs></PrivateRoute>
+      }
+      ,
+      {
+        path:'/batch',
+        element:<PrivateRoute><Batch></Batch></PrivateRoute>,
+        loader:() =>fetch ('https://spoffice-server.vercel.app/students')
       }
       ,
       {
