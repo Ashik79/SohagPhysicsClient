@@ -34,7 +34,7 @@ function ProgramEntry() {
         else if (program == 'Exam' || program == 'Others' || program == 'PBC') {
             setProgramStatus('admission')
         }
-        else if (program == 'ExamDue' || program == 'OthersDue' || program == 'HscPhyDue' || program == 'SscPhyDue' || program == 'MonthlyDue') {
+        else if (program == 'ExamDue' || program == 'HscPhyDue' || program == 'OthersDue' || program == 'HscPhyDue' || program == 'SscPhyDue' || program == 'MonthlyDue') {
             setProgramStatus('due')
         }
 
@@ -202,7 +202,9 @@ function ProgramEntry() {
                 const Fee = pamount;
                 const note = event.target.dueNote.value;
                 const due = event.target.due.value;
-
+                if (program == 'HscPhyDue') {
+                    user.monthlyAmount = 800;
+                }
                 const programData = {
                     program, Fee, payDate, due, note
                 }
@@ -323,7 +325,7 @@ function ProgramEntry() {
                                     <div>
                                         <p className='font-semibold'>Monthly Amount <span className='text-red-700'>*</span> </p>
                                         <input
-                                        onWheel={(e) => e.target.blur()}
+                                            onWheel={(e) => e.target.blur()}
                                             required
                                             name='monthlyAmount'
                                             type="text"
@@ -349,7 +351,7 @@ function ProgramEntry() {
                             programStatus == "regular" ? <div>
                                 <p className='font-semibold'>Note Fee <span className='text-red-700'>*</span> </p>
                                 <input
-                                onWheel={(e) => e.target.blur()}
+                                    onWheel={(e) => e.target.blur()}
                                     required
                                     name='noteFee'
                                     type="number"
@@ -361,7 +363,7 @@ function ProgramEntry() {
                             programStatus == "regular" ? <div>
                                 <p className='font-semibold'>Exam Fee <span className='text-red-700'>*</span> </p>
                                 <input
-                                onWheel={(e) => e.target.blur()}
+                                    onWheel={(e) => e.target.blur()}
                                     required
                                     name='examFee'
                                     type="number"
@@ -373,7 +375,7 @@ function ProgramEntry() {
                             programStatus == "due" ? <div>
                                 <p className='font-semibold'>Paid Amount <span className='text-red-700'>*</span> </p>
                                 <input
-                                onWheel={(e) => e.target.blur()}
+                                    onWheel={(e) => e.target.blur()}
                                     required
                                     name='duePaid'
                                     type="number"
@@ -385,7 +387,7 @@ function ProgramEntry() {
                             programStatus == "due" ? <div>
                                 <p className='font-semibold'>Due Amount <span className='text-red-700'>*</span> </p>
                                 <input
-                                onWheel={(e) => e.target.blur()}
+                                    onWheel={(e) => e.target.blur()}
                                     required
                                     name='due'
                                     type="number"
