@@ -139,6 +139,9 @@ function UpdateStudent() {
                                 <option>Sun 12</option>
                                 <option>Admission Cancelled</option>
                                 <option>Inactive</option>
+                                <option>SSC 25 (Physics Olympiad)</option>
+                                <option>Class 9 (SSC 27) Phy Champ</option>
+                                <option>Class 10 (SSC 26) Phy Champ</option>
 
                             </select>
                         </div>

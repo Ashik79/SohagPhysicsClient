@@ -123,27 +123,27 @@ function AddPayment() {
             const data = await response.json();
 
             if (data.modifiedCount) {
-                notifySuccess("Payment Successful!");
-                setNavigate(true);
+                // notifySuccess("Payment Successful!");
+                // setNavigate(true);
 
-                // const smsResponse = await fetch('https://bulksmsbd.net/api/smsapi', {
-                //     method: 'POST',
-                //     headers: {
-                //         'Content-Type': 'application/json',
-                //     },
-                //     body: JSON.stringify({
-                //         api_key: 'CUOP72nJJHahM30djaQG',
-                //         senderid: '8809617642567',
-                //         number: phone,
-                //         message: `${type} payment for ${getMonth(pmonth)} is successful\nId: ${id}\nName: ${name}\nPaid: ${pamount} TK\n${coupon ? `Discount: ${displayCoupon.amount} (${displayCoupon.title})` : ''}\nAssigned by: ${ptaken}\n SOHAG PHYSICS`
-                //     }),
-                // });
+                const smsResponse = await fetch('https://bulksmsbd.net/api/smsapi', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        api_key: 'CUOP72nJJHahM30djaQG',
+                        senderid: '8809617642567',
+                        number: phone,
+                        message: `${type} payment for ${getMonth(pmonth)} is successful\nId: ${id}\nName: ${name}\nPaid: ${pamount} TK\n${coupon ? `Discount: ${displayCoupon.amount} (${displayCoupon.title})` : ''}\nAssigned by: ${ptaken}\n SOHAG PHYSICS`
+                    }),
+                });
 
-                // const smsData = await smsResponse.json();
-                // if (smsData.response_code === 202) {
-                //     notifySuccess("Payment Successful!");
-                //     setNavigate(true);
-                // }
+                const smsData = await smsResponse.json();
+                if (smsData.response_code === 202) {
+                    notifySuccess("Payment Successful!");
+                    setNavigate(true);
+                }
             }
         } catch (error) {
             console.error("Error processing payment:", error);

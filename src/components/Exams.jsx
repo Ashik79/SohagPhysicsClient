@@ -13,7 +13,7 @@ function Exams() {
     const [displayExams, setDisplayExams] = useState([]);
 
     useEffect(() => {
-        
+
         const sortedExams = [...allExams].sort((a, b) => new Date(b.date) - new Date(a.date));
         setDisplayExams(sortedExams);
     }, [allExams]);
@@ -246,6 +246,9 @@ function Exams() {
                                         <option>Sun 12</option>
                                         <option>Admission Cancelled</option>
                                         <option>Inactive</option>
+                                        <option>SSC 25 (Physics Olympiad)</option>
+                                        <option>Class 9 (SSC 27) Phy Champ</option>
+                                        <option>Class 10 (SSC 26) Phy Champ</option>
 
                                     </select>
                                 </div>
@@ -436,6 +439,9 @@ function Exams() {
                                         <option>Sun 12</option>
                                         <option>Admission Cancelled</option>
                                         <option>Inactive</option>
+                                        <option>SSC 25 (Physics Olympiad)</option>
+                                        <option>Class 9 (SSC 27) Phy Champ</option>
+                                        <option>Class 10 (SSC 26) Phy Champ</option>
 
                                     </select>
                                 </div>
