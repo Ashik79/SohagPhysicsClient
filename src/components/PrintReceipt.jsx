@@ -56,7 +56,9 @@ function PrintReceipt() {
           </div>
         </div>
       </div>
-      <button onClick={handlePrint}>Print Receipt</button>
+      <div className='w-full text-center'>
+      <button className=' border-2 border-sky-600 font-bold text-sm py-1 px-5 w-full text-sky-600 rounded-xl hover:bg-sky-200' onClick={handlePrint}>Print </button>
+      </div>
     </div>
 
   );
