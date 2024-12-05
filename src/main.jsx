@@ -35,6 +35,8 @@ import Note from './components/Note';
 import EditNote from './components/EditNote';
 import StudentOverview from './components/StudentOverview';
 import Batch from './components/Batch';
+import PrintReceipt from './components/PrintReceipt';
+
 
 
 const fetchStudent = async ({ params }) => {
@@ -187,6 +189,11 @@ const router = createBrowserRouter([
       {
         path:'/message',
         element:<PrivateRoute><Message></Message></PrivateRoute>,
+            
+      },
+      {
+        path:'/print-receipt',
+        element:<PrivateRoute><PrintReceipt></PrintReceipt></PrivateRoute>,
             
       },
      

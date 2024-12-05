@@ -11,12 +11,14 @@ import { CgProfile } from "react-icons/cg";
 import { BsThreeDotsVertical } from "react-icons/bs";
 
 
+
+
 function AddPayment() {
     const user = useLoaderData()
-    const { month, date, year, loggedUser, getMonth, notifySuccess, notifyFailed,role } = useContext(AuthContext)
-
+    const { month, date, year, loggedUser, getMonth, notifySuccess, notifyFailed, role } = useContext(AuthContext)
+    const [showReceipt, setShowReceipt] = useState(false)
     const [loading, setLoading] = useState(false)
-
+    const [pdata, setPdata] = useState({})
     const [navigate, setNavigate] = useState(false)
 
     const [displayCoupon, setCoupon] = useState(null)
@@ -99,7 +101,7 @@ function AddPayment() {
             return; // Stop the function here
         }
 
-        if (!lastMonthPaid && !newStudent && pmonth!=lastMonth) {
+        if (!lastMonthPaid && !newStudent && pmonth != lastMonth) {
             notifyFailed(`Did not paid for ${lastMonthText}`)
             setLoading(false)
             return;
@@ -135,14 +137,15 @@ function AddPayment() {
                         api_key: 'CUOP72nJJHahM30djaQG',
                         senderid: '8809617642567',
                         number: phone,
-                        message: `${type} payment for ${getMonth(pmonth)} is successful\nId: ${id}\nName: ${name}\nPaid: ${pamount} TK\n${coupon ? `Discount: ${displayCoupon.amount} (${displayCoupon.title})` : ''}\nAssigned by: ${ptaken}\n SOHAG PHYSICS`
+                        message: `${type} payment for ${getMonth(pmonth)} is successful\nId: ${id}\nName: ${name}\nPaid: ${pamount} TK${coupon ? `\nDiscount: ${displayCoupon.amount} (${displayCoupon.title})` : ''}\nReceived by: ${ptaken}\n SOHAG PHYSICS`
                     }),
                 });
 
                 const smsData = await smsResponse.json();
                 if (smsData.response_code === 202) {
                     notifySuccess("Payment Successful!");
-                    setNavigate(true);
+                    
+                    printReceipt(pdata)
                 }
             }
         } catch (error) {
@@ -306,8 +309,10 @@ function AddPayment() {
                 </div>
 
 
+            {
+                <div className=''>{showReceipt && <MonthlyReciept  data={pdata} />}</div>
+            }
             </form>
-
             <div className="mt-8">
                 <h2 className="text-2xl font-bold mb-4">Recent Payments</h2>
                 {reversedPayments.map((payment, index) => (
@@ -315,6 +320,7 @@ function AddPayment() {
                 ))}
             </div>
             {navigate ? <Navigate to={`/payment`}></Navigate> : <></>}
+            
         </div>
     )
 }

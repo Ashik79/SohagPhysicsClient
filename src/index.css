@@ -11,3 +11,13 @@
     
     font-weight: bold;
 }
+
+@media print {
+  .receipt-container {
+    /* Adjust padding and other styles as needed */
+    padding: 200px;
+    max-width: 800px;
+    margin: 0 auto; /* Center the content */
+  }
+  /* Other specific styles for printing can be added here */
+}
