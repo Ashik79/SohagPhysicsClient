@@ -145,7 +145,7 @@ function AddPayment() {
                 if (smsData.response_code === 202) {
                     notifySuccess("Payment Successful!");
                     
-                    printReceipt(pdata)
+                   
                 }
             }
         } catch (error) {

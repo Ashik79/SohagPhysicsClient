@@ -36,6 +36,7 @@ import EditNote from './components/EditNote';
 import StudentOverview from './components/StudentOverview';
 import Batch from './components/Batch';
 import PrintReceipt from './components/PrintReceipt';
+import MyEntry from './components/StuffPart/MyEntry';
 
 
 
@@ -189,6 +190,11 @@ const router = createBrowserRouter([
       {
         path:'/message',
         element:<PrivateRoute><Message></Message></PrivateRoute>,
+            
+      },
+      {
+        path:'/entry',
+        element:<PrivateRoute><MyEntry></MyEntry></PrivateRoute>,
             
       },
       {

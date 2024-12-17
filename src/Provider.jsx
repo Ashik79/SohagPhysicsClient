@@ -27,6 +27,7 @@ function Provider({ children }) {
   const [loggedUser, setLoggedUser] = useState(null);
   const [loggedPhoto, setLoggedPhoto] = useState('profile.jpg');
   const [role, setRole] = useState(null);
+  const [staff, setStaff] = useState(null);
   const [loggedEmail, setLoggedEmail] = useState(null);
 
   const logout = () => {
@@ -61,6 +62,7 @@ function Provider({ children }) {
         .then(data => {
           
           setRole(data.role);
+          setStaff(data)
         
           localStorage.setItem("loggedPhoto", data.photo);
           localStorage.setItem("loggedUser", data.name);
@@ -89,6 +91,7 @@ console.log(role)
     logout,
     loggedUser,
     role,
+    staff,
     month,
     year,
     date,
