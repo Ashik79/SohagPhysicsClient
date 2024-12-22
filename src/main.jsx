@@ -38,6 +38,7 @@ import Batch from './components/Batch';
 import PrintReceipt from './components/PrintReceipt';
 import MyEntry from './components/StuffPart/MyEntry';
 import Monitor from './components/StuffPart/Monitor';
+import AttendanceBatch from './components/AttendanceBatch';
 
 
 
@@ -184,8 +185,8 @@ const router = createBrowserRouter([
       ,
       {
         path:'/attendance',
-        element:<PrivateRoute><Attendance></Attendance></PrivateRoute>,
-        loader:() =>fetch ('https://spoffice-server.vercel.app/students')
+        element:<PrivateRoute><AttendanceBatch></AttendanceBatch></PrivateRoute>,
+     
         
       },
       {
