@@ -37,6 +37,7 @@ import StudentOverview from './components/StudentOverview';
 import Batch from './components/Batch';
 import PrintReceipt from './components/PrintReceipt';
 import MyEntry from './components/StuffPart/MyEntry';
+import Monitor from './components/StuffPart/Monitor';
 
 
 
@@ -56,6 +57,18 @@ const fetchStudent = async ({ params }) => {
 
 const fetchUsers = async () => {
   const response = await fetch(`https://spoffice-server.vercel.app/getusers`);
+  
+  if (!response.ok) {
+    throw new Response(JSON.stringify({ message: 'users not found' }), {
+      status: 404,
+    });
+  }
+
+  const users = await response.json();
+  return users;
+};
+const fetchUsersFull = async () => {
+  const response = await fetch(`https://spoffice-server.vercel.app/getusersfull`);
   
   if (!response.ok) {
     throw new Response(JSON.stringify({ message: 'users not found' }), {
@@ -195,6 +208,12 @@ const router = createBrowserRouter([
       {
         path:'/entry',
         element:<PrivateRoute><MyEntry></MyEntry></PrivateRoute>,
+            
+      },
+      {
+        path:'/monitor',
+        element:<PrivateRoute><Monitor></Monitor></PrivateRoute>,
+        loader:fetchUsersFull
             
       },
       {

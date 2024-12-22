@@ -20,6 +20,7 @@ function MyEntry() {
                 setChecked(true);
             }
         }
+        else setChecked(true)
     }, [staff]);
 
     const getCurrentTime = () => {
