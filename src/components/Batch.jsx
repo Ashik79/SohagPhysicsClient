@@ -20,124 +20,138 @@ const Batch = () => {
   const [batchData, setBatchData] = useState([
     {
       name: "Sat 1",
+      vakka:'শনি ৭টা (নিউ টেন SSC 26 - HSC 28)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sat 2",
+      vakka:'শনি ৮টা (নিউ নাইন SSC 27 - HSC 29)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sat 3",
+      vakka:'শনি ৯টা (নিউ টেন SSC 26 - HSC 28)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sat 4",
+      vakka:'শনি ১০টা (নিউ নাইন SSC 27 - HSC 29)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sat 5",
+      vakka:'শনি ১১টা',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sat 6",
+      vakka:'শনি ২টা (HSC 26)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sat 7",
+      vakka:'শনি ৩টা (HSC 26)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sat 8",
+      vakka:'শনি ৪টা (HSC 25)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sat 9",
+      vakka:'শনি ৫টা (HSC 26)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sat 10",
+      vakka:'শনি ৬.১৫ টা (নিউ নাইন SSC 27 - HSC 29)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sat 11",
+      vakka:'শনি ৭.১৫ টা (নিউ টেন SSC 26 - HSC 28)',
       total: [],
       present: [],absent: [],
     },
-    {
-      name: "Sat 12",
-      total: [],
-      present: [],absent: [],
-    },
+    
     {
       name: "Sun 1",
+      vakka:'রবি ৭টা (HSC 25)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sun 2",
+      vakka:'রবি ৮টা (HSC 26)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sun 3",
+      vakka:'রবি ৯টা (HSC 26)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sun 4",
+      vakka:'রবি ১০টা (Nine & Ten combined)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sun 5",
+      vakka:'রবি ১১টা',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sun 6",
+      vakka:'রবি ২টা (HSC 26)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sun 7",
+      vakka:'রবি ৩টা (HSC 25)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sun 8",
+      vakka:'রবি ৪টা (HSC 26)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sun 9",
+      vakka:'রবি ৫টা (HSC 26)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sun 10",
+      vakka:'রবি ৬টা (নিউ নাইন SSC 27 - HSC 29)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sun 11",
+      vakka:'রবি ৭টা (নিউ টেন SSC 26 - HSC 28)',
       total: [],
       present: [],absent: [],
     },
-    {
-      name: "Sun 12",
-      total: [],
-      present: [],absent: [],
-    },
+    
   ])
 
 
@@ -154,124 +168,138 @@ useEffect(()=>{
   const tempBatchData = [
     {
       name: "Sat 1",
+      vakka:'শনি ৭টা (নিউ টেন SSC 26 - HSC 28)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sat 2",
+      vakka:'শনি ৮টা (নিউ নাইন SSC 27 - HSC 29)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sat 3",
+      vakka:'শনি ৯টা (নিউ টেন SSC 26 - HSC 28)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sat 4",
+      vakka:'শনি ১০টা (নিউ নাইন SSC 27 - HSC 29)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sat 5",
+      vakka:'শনি ১১টা',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sat 6",
+      vakka:'শনি ২টা (HSC 26)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sat 7",
+      vakka:'শনি ৩টা (HSC 26)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sat 8",
+      vakka:'শনি ৪টা (HSC 25)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sat 9",
+      vakka:'শনি ৫টা (HSC 26)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sat 10",
+      vakka:'শনি ৬.১৫ টা (নিউ নাইন SSC 27 - HSC 29)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sat 11",
+      vakka:'শনি ৭.১৫ টা (নিউ টেন SSC 26 - HSC 28)',
       total: [],
       present: [],absent: [],
     },
-    {
-      name: "Sat 12",
-      total: [],
-      present: [],absent: [],
-    },
+    
     {
       name: "Sun 1",
+      vakka:'রবি ৭টা (HSC 25)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sun 2",
+      vakka:'রবি ৮টা (HSC 26)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sun 3",
+      vakka:'রবি ৯টা (HSC 26)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sun 4",
+      vakka:'রবি ১০টা (Nine & Ten combined)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sun 5",
+      vakka:'রবি ১১টা',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sun 6",
+      vakka:'রবি ২টা (HSC 26)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sun 7",
+      vakka:'রবি ৩টা (HSC 25)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sun 8",
+      vakka:'রবি ৪টা (HSC 26)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sun 9",
+      vakka:'রবি ৫টা (HSC 26)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sun 10",
+      vakka:'রবি ৬টা (নিউ নাইন SSC 27 - HSC 29)',
       total: [],
       present: [],absent: [],
     },
     {
       name: "Sun 11",
+      vakka:'রবি ৭টা (নিউ টেন SSC 26 - HSC 28)',
       total: [],
       present: [],absent: [],
     },
-    {
-      name: "Sun 12",
-      total: [],
-      present: [],absent: [],
-    },
+    
   ]
   tempBatchData.forEach(batch => {
     students.forEach(stdnt => {
@@ -297,124 +325,138 @@ useEffect(()=>{
     const tempBatchData = [
       {
         name: "Sat 1",
+        vakka:'শনি ৭টা (নিউ টেন SSC 26 - HSC 28)',
         total: [],
         present: [],absent: [],
       },
       {
         name: "Sat 2",
+        vakka:'শনি ৮টা (নিউ নাইন SSC 27 - HSC 29)',
         total: [],
         present: [],absent: [],
       },
       {
         name: "Sat 3",
+        vakka:'শনি ৯টা (নিউ টেন SSC 26 - HSC 28)',
         total: [],
         present: [],absent: [],
       },
       {
         name: "Sat 4",
+        vakka:'শনি ১০টা (নিউ নাইন SSC 27 - HSC 29)',
         total: [],
         present: [],absent: [],
       },
       {
         name: "Sat 5",
+        vakka:'শনি ১১টা',
         total: [],
         present: [],absent: [],
       },
       {
         name: "Sat 6",
+        vakka:'শনি ২টা (HSC 26)',
         total: [],
         present: [],absent: [],
       },
       {
         name: "Sat 7",
+        vakka:'শনি ৩টা (HSC 26)',
         total: [],
         present: [],absent: [],
       },
       {
         name: "Sat 8",
+        vakka:'শনি ৪টা (HSC 25)',
         total: [],
         present: [],absent: [],
       },
       {
         name: "Sat 9",
+        vakka:'শনি ৫টা (HSC 26)',
         total: [],
         present: [],absent: [],
       },
       {
         name: "Sat 10",
+        vakka:'শনি ৬.১৫ টা (নিউ নাইন SSC 27 - HSC 29)',
         total: [],
         present: [],absent: [],
       },
       {
         name: "Sat 11",
+        vakka:'শনি ৭.১৫ টা (নিউ টেন SSC 26 - HSC 28)',
         total: [],
         present: [],absent: [],
       },
-      {
-        name: "Sat 12",
-        total: [],
-        present: [],absent: [],
-      },
+      
       {
         name: "Sun 1",
+        vakka:'রবি ৭টা (HSC 25)',
         total: [],
         present: [],absent: [],
       },
       {
         name: "Sun 2",
+        vakka:'রবি ৮টা (HSC 26)',
         total: [],
         present: [],absent: [],
       },
       {
         name: "Sun 3",
+        vakka:'রবি ৯টা (HSC 26)',
         total: [],
         present: [],absent: [],
       },
       {
         name: "Sun 4",
+        vakka:'রবি ১০টা (Nine & Ten combined)',
         total: [],
         present: [],absent: [],
       },
       {
         name: "Sun 5",
+        vakka:'রবি ১১টা',
         total: [],
         present: [],absent: [],
       },
       {
         name: "Sun 6",
+        vakka:'রবি ২টা (HSC 26)',
         total: [],
         present: [],absent: [],
       },
       {
         name: "Sun 7",
+        vakka:'রবি ৩টা (HSC 25)',
         total: [],
         present: [],absent: [],
       },
       {
         name: "Sun 8",
+        vakka:'রবি ৪টা (HSC 26)',
         total: [],
         present: [],absent: [],
       },
       {
         name: "Sun 9",
+        vakka:'রবি ৫টা (HSC 26)',
         total: [],
         present: [],absent: [],
       },
       {
         name: "Sun 10",
+        vakka:'রবি ৬টা (নিউ নাইন SSC 27 - HSC 29)',
         total: [],
         present: [],absent: [],
       },
       {
         name: "Sun 11",
+        vakka:'রবি ৭টা (নিউ টেন SSC 26 - HSC 28)',
         total: [],
         present: [],absent: [],
       },
-      {
-        name: "Sun 12",
-        total: [],
-        present: [],absent: [],
-      },
+      
     ]
     tempBatchData.forEach(batch => {
       students.forEach(stdnt => {

@@ -74,7 +74,7 @@ const BatchCard = ({ batch }) => {
 
     return (
         <div className="relative w-full max-w-xs p-4  border-sky-500 border-2 rounded-lg shadow-md bg-white text-gray-800">
-            <h3 className="text-xl font-bold">{batch.name}</h3>
+            <h3 className="text-lg font-bold">{batch.vakka}</h3>
             <p className="text-gray-600 mt-2">
                 Present: <span className="font-semibold">{batch.present.length}</span> /
                 Total: <span className="font-semibold">{batch.total.length}</span>

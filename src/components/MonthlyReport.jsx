@@ -1,0 +1,459 @@
+import React, { useContext, useState } from 'react'
+import { AuthContext } from '../Provider';
+import { IoCloudDownloadOutline } from "react-icons/io5";
+
+import { jsPDF } from "jspdf";
+import "jspdf-autotable"; // Importing jsPDF autoTable plugin if necessary
+
+function MonthlyReport() {
+    const { notifyFailed, month, year, notifySuccess, role, date, getMonth } = useContext(AuthContext)
+    const [students, setStudents] = useState([])
+
+    const [paymentMonth, setPaymentMonth] = useState(month)
+    const [paymentYear, setPaymentYear] = useState(year)
+    const [batch, setBatch] = useState('')
+
+    const [loading, setLoading] = useState(false)
+
+
+
+
+    const handleMonthChange = (event) => {
+        setPaymentMonth(event.target.value);
+    };
+
+    const handleYearChange = (event) => {
+        setPaymentYear(event.target.value);
+    };
+
+    console.log(date)
+
+
+
+    const handleSearch = async (e) => {
+        setLoading(true)
+        e.preventDefault();
+        const query = {};
+        const batch = e.target.batch.value;
+        setBatch(batch)
+        const level = e.target.class.value;
+        const program = e.target.program.value;
+        const session = e.target.session.value;
+        const discounted = e.target.discounted.value;
+        if (level) {
+            query.level = level;
+        }
+        if (batch) query.batch = batch;
+
+        if (session) query.session = session;
+        if (discounted) {
+            query.discounted = discounted;
+        }
+
+        try {
+            const res = await fetch('https://spoffice-server.vercel.app/students', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(query),
+            });
+
+            if (!res.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await res.json();
+            let filteredStudents = data;
+
+            // Filter by program
+            if (program) {
+                if (program == 'Free') {
+                    filteredStudents = filteredStudents.filter(student => student.programs.length == 0)
+                }
+                else {
+                    filteredStudents = filteredStudents.filter(student =>
+                        student.programs && student.programs.some(p => p.program === program)
+                    )
+                }
+            }
+
+
+
+            // Filter by attendance status
+
+
+            setStudents(filteredStudents);
+
+            if (filteredStudents.length) {
+                notifySuccess(`Found ${filteredStudents.length} students`);
+                setLoading(false)
+            } else {
+                notifyFailed('Sorry, no student is found');
+                setLoading(false)
+            }
+        } catch (err) {
+            console.error('Error fetching students:', err);
+            notifyFailed('An error occurred while fetching data');
+            setLoading(false)
+        }
+    };
+
+
+
+
+
+
+
+    // const handleDownload = async () => {
+
+
+    //     try {
+
+    //         // const downloadResponse = await fetch('https://spoffice-server.vercel.app/download/monthly', {
+    //         const downloadResponse = await fetch('http://localhost:5000/download/monthly', {
+
+    //             method: 'POST',
+    //             headers: {
+    //                 'content-type': 'application/json'
+
+    //             },
+    //             body: JSON.stringify({students,month:paymentMonth,year:paymentYear})
+    //         })
+
+    //         if (downloadResponse.ok) {
+    //             const blob = await downloadResponse.blob();
+    //             const url = window.URL.createObjectURL(blob);
+    //             const a = document.createElement('a');
+    //             a.href = url;
+    //             a.download = `monthly-report.pdf`;
+    //             document.body.appendChild(a);
+    //             a.click();
+    //             a.remove();
+    //         } else {
+    //             console.error('Failed to download Info');
+    //         }
+    //     }
+    //     catch (err) {
+    //         console.log(err)
+    //     }
+    // }
+
+
+
+    const handleDownload = async () => {
+        try {
+          // Create jsPDF instance with landscape orientation
+          const doc = new jsPDF("landscape");
+      
+          let isFirstPage = true; // Track if it's the first page for adding title and logo
+      
+          // Table headers
+          const headers = [
+            "Sl No", "Roll", "Name", "Phone", ...Array.from({ length: 31 }, (_, i) => (i + 1).toString()), "Comments"
+          ];
+      
+          // Table data rows for students
+          const tableData = students.map((student, index) => [
+            index + 1,
+            student.id,
+            student.name,
+            student.phone,
+            ...Array.from({ length: 31 }, (_, i) => {
+              const date = `${i + 1}-${paymentMonth}-${paymentYear}`;
+              return student.attendances.some((att) => att.date === date) ? "P" : "";
+            }),
+            "", // Empty comments column
+          ]);
+      
+          // Column width configuration (fixed widths)
+          const columnWidths = [10, 20, 40, 30, ...Array(31).fill(5), 40]; // 31 days columns + other columns
+      
+          // Fetch the logo image as a base64 URL
+          const fetchLogo = async () => {
+            const logoUrl = "/logo.png"; // Replace with the correct URL to your logo
+            const response = await fetch(logoUrl);
+            const blob = await response.blob();
+            const reader = new FileReader();
+            return new Promise((resolve, reject) => {
+              reader.onloadend = () => resolve(reader.result);
+              reader.onerror = reject;
+              reader.readAsDataURL(blob);
+            });
+          };
+      
+          // Wait for the logo to be loaded before generating the PDF
+          const logoUrlBase64 = await fetchLogo();
+      
+          // Add table using autoTable plugin
+          doc.autoTable({
+            head: [headers],
+            body: tableData,
+            startY: 40, // Start the table after the title and logo
+            columnStyles: {
+              0: { cellWidth: columnWidths[0] },
+              1: { cellWidth: columnWidths[1] },
+              2: { cellWidth: columnWidths[2] },
+              3: { cellWidth: columnWidths[3] },
+              ...Array.from({ length: 31 }, (_, i) => ({
+                [i + 4]: { cellWidth: columnWidths[4] } // Setting width for 31 day columns
+              })).reduce((acc, curr) => ({ ...acc, ...curr }), {}),
+              35: { cellWidth: columnWidths[35] }, // Comments column
+            },
+            theme: "grid", // Use grid theme for better visibility
+            headStyles: {
+              fillColor: [242, 242, 242], // Light grey background for header
+              textColor: [0, 0, 0], // Black text color
+              fontStyle: 'bold', // Bold font for header
+              halign: 'center', // Center-align header text
+              minCellHeight: 5, // Reduced height for header cells
+              cellPadding: 1, // Reduce padding inside header cells
+              lineWidth: 0.5, // Border width for header cells
+              lineColor: [200, 200, 200], // Lighter gray color for header cell borders
+            },
+            bodyStyles: {
+              minCellHeight: 4, // Set minimum height for body rows (reduced)
+              cellPadding: 1, // Reduce padding inside body cells
+              lineWidth: 0.5, // Border width for body cells
+              lineColor: [200, 200, 200], // Lighter gray color for body cell borders
+            },
+            margin: { top: 10, bottom: 10, left: 10, right: 10 }, // Reduce margins to fit more content
+            didDrawPage: (data) => {
+              if (isFirstPage) {
+                // Add the logo at the top of the first page
+                doc.addImage(logoUrlBase64, 'PNG', 10, 10, 30, 30); // Adjust logo size and position as needed
+      
+                // Calculate the center of the page
+                const pageWidth = doc.internal.pageSize.width;
+                const titleText = "Sohag Physics";
+                const subtitleText = `Attendance Sheet for ${batch} - ${getMonth(paymentMonth)}, ${paymentYear}`;
+      
+                // Add title and subtitle to the first page
+                doc.setFontSize(16);
+                doc.text(titleText, pageWidth / 2, 20, { align: "center" });
+                doc.setFontSize(12);
+                doc.text(subtitleText, pageWidth / 2, 30, { align: "center" });
+      
+                // Set the flag to false after the first page
+                isFirstPage = false;
+              }
+            },
+            pageBreak: "auto", // Ensure the table breaks if it overflows to the next page
+          });
+      
+          // Save the generated PDF
+          doc.save(`monthly-report-${paymentMonth}-${paymentYear}.pdf`);
+        } catch (err) {
+          console.log("Error generating PDF:", err);
+        }
+      };
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    return (
+        role == 'CEO' ? <div className=''>
+            <h1 className=' text-center lg:text-left md:text-center font-semibold text-2xl text-cyan-500 underline mt-10'>Monthly Report</h1>
+            <form className='mx-auto w-full' onSubmit={handleSearch} >
+
+                {/* students part */}
+                <div className='flex mt-2 flex-col lg:flex-row'>
+                    <h1 className='font-bold text-lg lg:w-1/4'>Searching Options :</h1>
+                    <div className='grid grid-cols-1 lg:w-2/3 lg:grid-cols-2 gap-3'>
+
+
+                        <div>
+                            <p className='font-semibold'>Batch </p>
+
+                            <select name='batch' className="select text-lg font-semibold  select-info w-full ">
+                           
+                                <option value={'Sat 1'}>শনি ৭টা (নিউ টেন SSC 26 - HSC 28)</option>
+                                <option value={'Sat 2'}>শনি ৮টা (নিউ নাইন SSC 27 - HSC 29)</option>
+                                <option value={'Sat 3'}>শনি ৯টা (নিউ টেন SSC 26 - HSC 28)</option>
+                                <option value={'Sat 4'}>শনি ১০টা (নিউ নাইন SSC 27 - HSC 29)</option>
+                                <option value={'Sat 5'}>শনি ১১টা </option>
+
+                                <option value={'Sat 6'}>শনি ২টা (HSC 26)</option>
+                                <option value={'Sat 7'}>শনি ৩টা (HSC 26)</option>
+                                <option value={'Sat 8'}>শনি ৪টা (HSC 25)</option>
+                                <option value={'Sat 9'}>শনি ৫টা (HSC 26)</option>
+                                <option value={'Sat 10'}>শনি ৬.১৫ টা (নিউ নাইন SSC 27 - HSC 29)</option>
+                                <option value={'Sat 11'}>শনি ৭.১৫ টা (নিউ টেন SSC 26 - HSC 28)</option>
+                                <option value={'Sun 1'}>রবি ৭টা (HSC 25)</option>
+                                <option value={'Sun 2'}>রবি ৮টা (HSC 26)</option>
+                                <option value={'Sun 3'}>রবি ৯টা (HSC 26)</option>
+                                <option value={'Sun 4'}>রবি ১০টা (Nine & Ten combined)</option>
+                                <option value={'Sun 5'}>রবি ১১টা </option>
+
+                                <option value={'Sun 6'}>রবি ২টা (HSC 26) </option>
+                                <option value={'Sun 7'}>রবি ৩টা (HSC 25) </option>
+                                <option value={'Sun 8'}>রবি ৪টা (HSC 26) </option>
+                                <option value={'Sun 9'}>রবি ৫টা (HSC 26) </option>
+                                <option value={'Sun 10'}>রবি ৬টা (নিউ নাইন SSC 27 - HSC 29) </option>
+                                <option value={'Sun 11'}>রবি ৭টা (নিউ টেন SSC 26 - HSC 28) </option>
+                                <option>Exam Batch HSC 25</option>
+                                <option>Exam Batch HSC 26</option>
+                                <option>Exam Batch (নিউ নাইন SSC 27 - HSC 29)</option>
+                                <option>Exam Batch (নিউ টেন SSC 26 - HSC 28)</option>
+                                <option>Admission Cancelled</option>
+                                <option>Inactive</option>
+                                <option>SSC 25 (Physics Olympiad)</option>
+                                <option>Class 9 (SSC 27) Phy Champ</option>
+                                <option>Class 10 (SSC 26) Phy Champ</option>
+
+                            </select>
+                        </div>
+                        <div>
+                            <p className='font-semibold'>Class  </p>
+
+                            <select name='class' className="select text-lg font-semibold  select-info w-full ">
+
+                                <option value={""}>All</option>
+                                <option>Eight</option>
+                                <option>Nine</option>
+                                <option>Ten</option>
+                                <option>SSC</option>
+                                <option>Eleven</option>
+                                <option>Tweleve</option>
+                                <option>HSC</option>
+                                <option>Admission</option>
+                                <option>BCS</option>
+
+                            </select>
+                        </div>
+
+                        <div>
+                            <p className='font-semibold'>Program  </p>
+                            <select name='program' className="select text-lg font-semibold  select-info w-full ">
+                                <option value={''}>All</option>
+                                <option value={'Free'}>Free Class</option>
+                                <option value={'Eight'}>Eight</option>
+                                <option value={'EightDue'}>Eight Due</option>
+                                <option value={'Nine'}>Nine</option>
+                                <option value={'NineDue'}>Nine Due</option>
+                                <option value={'Ten'}>Ten</option>
+                                <option value={'TenDue'}>Ten Due</option>
+                                <option value={'Eleven'}>Eleven</option>
+                                <option value={'ElevenDue'}>Eleven Due</option>
+                                <option value={'Hsc'}>Hsc</option>
+                                <option value={'HscDue'}>Hsc Due</option>
+
+
+                                <option value={'Exam'}>Exam Batch </option>
+                                <option value={'ExamDue'}>Exam Batch Due </option>
+
+
+
+
+                            </select>
+                        </div>
+                        <div >
+                            <p className='font-semibold'>Discounted Students  </p>
+                            <select name='discounted' className="select text-lg font-semibold  select-info w-full ">
+                                <option value={''}>Not Applicable</option>
+                                <option value={true}>Discounted</option>
+
+
+
+
+
+                            </select>
+                        </div>
+                        <div className='lg:col-span-2'>
+                            <p className='font-semibold'>Session  </p>
+                            <select name='session' className="select text-lg font-semibold  select-info w-full ">
+
+
+                                <option value={""}>All</option>
+                                <option>2025</option>
+                                <option>2026</option>
+                                <option>2027</option>
+                                <option>2028</option>
+                                <option>2029</option>
+                                <option>2030</option>
+
+
+                            </select>
+                        </div>
+
+
+
+                        <div>
+                            <p className='font-semibold'>Month  </p>
+                            <select
+                                onChange={handleMonthChange}
+                                defaultValue={month}
+                                name='month'
+
+                                className="select text-lg font-semibold  select-info w-full"
+                            >
+
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+
+
+                        <div>
+                            <p className='font-semibold'>Year  </p>
+                            <select onChange={handleYearChange} defaultValue={year} name='year' className="select text-lg font-semibold  select-info w-full ">
+
+                                <option>2024</option>
+                                <option>2025</option>
+                                <option>2026</option>
+                            </select>
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <div className='flex mt-10 flex-col w-full lg:flex-row'>
+                    <h1 className='font-bold text-lg lg:w-1/4'></h1>
+                    <div className='lg:w-2/3 text-center'>
+                        <input className=" text-lg font-semibold h-11 w-full bg-blue-100  border-2 rounded-xl    btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Find Info"}`} />
+                        <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
+                    </div>
+                </div>
+
+
+
+            </form>
+
+            {
+                students.length ?
+                    <div className='text-sky-600 text-center mt-8'>
+                        <hr />
+                        <p className='text-xl font-semibold'>Total Students Found <span className='font-bold text-red-600 text-2xl border-sky-600 border-2 rounded-full  px-2'>{students.length}</span></p>
+
+                        <button onClick={handleDownload} className='flex items-center justify-center gap-1  border-2 font-bold text-sky-600 hover:bg-slate-400 py-1 mt-3 w-full hover:text-white  rounded-lg border-sky-600'><IoCloudDownloadOutline /> Download</button>
+
+                    </div> : <></>
+            }
+
+
+        </div> : <div className='text-red-600'> You Don't Have Permission</div>
+    )
+}
+
+export default MonthlyReport

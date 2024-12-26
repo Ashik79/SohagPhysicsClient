@@ -18,8 +18,9 @@ function LargeNav() {
                 {role === 'CEO' && <NavLink to={'/coupons'}><li className='pl-2 hover:bg-gray-200'>Coupons</li></NavLink>}
                 {(role == 'CEO' || role =='Manager') && <NavLink to={'/batch'}><li className='pl-2 hover:bg-gray-200'>Batch Students</li></NavLink>}
                 {
-                   (role == 'CEO' || role =='Manager')? <NavLink to={'/download'}><li className='pl-2 hover:bg-gray-200'>Download</li></NavLink> : ''
+                   (role == 'CEO' || role =='Manager')? <NavLink to={'/download'}><li className='pl-2 hover:bg-gray-200'>Download Info</li></NavLink> : ''
                 }
+                {(role == 'CEO' || role =='Manager') && <NavLink to={'/monthly-report'}><li className='pl-2 hover:bg-gray-200'>Attendance Sheet</li></NavLink>}
                 {
                     (role == 'CEO' || role =='Manager') ? <NavLink to={'/message'}><li className='pl-2 hover:bg-gray-200'>Message</li></NavLink> : ''
                 }

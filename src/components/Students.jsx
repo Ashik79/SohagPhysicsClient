@@ -183,30 +183,34 @@ function Students() {
 
                             <select name='batch' className="select text-lg font-semibold  select-info w-full ">
                                 <option value={""}>All</option>
-                                <option>Sat 1</option>
-                                <option>Sat 2</option>
-                                <option>Sat 3</option>
-                                <option>Sat 4</option>
-                                <option>Sat 5</option>
-                                <option>Sat 6</option>
-                                <option>Sat 7</option>
-                                <option>Sat 8</option>
-                                <option>Sat 9</option>
-                                <option>Sat 10</option>
-                                <option>Sat 11</option>
-                                <option>Sat 12</option>
-                                <option>Sun 1</option>
-                                <option>Sun 2</option>
-                                <option>Sun 3</option>
-                                <option>Sun 4</option>
-                                <option>Sun 5</option>
-                                <option>Sun 6</option>
-                                <option>Sun 7</option>
-                                <option>Sun 8</option>
-                                <option>Sun 9</option>
-                                <option>Sun 10</option>
-                                <option>Sun 11</option>
-                                <option>Sun 12</option>
+                                <option value={'Sat 1'}>শনি ৭টা (নিউ টেন SSC 26 - HSC 28)</option>
+                                <option value={'Sat 2'}>শনি ৮টা (নিউ নাইন SSC 27 - HSC 29)</option>
+                                <option value={'Sat 3'}>শনি ৯টা (নিউ টেন SSC 26 - HSC 28)</option>
+                                <option value={'Sat 4'}>শনি ১০টা (নিউ নাইন SSC 27 - HSC 29)</option>
+                                <option value={'Sat 5'}>শনি ১১টা </option>
+                               
+                                <option value={'Sat 6'}>শনি ২টা (HSC 26)</option>
+                                <option value={'Sat 7'}>শনি ৩টা (HSC 26)</option>
+                                <option value={'Sat 8'}>শনি ৪টা (HSC 25)</option>
+                                <option value={'Sat 9'}>শনি ৫টা (HSC 26)</option>
+                                <option value={'Sat 10'}>শনি ৬.১৫ টা (নিউ নাইন SSC 27 - HSC 29)</option>
+                                <option value={'Sat 11'}>শনি ৭.১৫ টা (নিউ টেন SSC 26 - HSC 28)</option>
+                                <option value={'Sun 1'}>রবি ৭টা (HSC 25)</option>
+                                <option value={'Sun 2'}>রবি ৮টা (HSC 26)</option>
+                                <option value={'Sun 3'}>রবি ৯টা (HSC 26)</option>
+                                <option value={'Sun 4'}>রবি ১০টা (Nine & Ten combined)</option>
+                                <option value={'Sun 5'}>রবি ১১টা </option>
+                               
+                                <option value={'Sun 6'}>রবি ২টা (HSC 26) </option>
+                                <option value={'Sun 7'}>রবি ৩টা (HSC 25) </option>
+                                <option value={'Sun 8'}>রবি ৪টা (HSC 26) </option>
+                                <option value={'Sun 9'}>রবি ৫টা (HSC 26) </option>
+                                <option value={'Sun 10'}>রবি ৬টা (নিউ নাইন SSC 27 - HSC 29) </option>
+                                <option value={'Sun 11'}>রবি ৭টা (নিউ টেন SSC 26 - HSC 28) </option>
+                                <option>Exam Batch HSC 25</option>
+                                <option>Exam Batch HSC 26</option>
+                                <option>Exam Batch (নিউ নাইন SSC 27 - HSC 29)</option>
+                                <option>Exam Batch (নিউ টেন SSC 26 - HSC 28)</option>
                                 <option>Admission Cancelled</option>
                                 <option>Inactive</option>
                                 <option>SSC 25 (Physics Olympiad)</option>

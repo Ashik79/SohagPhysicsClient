@@ -39,6 +39,7 @@ import PrintReceipt from './components/PrintReceipt';
 import MyEntry from './components/StuffPart/MyEntry';
 import Monitor from './components/StuffPart/Monitor';
 import AttendanceBatch from './components/AttendanceBatch';
+import MonthlyReport from './components/MonthlyReport';
 
 
 
@@ -226,6 +227,11 @@ const router = createBrowserRouter([
       {
         path:'/download',
         element:<PrivateRoute><Download></Download></PrivateRoute>,
+            
+      },
+      {
+        path:'/monthly-report',
+        element:<PrivateRoute><MonthlyReport></MonthlyReport></PrivateRoute>,
             
       },
       {
