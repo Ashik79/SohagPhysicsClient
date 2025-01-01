@@ -131,9 +131,28 @@ function ProgramEntry() {
 
                 const resData = await res.json()
                 if (resData.modifiedCount) {
-                    setLoading(false)
-                    notifySuccess("Program Added successfully !")
-                    setDisplayUser(user)
+
+                    const response2 = await fetch('https://bulksmsbd.net/api/smsapi', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            api_key: 'CUOP72nJJHahM30djaQG',
+                            senderid: '8809617642567',
+                            number: user.phone,
+                            message: `Successfully enrolled program ${program}\nStudent ID: ${id}\nName: ${name}\nPaid Amount:${Fee}\nEnrolled by: ${loggedUser}\nSohag Physics`
+
+                        }),
+                    })
+                    const result2 = await response2.json();
+                    console.log(result2);
+                    if (result2.response_code == 202) {
+
+                        setLoading(false)
+                        notifySuccess("Program Added successfully !")
+                        setDisplayUser(user)
+                    }
                 }
             }
 
@@ -167,28 +186,28 @@ function ProgramEntry() {
 
                 const resData = await res.json()
                 if (resData.modifiedCount) {
-                    setLoading(false)
-                    notifySuccess("Program Added successfully !")
-                    setDisplayUser(user)
-                    // const response2 = await fetch('https://bulksmsbd.net/api/smsapimany', {
-                    //     method: 'POST',
-                    //     headers: {
-                    //         'Content-Type': 'application/json',
-                    //     },
-                    //     body: JSON.stringify({
-                    //         api_key: 'CUOP72nJJHahM30djaQG',
-                    //         senderid: '8809617642567',
-                    //         messages: [
-                    //             {
-                    //                 to: `${phone}`,
-                    //                 message: `Welcome to Sohag Physics\nStudent ID: ${id}\nName: ${name}\nAdmitted by: ${admittedBy}`
-                    //             }
 
-                    //         ],
-                    //     }),
-                    // })
-                    // const result2 = await response2.json();
-                    // console.log(result2);
+                    const response2 = await fetch('https://bulksmsbd.net/api/smsapi', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            api_key: 'CUOP72nJJHahM30djaQG',
+                            senderid: '8809617642567',
+                            number: user.phone,
+                            message: `Successfully enrolled program ${program}\nStudent ID: ${id}\nName: ${name}\nPaid Amount:${Fee}\nEnrolled by: ${loggedUser}\nSohag Physics`
+
+                        }),
+                    })
+                    const result2 = await response2.json();
+                    console.log(result2);
+                    if (result2.response_code == 202) {
+
+                        setLoading(false)
+                        notifySuccess("Program Added successfully !")
+                        setDisplayUser(user)
+                    }
                 }
             }
             else if (programStatus == 'due') {
@@ -222,30 +241,30 @@ function ProgramEntry() {
 
                 const resData = await res.json()
                 if (resData.modifiedCount) {
-                    setLoading(false)
-                    notifySuccess("Program Added successfully !")
-                    setDisplayUser(user)
-                    // const response2 = await fetch('https://bulksmsbd.net/api/smsapi', {
-                    //     method: 'POST',
-                    //     headers: {
-                    //         'Content-Type': 'application/json',
-                    //     },
-                    //     body: JSON.stringify({
-                    //         api_key: 'CUOP72nJJHahM30djaQG',
-                    //         senderid: '8809617642567',
-                    //         number:user.phone,
-                    //         message: `Successfully enrolled program ${program}\nStudent ID: ${id}\nName: ${name}\nPaid Amount:${Fee}\nDue Amount:${due}\nEnrolled by: ${loggedUser}`
-
-                    //     }),
-                    // })
-                    // const result2 = await response2.json();
-                    // console.log(result2);
-                    // if (result2.response_code == 202) {
-
-                    //     setLoading(false)
+                    // setLoading(false)
                     // notifySuccess("Program Added successfully !")
                     // setDisplayUser(user)
-                    // }
+                    const response2 = await fetch('https://bulksmsbd.net/api/smsapi', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            api_key: 'CUOP72nJJHahM30djaQG',
+                            senderid: '8809617642567',
+                            number: user.phone,
+                            message: `Successfully enrolled program ${program}\nStudent ID: ${id}\nName: ${name}\nPaid Amount:${Fee}\nDue Amount:${due}\nEnrolled by: ${loggedUser}`
+
+                        }),
+                    })
+                    const result2 = await response2.json();
+                    console.log(result2);
+                    if (result2.response_code == 202) {
+
+                        setLoading(false)
+                        notifySuccess("Program Added successfully !")
+                        setDisplayUser(user)
+                    }
                 }
             }
         }
@@ -339,6 +358,7 @@ function ProgramEntry() {
                             programStatus == "admission" ? <div>
                                 <p className='font-semibold'>Program Fee <span className='text-red-700'>*</span> </p>
                                 <input
+                                    onWheel={(e) => e.target.blur()}
                                     required
                                     name='programFee'
                                     type="number"
