@@ -37,7 +37,34 @@ function AddPayment() {
         }, 500)
     }
 
-    console.log(user.programs.length)
+   
+
+
+
+    //Last month status
+    const [lastMonthPaid, setLastMonthPaid] = useState(false)
+    let lastYear = year
+    var lastMonth = month - 1;
+    if (lastMonth == 0) {
+        lastMonth += 12;
+        lastYear--;
+    }
+    const lastMonthText = getMonth(lastMonth)
+    console.log(lastMonthText);
+
+    useEffect(() => {
+       
+        user.payments.forEach(payment => {
+            if (payment.type == "Monthly" && parseInt(payment.pmonth) == lastMonth && parseInt(payment.pyear) == lastYear) {
+                setLastMonthPaid(true);
+            }
+        });
+        if (!lastMonthPaid) {
+            const haveMonthly = payments.some(payment => payment.type == "Monthly")
+            if (!haveMonthly) { setNewStudent(true) }
+        }
+    }, [user.payments, month,user]);
+
     const handlePayment = async (event) => {
         event.preventDefault();
         if (user.programs.length === 0) {
@@ -155,34 +182,6 @@ function AddPayment() {
             setLoading(false);
         }
     };
-
-
-
-    //Last month status
-    const [lastMonthPaid, setLastMonthPaid] = useState(false)
-    let lastYear = year
-    var lastMonth = month - 1;
-    if (lastMonth == 0) {
-        lastMonth += 12;
-        lastYear--;
-    }
-    const lastMonthText = getMonth(lastMonth)
-    console.log(lastMonthText);
-
-    useEffect(() => {
-        const lastMonth = month - 1;
-        user.payments.forEach(payment => {
-            if (payment.type == "Monthly" && payment.pmonth == lastMonth && payment.pyear == lastYear) {
-                setLastMonthPaid(true);
-            }
-        });
-        if (!lastMonthPaid) {
-            const haveMonthly = payments.some(payment => payment.type == "Monthly")
-            if (!haveMonthly) { setNewStudent(true) }
-        }
-    }, [user.payments, month]);
-
-
 
     return (
         <div>
