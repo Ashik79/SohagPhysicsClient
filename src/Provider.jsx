@@ -7,9 +7,24 @@ import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from "firebas
 export const AuthContext = createContext(null);
 
 function Provider({ children }) {
-  const [month, setMonth] = useState(new Date().getMonth()+1);
-  const [year, setYear] = useState(new Date().getFullYear());
-  const [date, setDate] = useState(new Date().getDate());
+  const getDhakaTime = () => {
+    const offset = 6 * 60; // GMT+6 in minutes
+    const now = new Date();
+    const utc = now.getTime() + now.getTimezoneOffset() * 60000; // Convert to UTC
+    return new Date(utc + offset * 60000); // Convert to GMT+6
+  };
+  
+ 
+    const [month, setMonth] = useState(0);
+    const [year, setYear] = useState(0);
+    const [date, setDate] = useState(0);
+  
+    useEffect(() => {
+      const dhakaTime = getDhakaTime();
+      setMonth(dhakaTime.getMonth() + 1);
+      setYear(dhakaTime.getFullYear());
+      setDate(dhakaTime.getDate());
+    }, []);
 
  
 
