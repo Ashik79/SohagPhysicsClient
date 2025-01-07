@@ -101,7 +101,9 @@ console.log(result)
                     setLoading(false)
                     setNavigate(true)
                 }
-
+                else (notifyFailed(result2.error_message))
+                setLoading(false)
+                setNavigate(true)
 
 
 
