@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../Provider';
 import { Navigate } from 'react-router-dom';
+import ImageUpload from './ImageUpload';
 
 function Admission() {
 
@@ -10,7 +11,12 @@ function Admission() {
     const [navigate, setNavigate] = useState(false)
     const [error, setError] = useState('')
     const [id, setId] = useState(0)
+    const [uploadedImageUrl, setUploadedImageUrl] = useState('');
 
+    const handleImageUpload = (url) => {
+        setUploadedImageUrl(url);
+        console.log("Image URL received in parent:", url);
+    };
 
 
     const handleAdmission = async (e) => {
@@ -20,7 +26,10 @@ function Admission() {
         console.log("admission clicked")
         e.preventDefault();
         const id = e.target.id.value;
-
+        let image = '';
+        if (uploadedImageUrl) {
+            image = uploadedImageUrl
+        }
         setLoading(true)
         setId(id)
         // const monthlyAmount = parseInt(e.target.monthlyAmount.value)
@@ -56,7 +65,7 @@ function Admission() {
 
         //sob data diye object banai
         const formData = {
-            id, batch, name, school, college, programs, session, target, phone, address, reference, gname, gphone, gender, admissionDate, payments, admittedBy, admissionMonth, admissionYear, attendances, exams
+            id, batch, name,image, school, college, programs, session, target, phone, address, reference, gname, gphone, gender, admissionDate, payments, admittedBy, admissionMonth, admissionYear, attendances, exams
         }
         console.log(formData)
 
@@ -78,8 +87,8 @@ function Admission() {
             } else {
                 // Handle successful response
                 const result = await response.json();
-               
-console.log(result)
+
+                console.log(result)
                 const response2 = await fetch('https://bulksmsbd.net/api/smsapi', {
                     method: 'POST',
                     headers: {
@@ -88,9 +97,9 @@ console.log(result)
                     body: JSON.stringify({
                         api_key: 'CUOP72nJJHahM30djaQG',
                         senderid: '8809617642567',
-                        number:phone,
+                        number: phone,
                         message: `Welcome to Sohag Physics\nStudent ID: ${id}\nName: ${name}\nRegistered by: ${admittedBy}\nContact:\n 01789539292\n 01780719371\nFB Group:\nhttps://facebook.com/groups/351973371171795\nFB Page:\nhttps://facebook.com/sohagphysics\nWebsite: https://sohagphysics.fun`
-                        
+
                     }),
                 })
                 const result2 = await response2.json();
@@ -132,6 +141,10 @@ console.log(result)
                 <div className='flex mt-2 flex-col lg:flex-row'>
                     <h1 className='font-bold text-lg lg:w-1/4'>Student's Information :</h1>
                     <div className='grid grid-cols-1 lg:w-2/3 lg:grid-cols-2 gap-3'>
+                        <div className='lg:col-span-2'>
+                            <ImageUpload onUpload={handleImageUpload}></ImageUpload>
+
+                        </div>
                         <div>
                             <p className='font-semibold'>ID <span className='text-red-700'>*</span> <span className='text-sm text-gray-500'>Must be 6 digits</span></p>
                             <input
@@ -161,7 +174,7 @@ console.log(result)
                                 <option value={'Sat 3'}>শনি ৯টা (নিউ টেন SSC 26 - HSC 28)</option>
                                 <option value={'Sat 4'}>শনি ১০টা (নিউ নাইন SSC 27 - HSC 29)</option>
                                 <option value={'Sat 5'}>শনি ১১টা </option>
-                               
+
                                 <option value={'Sat 6'}>শনি ২টা (HSC 26)</option>
                                 <option value={'Sat 7'}>শনি ৩টা (HSC 26)</option>
                                 <option value={'Sat 8'}>শনি ৪টা (HSC 25)</option>
@@ -173,7 +186,7 @@ console.log(result)
                                 <option value={'Sun 3'}>রবি ৯টা (HSC 26)</option>
                                 <option value={'Sun 4'}>রবি ১০টা (Nine & Ten combined)</option>
                                 <option value={'Sun 5'}>রবি ১১টা </option>
-                               
+
                                 <option value={'Sun 6'}>রবি ২টা (HSC 26) </option>
                                 <option value={'Sun 7'}>রবি ৩টা (HSC 25) </option>
                                 <option value={'Sun 8'}>রবি ৪টা (HSC 26) </option>
@@ -189,7 +202,7 @@ console.log(result)
                                 <option>SSC 25 (Physics Olympiad)</option>
                                 <option>Class 9 (SSC 27) Phy Champ</option>
                                 <option>Class 10 (SSC 26) Phy Champ</option>
-                               
+
 
 
 

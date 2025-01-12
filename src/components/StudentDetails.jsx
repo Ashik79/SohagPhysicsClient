@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { Navigate, useLoaderData } from 'react-router-dom';
+import { Link, Navigate, useLoaderData } from 'react-router-dom';
 import StudentDetailsPart from './StudentDetailsPart';
 import MonthlyPaymentsComponent from './MonthlyPaymentsComponent';
 import { FaUserEdit } from "react-icons/fa";
@@ -152,10 +152,15 @@ const StudentDetails = () => {
           <h1 className="text-2xl lg:text-3xl text-sky-800 font-bold mb-2">{student.name}</h1>
           <h2 className="text-xl mb-4">Roll: {student.id}</h2>
         </div>
-        <div className='text-2xl flex flex-col gap-1 pt-3 text-sky-800'>
-          <a href={`/student/update/${student.id}`}><FaUserEdit /></a>
-          <div onClick={() => document.getElementById('my_modal_1').showModal()}><TiMessages /></div>
-          <button onClick={() => handleDelete()} className={'hidden'}><RiDeleteBin5Line /></button>
+        <div className='flex gap-3'>
+          <div className='w-24 lg:w-32  mb-4 '>
+            <img className='rounded-lg' src={`${student.image?student.image:'/profile.jpg'}`} alt="Image" />
+          </div>
+          <div className='text-2xl flex flex-col gap-1 pt-3 text-sky-800'>
+            <Link to={`/student/update/${student.id}`}><FaUserEdit /></Link>
+            <div onClick={() => document.getElementById('my_modal_1').showModal()}><TiMessages /></div>
+            <button onClick={() => handleDelete()} className={'hidden'}><RiDeleteBin5Line /></button>
+          </div>
         </div>
       </div>
       <div className="flex gap-2 text-sm overflow-x-auto mb-5">

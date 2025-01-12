@@ -113,19 +113,24 @@ const [lastAttendanceDate,setLastAttendanceDate]=useState("Not Found")
                                 )) : <></>}
                             </p>
                             <p className='font-semibold'> Last present in <span className='font-semibold text-sky-600'>{lastAttendanceDate}</span></p>
-                            {present ? (
-                                <div className='flex items-center justify-center'>
-                                    <button className='py-5 px-2 flex items-center gap-1 flex-col text-xl bg-gray-200 rounded-xl text-green-600 font-bold'>
-                                        <FaCalendarCheck /> Present
-                                    </button>
+                            <div className='flex justify-around my-1 mx-10 items-center '>
+                                <div className='w-24 lg:w-32  mb-4 '>
+                                    <img className='rounded-lg' src={`${student.image ? student.image : '/profile.jpg'}`} alt="Image" />
                                 </div>
-                            ) : (
-                                <div className='flex items-center justify-center'>
-                                    <button type='submit' className='py-5 px-2 bg-gray-300 text-xl rounded-xl text-red-600 font-bold'>
-                                        Mark <br /> Present
-                                    </button>
-                                </div>
-                            )}
+                                {present ? (
+                                    <div className='flex items-center justify-center'>
+                                        <button className='py-5 px-2 flex items-center gap-1 flex-col text-xl bg-gray-200 rounded-xl text-green-600 font-bold'>
+                                            <FaCalendarCheck /> Present
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className='flex items-center justify-center'>
+                                        <button type='submit' className='py-5 px-2 bg-gray-300 text-xl rounded-xl text-red-600 font-bold'>
+                                            Mark <br /> Present
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Payment Status */}

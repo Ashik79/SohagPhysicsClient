@@ -1,17 +1,21 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../Provider';
 import { Navigate, useLoaderData } from 'react-router-dom';
+import ImageUpload from './ImageUpload';
 
 function UpdateStudent() {
 
     const { month, year, date, notifySuccess, notifyFailed, role } = useContext(AuthContext)
     const [navigate, setNavigate] = useState(false)
-
+    const [uploadedImageUrl, setUploadedImageUrl] = useState('');
     const student = useLoaderData()
     const { address, batch, college, gender, gname, gphone, id, monthlyAmount, name, phone, program, reference, school, session, target, group } = student
 
     const [error, setError] = useState('')
-
+    const handleImageUpload = (url) => {
+        setUploadedImageUrl(url);
+        console.log("Image URL received in parent:", url);
+    };
 
 
 
@@ -21,6 +25,10 @@ function UpdateStudent() {
         console.log(admissionDate)
         console.log("admission clicked")
         e.preventDefault();
+        let image = student?.image
+        if (uploadedImageUrl) {
+            image = uploadedImageUrl
+        }
 
         const monthlyAmount = parseInt(e.target.monthlyAmount.value)
         const batch = e.target.batch.value;
@@ -45,7 +53,7 @@ function UpdateStudent() {
 
         //sob data diye object banai
         const formData = {
-            id, monthlyAmount, batch, name, school, college, session, target, phone, address, reference, gname, gphone, gender
+            id, monthlyAmount, batch, name,image, school, college, session, target, phone, address, reference, gname, gphone, gender
         }
         console.log(formData)
 
@@ -95,6 +103,10 @@ function UpdateStudent() {
                 {/* students part */}
                 <div className='flex mt-2 flex-col lg:flex-row'>
                     <h1 className='font-bold text-lg lg:w-1/4'>Student's Information :</h1>
+                    <div className='lg:col-span-2'>
+                        <ImageUpload onUpload={handleImageUpload}></ImageUpload>
+
+                    </div>
                     <div className='grid grid-cols-1 lg:w-2/3 lg:grid-cols-2 gap-3'>
 
 
@@ -118,7 +130,7 @@ function UpdateStudent() {
                                 <option value={'Sat 3'}>শনি ৯টা (নিউ টেন SSC 26 - HSC 28)</option>
                                 <option value={'Sat 4'}>শনি ১০টা (নিউ নাইন SSC 27 - HSC 29)</option>
                                 <option value={'Sat 5'}>শনি ১১টা </option>
-                               
+
                                 <option value={'Sat 6'}>শনি ২টা (HSC 26)</option>
                                 <option value={'Sat 7'}>শনি ৩টা (HSC 26)</option>
                                 <option value={'Sat 8'}>শনি ৪টা (HSC 25)</option>
@@ -130,7 +142,7 @@ function UpdateStudent() {
                                 <option value={'Sun 3'}>রবি ৯টা (HSC 26)</option>
                                 <option value={'Sun 4'}>রবি ১০টা (Nine & Ten combined)</option>
                                 <option value={'Sun 5'}>রবি ১১টা </option>
-                               
+
                                 <option value={'Sun 6'}>রবি ২টা (HSC 26) </option>
                                 <option value={'Sun 7'}>রবি ৩টা (HSC 25) </option>
                                 <option value={'Sun 8'}>রবি ৪টা (HSC 26) </option>
@@ -161,7 +173,7 @@ function UpdateStudent() {
                         </div>
 
 
-                        <div className={`${role =='CEO'?'':'hidden'}`}>
+                        <div className={`${role == 'CEO' ? '' : 'hidden'}`}>
                             <p className='font-semibold'>Monthly Fee <span className='text-red-700'>*</span> </p>
                             <input
 
