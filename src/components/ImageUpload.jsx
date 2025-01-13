@@ -19,7 +19,7 @@ const ImageUpload = ({ onUpload }) => {
 
         try {
             const response = await fetch(
-                `https://api.imgbb.com/1/upload?key=7888e34aa71f413d228d21730a6ac3eb`,
+                `https://api.imgbb.com/1/upload?key=887f7e7ef6edcddafe9df270d7ddc6b1`,
                 {
                     method: 'POST',
                     body: formData
