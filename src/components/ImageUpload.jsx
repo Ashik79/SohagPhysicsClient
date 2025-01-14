@@ -49,8 +49,8 @@ const ImageUpload = ({ onUpload }) => {
     };
 
     return (
-        <div className='flex justify-between'>
-            <div className='flex flex-col gap-1'>
+        <div className='flex justify-between items-center gap-2 w-full'>
+            <div className='flex flex-col gap-2 w-3/4'>
                 <input className='text-blue-700 font-semibold' type="file" onChange={handleImageChange} accept="image/*" />
                 <button className='border-2 h-8 text-sm font-semibold  w-full mx-auto my-2 rounded-lg border-sky-700 bg-sky-200' onClick={handleUpload} disabled={uploading}>
                     {uploading ? "Uploading..." : "Upload Image"}
@@ -58,7 +58,7 @@ const ImageUpload = ({ onUpload }) => {
             </div>
 
             {imageUrl && (
-                <div >
+                <div className='w-1/4'>
                     
                     <img className='rounded-2xl' src={imageUrl} alt="Uploaded" width="100" />
                 </div>
