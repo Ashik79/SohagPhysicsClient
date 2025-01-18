@@ -21,7 +21,6 @@ import Students from './components/Students';
 import StudentDetails from './components/StudentDetails';
 import UpdateStudent from './components/UpdateStudent';
 import PaymentComponent from './components/PaymentOverview';
-import Attendance from './components/Attendance';
 import TakeAttendance from './components/TakeAttendance';
 import Exams from './components/Exams';
 import Exam from './components/Exam';
@@ -40,6 +39,11 @@ import MyEntry from './components/StuffPart/MyEntry';
 import Monitor from './components/StuffPart/Monitor';
 import AttendanceBatch from './components/AttendanceBatch';
 import MonthlyReport from './components/MonthlyReport';
+import Staffs from './components/StuffPart/Staffs';
+import StaffDetails from './components/StuffPart/StaffDetails';
+
+
+
 
 
 
@@ -54,6 +58,18 @@ const fetchStudent = async ({ params }) => {
 
   const student = await response.json();
   return student;
+};
+const fetchStaff = async ({ params }) => {
+  const response = await fetch(`https://spoffice-server.vercel.app/staff/${params.id}`);
+  
+  if (!response.ok) {
+    throw new Response(JSON.stringify({ message: 'Staff not found' }), {
+      status: 404,
+    });
+  }
+
+  const staff = await response.json();
+  return staff;
 };
 
 
@@ -102,6 +118,12 @@ const router = createBrowserRouter([
       {
         path:'/register',
         element:<PrivateRoute><Admission></Admission></PrivateRoute>
+      }
+      ,
+      {
+        path:'/staffs',
+        element:<PrivateRoute><Staffs></Staffs></PrivateRoute>,
+        loader:fetchUsersFull
       }
       ,
      
@@ -163,6 +185,12 @@ const router = createBrowserRouter([
         path:'/students/:id',
         element:<PrivateRoute><StudentDetails></StudentDetails></PrivateRoute>,
         loader:fetchStudent,
+      }
+      ,
+      {
+        path:'/staffs/:id',
+        element:<PrivateRoute><StaffDetails></StaffDetails></PrivateRoute>,
+        loader:fetchStaff,
       }
       ,
       {

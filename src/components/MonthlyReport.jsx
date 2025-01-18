@@ -141,111 +141,114 @@ function MonthlyReport() {
 
     const handleDownload = async () => {
         try {
-          // Create jsPDF instance with landscape orientation
-          const doc = new jsPDF("landscape");
-      
-          let isFirstPage = true; // Track if it's the first page for adding title and logo
-      
-          // Table headers
-          const headers = [
-            "Sl No", "Roll", "Name", "Phone", ...Array.from({ length: 31 }, (_, i) => (i + 1).toString()), "Comments"
-          ];
-      
-          // Table data rows for students
-          const tableData = students.map((student, index) => [
-            index + 1,
-            student.id,
-            student.name,
-            student.phone,
-            ...Array.from({ length: 31 }, (_, i) => {
-              const date = `${i + 1}-${paymentMonth}-${paymentYear}`;
-              return student.attendances.some((att) => att.date === date) ? "P" : "";
-            }),
-            "", // Empty comments column
-          ]);
-      
-          // Column width configuration (fixed widths)
-          const columnWidths = [10, 20, 40, 30, ...Array(31).fill(5), 40]; // 31 days columns + other columns
-      
-          // Fetch the logo image as a base64 URL
-          const fetchLogo = async () => {
-            const logoUrl = "/logo.png"; // Replace with the correct URL to your logo
-            const response = await fetch(logoUrl);
-            const blob = await response.blob();
-            const reader = new FileReader();
-            return new Promise((resolve, reject) => {
-              reader.onloadend = () => resolve(reader.result);
-              reader.onerror = reject;
-              reader.readAsDataURL(blob);
+            // Create jsPDF instance with landscape orientation
+            const doc = new jsPDF("landscape");
+
+            let isFirstPage = true; // Track if it's the first page for adding title and logo
+            
+            // Table headers
+            const headers = [
+                "Sl No", "Roll", "Name", "Phone","Program", "Payment", ...Array.from({ length: 31 }, (_, i) => (i + 1).toString())
+            ];
+
+            // Table data rows for students
+            const tableData = students.map((student, index) => [
+                index + 1,
+                student.id,
+                student.name,
+                student.phone,
+                (student.programs.length)?student.programs[student.programs.length-1].program:"Free Class",
+                student.payments.find(payment => payment.pmonth ==paymentMonth && payment.pyear==paymentYear )?
+                "Paid":"Unpaid",
+                ...Array.from({ length: 31 }, (_, i) => {
+                    const date = `${i + 1}-${paymentMonth}-${paymentYear}`;
+                    return student.attendances.some((att) => att.date === date) ? "P" : "";
+                }),
+                 // Empty comments column
+            ]);
+
+            // Column width configuration (fixed widths)
+           
+
+            // Fetch the logo image as a base64 URL
+            const fetchLogo = async () => {
+                const logoUrl = "/logo.png"; // Replace with the correct URL to your logo
+                const response = await fetch(logoUrl);
+                const blob = await response.blob();
+                const reader = new FileReader();
+                return new Promise((resolve, reject) => {
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+            };
+
+            // Wait for the logo to be loaded before generating the PDF
+            const logoUrlBase64 = await fetchLogo();
+
+            // Add table using autoTable plugin
+            doc.autoTable({
+                head: [headers],
+                body: tableData,
+                startY: 40,
+                columnStyles: {
+                    0: { cellWidth: 10 }, // Sl No
+                    1: { cellWidth: 15 }, // Roll
+                    2: { cellWidth: 30 }, // Name
+                    3: { cellWidth: 25 }, // Phone
+                    4: { cellWidth: 27 }, // Program
+                    5: { cellWidth: 18 }, // Payment
+                    ...Array.from({ length: 31 }, (_, i) => ({ [i + 6]: { cellWidth: 5 } })).reduce(
+                        (acc, curr) => ({ ...acc, ...curr }),
+                        {}
+                    ), // Day columns
+                   
+                },
+                theme: "grid",
+                headStyles: {
+                    fillColor: [242, 242, 242],
+                    textColor: [0, 0, 0],
+                    fontStyle: "bold",
+                    halign: "center",
+                    minCellHeight: 5,
+                    cellPadding: 1,
+                    lineWidth: 0.5,
+                    lineColor: [200, 200, 200],
+                },
+                bodyStyles: {
+                    minCellHeight: 4,
+                    cellPadding: 1,
+                    lineWidth: 0.5,
+                    lineColor: [200, 200, 200],
+                },
+                margin: { top: 10, bottom: 10, left: 10, right: 10 },
+                didDrawPage: (data) => {
+                    if (isFirstPage) {
+                        doc.addImage(logoUrlBase64, "PNG", 10, 10, 30, 30);
+                        const pageWidth = doc.internal.pageSize.width;
+                        doc.setFontSize(16);
+                        doc.text("Sohag Physics", pageWidth / 2, 20, { align: "center" });
+                        doc.setFontSize(12);
+                        doc.text(
+                            `Attendance Sheet for ${batch} - ${getMonth(paymentMonth)}, ${paymentYear}`,
+                            pageWidth / 2,
+                            30,
+                            { align: "center" }
+                        );
+                        isFirstPage = false;
+                    }
+                },
+                pageBreak: "auto",
             });
-          };
-      
-          // Wait for the logo to be loaded before generating the PDF
-          const logoUrlBase64 = await fetchLogo();
-      
-          // Add table using autoTable plugin
-          doc.autoTable({
-            head: [headers],
-            body: tableData,
-            startY: 40, // Start the table after the title and logo
-            columnStyles: {
-              0: { cellWidth: columnWidths[0] },
-              1: { cellWidth: columnWidths[1] },
-              2: { cellWidth: columnWidths[2] },
-              3: { cellWidth: columnWidths[3] },
-              ...Array.from({ length: 31 }, (_, i) => ({
-                [i + 4]: { cellWidth: columnWidths[4] } // Setting width for 31 day columns
-              })).reduce((acc, curr) => ({ ...acc, ...curr }), {}),
-              35: { cellWidth: columnWidths[35] }, // Comments column
-            },
-            theme: "grid", // Use grid theme for better visibility
-            headStyles: {
-              fillColor: [242, 242, 242], // Light grey background for header
-              textColor: [0, 0, 0], // Black text color
-              fontStyle: 'bold', // Bold font for header
-              halign: 'center', // Center-align header text
-              minCellHeight: 5, // Reduced height for header cells
-              cellPadding: 1, // Reduce padding inside header cells
-              lineWidth: 0.5, // Border width for header cells
-              lineColor: [200, 200, 200], // Lighter gray color for header cell borders
-            },
-            bodyStyles: {
-              minCellHeight: 4, // Set minimum height for body rows (reduced)
-              cellPadding: 1, // Reduce padding inside body cells
-              lineWidth: 0.5, // Border width for body cells
-              lineColor: [200, 200, 200], // Lighter gray color for body cell borders
-            },
-            margin: { top: 10, bottom: 10, left: 10, right: 10 }, // Reduce margins to fit more content
-            didDrawPage: (data) => {
-              if (isFirstPage) {
-                // Add the logo at the top of the first page
-                doc.addImage(logoUrlBase64, 'PNG', 10, 10, 30, 30); // Adjust logo size and position as needed
-      
-                // Calculate the center of the page
-                const pageWidth = doc.internal.pageSize.width;
-                const titleText = "Sohag Physics";
-                const subtitleText = `Attendance Sheet for ${batch} - ${getMonth(paymentMonth)}, ${paymentYear}`;
-      
-                // Add title and subtitle to the first page
-                doc.setFontSize(16);
-                doc.text(titleText, pageWidth / 2, 20, { align: "center" });
-                doc.setFontSize(12);
-                doc.text(subtitleText, pageWidth / 2, 30, { align: "center" });
-      
-                // Set the flag to false after the first page
-                isFirstPage = false;
-              }
-            },
-            pageBreak: "auto", // Ensure the table breaks if it overflows to the next page
-          });
-      
-          // Save the generated PDF
-          doc.save(`monthly-report-${paymentMonth}-${paymentYear}.pdf`);
+            
+
+            // Save the generated PDF
+            doc.save(`Attendance sheet of batch ${students[0].batch} ${getMonth(paymentMonth)},${paymentYear}.pdf`);
         } catch (err) {
-          console.log("Error generating PDF:", err);
+            console.log("Error generating PDF:", err);
         }
-      };
-      
+    };
+
 
 
 
@@ -276,7 +279,7 @@ function MonthlyReport() {
                             <p className='font-semibold'>Batch </p>
 
                             <select name='batch' className="select text-lg font-semibold  select-info w-full ">
-                           
+
                                 <option value={'Sat 1'}>শনি ৭টা (নিউ টেন SSC 26 - HSC 28)</option>
                                 <option value={'Sat 2'}>শনি ৮টা (নিউ নাইন SSC 27 - HSC 29)</option>
                                 <option value={'Sat 3'}>শনি ৯টা (নিউ টেন SSC 26 - HSC 28)</option>
