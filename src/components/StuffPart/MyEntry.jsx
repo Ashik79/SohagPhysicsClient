@@ -54,8 +54,8 @@ function MyEntry() {
 
     const handleEntry = async (e) => {
         e.preventDefault();
-        const hr = parseInt(e.target.hour.value);
-        const min = parseInt(e.target.min.value);
+        const hr = parseInt(defaultHour);
+        const min = parseInt(defaultMinute);
         const reason = e.target.reason.value;
 
         if (checked) {
@@ -144,37 +144,7 @@ function MyEntry() {
                                 </div>
 
                                 <div className='flex flex-col gap-4'>
-                                    <div className='flex gap-3 justify-between'>
-                                        <label className='w-1/2 font-semibold'>
-                                            Hour:
-                                            <select
-                                                name='hour'
-                                                defaultValue={defaultHour}
-                                                className='ml-2 border rounded w-1/2 p-1'
-                                            >
-                                                {[...Array(24).keys()].map((hr) => (
-                                                    <option key={hr} value={hr}>
-                                                        {hr}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </label>
-
-                                        <label className='w-1/2 font-semibold'>
-                                            Minute:
-                                            <select
-                                                name='min'
-                                                defaultValue={defaultMinute}
-                                                className='ml-2 border rounded p-1 w-1/2'
-                                            >
-                                                {[...Array(60).keys()].map((min) => (
-                                                    <option key={min} value={min}>
-                                                        {min}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </label>
-                                    </div>
+                                   
 
                                     {checked ? (
                                         <div>
@@ -266,7 +236,7 @@ function MyEntry() {
                     </div>
                 </div>
             ) : (
-                <div className="flex items-center justify-center h-screen bg-gray-100">
+                <div className="flex mt-10 justify-center  bg-gray-100">
                     <div className="flex flex-col items-center">
                         <FaSpinner className="text-blue-500 animate-spin text-6xl mb-4" />
                         <p className="text-lg font-semibold text-gray-700">Loading, please wait...</p>

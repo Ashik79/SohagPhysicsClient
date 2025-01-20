@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { FaEdit, FaTrash } from 'react-icons/fa';
+import { AuthContext } from '../../Provider';
+const SessionCard = ({ session, edit,del }) => {
 
-const SessionCard = ({ session }) => {
+  const {role} =useContext(AuthContext)
   const {
     out,
     inHour,
@@ -55,7 +58,26 @@ const SessionCard = ({ session }) => {
           )}
         </div>
       </div>
+
+      {/* Buttons Section */}
+      {(role !='Admin' && edit) ?<div className="flex justify-end gap-4 mt-4">
+        <button
+          className="flex items-center gap-2 bg-blue-500 text-sm text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+          onClick={() =>edit(session)}
+        >
+          <FaEdit className="text-sm" />
+          Edit
+        </button>
+        <button
+          className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+          onClick={() =>del(session)}
+        >
+          <FaTrash className="text-lg" />
+          Delete
+        </button>
+      </div>:<div></div>}
     </div>
+
   );
 };
 
