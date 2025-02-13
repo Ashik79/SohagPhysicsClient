@@ -35,6 +35,23 @@ const EditNote = () => {
         { value: 'jotirbiggan', label: '১১. জ্যোতির্বিজ্ঞান' },
     ];
 
+    const SscNotes = [
+        { value: 'রাশি', label: '১. ভৌত রাশি এবং পরিমাপ' },
+        { value: 'গতি', label: '২. গতি' },
+        { value: 'বল', label: '৩. বল' },
+        { value: 'শক্তি', label: '৪. কাজ, ক্ষমতা ও শক্তি' },
+        { value: 'চাপ', label: '৫. পদার্থের অবস্থা ও চাপ' },
+        { value: 'তাপ', label: '৬. বৃহত্তর ওপর তাপের প্রভাব' },
+        { value: 'তরঙ্গ', label: '৭. তরঙ্গ ও শব্দ' },
+        { value: 'প্রতিফলন', label: '৮. আলোর প্রতিফলন' },
+        { value: 'প্রতিসরণ', label: '৯. আলোর প্রতিসরণ' },
+        { value: 'স্থিরবিদ্যুৎ', label: '১০. স্থির বিদ্যুৎ' },
+        { value: 'চলবিদ্যুৎ', label: '১১. চল বিদ্যুৎ' },
+        { value: 'চৌম্বক', label: '১২. বিদ্যুতের চৌম্বক ক্রিয়া' },
+        { value: 'ইলেকট্রনিক্স', label: '১৩. আধুনিক পদার্থবিজ্ঞান ও ইলেকট্রনিক্স' },
+        { value: 'জীবন', label: '১৪. জীবন বাঁচাতে পদার্থবিজ্ঞান' },
+    ];
+    
     const toggleOption = (value) => {
         setSelectedValues(prev => {
             if (prev.includes(value)) {
@@ -74,7 +91,7 @@ const EditNote = () => {
     return (
         <div className="flex flex-col flex-wrap gap-4">
             <div className="mt-4 ">
-                <p className="font-semibold underline my-2">Selected Notes:</p>
+                <p className="font-bold underline my-2 mt-5 text-lg text-sky-600">Selected Notes:</p>
                 <ul className='flex flex-wrap gap-2 border-sky-600 border-2 rounded-xl p-3'>
                     {selectedValues.map(value => (
                         <li className='font-semibold text-sm bg-sky-200 px-1 rounded-md' key={value}>{value}</li>
@@ -83,7 +100,7 @@ const EditNote = () => {
             </div>
 
             <div className='w-full'>
-                <p className="font-semibold underline my-2">First Paper Notes:</p>
+                <p className="font-bold underline my-2 mt-5 text-lg text-sky-600">First Paper Notes:</p>
                 <div className='grid lg:grid-cols-4 grid-cols-2 md:grid-cols-3 gap-3 mb-4'>
                     {firstPaperNotes.map(option => (
                         <div
@@ -98,9 +115,23 @@ const EditNote = () => {
                     ))}
                 </div>
 
-                <p className="font-semibold underline my-2">Second Paper Notes:</p>
+                <p className="font-bold underline my-2 mt-5 text-lg text-sky-600">Second Paper Notes:</p>
                 <div className='grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 gap-3'>
                     {secondPaperNotes.map(option => (
+                        <div
+                            key={option.value}
+                            onClick={() => toggleOption(option.value)}
+                            className={`flex items-center justify-center text-center h-16 rounded-xl cursor-pointer transition-all 
+                                ${selectedValues.includes(option.value) ? 'bg-sky-500 px-1 text-sm font-semibold text-white' : 'bg-gray-200 text-black'}`}
+                        >
+
+                            <span className='text-sm text-center px-1 font-semibold'>{option.label}</span>
+                        </div>
+                    ))}
+                </div>
+                <p className="font-bold underline my-2 mt-5 text-lg text-sky-600">SSC Notes:</p>
+                <div className='grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 gap-3'>
+                    {SscNotes.map(option => (
                         <div
                             key={option.value}
                             onClick={() => toggleOption(option.value)}

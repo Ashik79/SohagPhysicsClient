@@ -18,7 +18,7 @@ const tarikh =`${day} ${getMonth(month)}, ${year}`
     const [file, setFile] = useState(null)
     const [loading, setLoading] = useState(false)
     useEffect(() => {
-        let sortedResults = [...displayResults].sort((a, b) => (b.mcqMarks + b.writenMarks) - (a.mcqMarks + a.writenMarks));
+        const sortedResults = [...displayResults].sort((a, b) => (b.mcqMarks + b.writenMarks) - (a.mcqMarks + a.writenMarks));
         let rank = 1;
         let previousMarks = sortedResults[0]?.mcqMarks + sortedResults[0]?.writenMarks
         console.log(sortedResults)
@@ -27,7 +27,7 @@ const tarikh =`${day} ${getMonth(month)}, ${year}`
         sortedResults.forEach((result, index) => {
             // If the current student's marks are the same as the previous student's, they share the same rank
             if ((result.mcqMarks + result.writenMarks) != previousMarks) {
-                rank = index + 1; // Update rank based on the index
+                rank ++; // Update rank based on the index
             }
 
             result.merit = rank; // Assign the rank (merit) to the student
@@ -35,7 +35,7 @@ const tarikh =`${day} ${getMonth(month)}, ${year}`
         });
         setDisplayResults(sortedResults);
         console.log(displayResults)
-    }, []);
+    }, [displayResults.length]);
 
 
     //pagination
@@ -348,7 +348,7 @@ const tarikh =`${day} ${getMonth(month)}, ${year}`
                 console.log(result)
                 const message = {
                     to: `${num.phone}`,
-                    message: `Hey ${num.name},\nHere is your result! \nExam Name: ${title}\nExam Date: ${tarikh}\n${mcqTotal ? 'MCQ: ' : ''}${mcqTotal ? result.mcqMarks : ''}${mcqTotal ? `/${mcqTotal}\n` : ''}${writenTotal ? `Written: ${result.writenMarks}/${writenTotal}\n` : ''}Total: ${result.mcqMarks + result.writenMarks}/${mcqTotal + writenTotal}\nMerit:${result.merit}/${examResults.length}\nSohag Physics`
+                    message: `Hey ${num.name},\nHere is your result! \nExam Name: ${title}\nExam Date: ${tarikh}\n${mcqTotal ? 'MCQ: ' : ''}${mcqTotal ? result.mcqMarks : ''}${mcqTotal ? `/${mcqTotal}\n` : ''}${writenTotal ? `Written: ${result.writenMarks}/${writenTotal}\n` : ''}Total: ${result.mcqMarks + result.writenMarks}/${mcqTotal + writenTotal}\nMerit:${result.merit} \nSohag Physics`
                 }
                 messages.push(message)
 
@@ -482,7 +482,7 @@ const tarikh =`${day} ${getMonth(month)}, ${year}`
                         Total Results
                     </span>
                     <span className='font-semibold w-1/2'>
-                        {examResults.length}
+                        {displayResults?.length}
                     </span>
                 </div>
 
