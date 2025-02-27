@@ -348,7 +348,7 @@ const tarikh =`${day} ${getMonth(month)}, ${year}`
                 console.log(result)
                 const message = {
                     to: `${num.phone}`,
-                    message: `Hey ${num.name},\nHere is your result! \nExam Name: ${title}\nExam Date: ${tarikh}\n${mcqTotal ? 'MCQ: ' : ''}${mcqTotal ? result.mcqMarks : ''}${mcqTotal ? `/${mcqTotal}\n` : ''}${writenTotal ? `Written: ${result.writenMarks}/${writenTotal}\n` : ''}Total: ${result.mcqMarks + result.writenMarks}/${mcqTotal + writenTotal}\nMerit:${result.merit} \nSohag Physics`
+                    message: `Hey ${num.name},\nHere is your result! \nExam Name: ${title}\nExam Date: ${tarikh}\n${mcqTotal ? 'MCQ: ' : ''}${mcqTotal ? result.mcqMarks : ''}${mcqTotal ? `/${mcqTotal}\n` : ''}${writenTotal ? `Written: ${result.writenMarks}/${writenTotal}\n` : ''}Total: ${result.mcqMarks + result.writenMarks}/${mcqTotal + writenTotal}\nMerit:${result.merit}\nHighest Mark: ${displayResults[0].total} \nSohag Physics`
                 }
                 messages.push(message)
 
