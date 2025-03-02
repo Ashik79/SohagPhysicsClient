@@ -20,11 +20,17 @@ function AddPayment() {
     const [loading, setLoading] = useState(false)
     const [pdata, setPdata] = useState({})
     const [navigate, setNavigate] = useState(false)
-
+    const [paymentType, setPaymentType] = useState('Monthly')
     const [displayCoupon, setCoupon] = useState(null)
     const [newStudent, setNewStudent] = useState(false)
 
-    console.log(user)
+    const handleOptionChange = (event) => {
+        setPaymentType(event.target.value);
+    };
+    console.log(paymentType)
+
+
+
     const { monthlyAmount, name, id, payments, phone } = user;
     const reversedPayments = [...payments].reverse();
 
@@ -37,7 +43,7 @@ function AddPayment() {
         }, 500)
     }
 
-   
+
 
 
 
@@ -50,10 +56,10 @@ function AddPayment() {
         lastYear--;
     }
     const lastMonthText = getMonth(lastMonth)
-    console.log(lastMonthText);
+
 
     useEffect(() => {
-       
+
         user.payments.forEach(payment => {
             if (payment.type == "Monthly" && parseInt(payment.pmonth) == lastMonth && parseInt(payment.pyear) == lastYear) {
                 setLastMonthPaid(true);
@@ -63,7 +69,7 @@ function AddPayment() {
             const haveMonthly = payments.some(payment => payment.type == "Monthly")
             if (!haveMonthly) { setNewStudent(true) }
         }
-    }, [user.payments, month,user]);
+    }, [user.payments, month, user]);
 
     const handlePayment = async (event) => {
         event.preventDefault();
@@ -128,7 +134,7 @@ function AddPayment() {
             return; // Stop the function here
         }
 
-        if (!lastMonthPaid && !newStudent && pmonth != lastMonth && type =='Monthly') {
+        if (!lastMonthPaid && !newStudent && pmonth != lastMonth && type == 'Monthly') {
             notifyFailed(`Did not paid for ${lastMonthText}`)
             setLoading(false)
             return;
@@ -171,8 +177,8 @@ function AddPayment() {
                 const smsData = await smsResponse.json();
                 if (smsData.response_code === 202) {
                     notifySuccess("Payment Successful!");
-                    
-                   
+
+
                 }
             }
         } catch (error) {
@@ -217,7 +223,9 @@ function AddPayment() {
 
                         <div>
                             <p className='font-semibold'>Payment Type <span className='text-red-700'>*</span> </p>
-                            <select name='type' defaultValue={month} className="select select-inf text-lg font-semibold w-full ">
+                            <select name='type'
+                                onChange={handleOptionChange}
+                                defaultValue={month} className="select select-inf text-lg font-semibold w-full ">
 
                                 <option >Monthly</option>
                                 <option >Due</option>
@@ -227,7 +235,7 @@ function AddPayment() {
                             </select>
                         </div>
                         {
-                            role == "CEO" ? <div>
+                            role == "CEO" && <div>
                                 <p className='font-semibold'>Amount <span className='text-red-700'>*</span> </p>
                                 <input
                                     required
@@ -236,12 +244,26 @@ function AddPayment() {
                                     type="number"
                                     onWheel={(e) => e.target.blur()}
                                     className="input text-lg font-semibold  input-bordered input-info w-full " />
-                            </div> : <div>
+                            </div>}
+                        {role != 'CEO' && paymentType == 'Monthly' &&
+                            <div>
                                 <p className='font-semibold'>Amount <span className='text-red-700'>*</span> </p>
                                 <input
                                     required
                                     name='pamount'
                                     value={monthlyAmount}
+                                    type="number"
+                                    onWheel={(e) => e.target.blur()}
+                                    className="input text-lg font-semibold  input-bordered input-info w-full " />
+                            </div>
+                        }
+                        {role != 'CEO' && paymentType == 'Note Fee' &&
+                            <div>
+                                <p className='font-semibold'>Amount <span className='text-red-700'>*</span> </p>
+                                <input
+                                    required
+                                    name='pamount'
+                                   
                                     type="number"
                                     onWheel={(e) => e.target.blur()}
                                     className="input text-lg font-semibold  input-bordered input-info w-full " />
@@ -308,9 +330,9 @@ function AddPayment() {
                 </div>
 
 
-            {
-                <div className=''>{showReceipt && <MonthlyReciept  data={pdata} />}</div>
-            }
+                {
+                    <div className=''>{showReceipt && <MonthlyReciept data={pdata} />}</div>
+                }
             </form>
             <div className="mt-8">
                 <h2 className="text-2xl font-bold mb-4">Recent Payments</h2>
@@ -319,7 +341,7 @@ function AddPayment() {
                 ))}
             </div>
             {navigate ? <Navigate to={`/payment`}></Navigate> : <></>}
-            
+
         </div>
     )
 }

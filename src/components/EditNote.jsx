@@ -103,8 +103,11 @@ const EditNote = () => {
                 <ImCross /> Note fee DUE
             </p>}
 
-
-            <div className="mt-4 ">
+            <div className='ml-2 mt-5'>
+                <p className='text-sky-600 font-bold text-lg'>{student.name}</p>
+                <p className='text-sm text-gray-500 font-semibold'>{student.id}</p>
+            </div>
+            <div className=" ">
                 <p className="font-bold underline my-2 mt-5 text-lg text-sky-600">Selected Notes:</p>
                 <ul className='flex flex-wrap gap-2 border-sky-600 border-2 rounded-xl p-3'>
                     {selectedValues.map(value => (
