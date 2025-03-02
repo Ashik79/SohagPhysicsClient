@@ -16,7 +16,7 @@ const MonthlyPaymentsComponent = ({ payments, student }) => {
 
   const getPaymentForMonth = (month) => {
     return payments.find(payment =>
-      payment.pyear == selectedYear && payment.pmonth == month
+      payment.pyear == selectedYear && payment.pmonth == month && payment.type =='Monthly'
     );
   };
 

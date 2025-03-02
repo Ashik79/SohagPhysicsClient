@@ -1,13 +1,20 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import { AuthContext } from '../Provider';
+import { FaCheckCircle } from "react-icons/fa";
+import { ImCross } from "react-icons/im";
 
 const EditNote = () => {
-    const {notifyFailed,notifySuccess}=useContext(AuthContext)
+    const { notifyFailed, notifySuccess } = useContext(AuthContext)
     const student = useLoaderData()
     const previousNotes = student.notes
     const [selectedValues, setSelectedValues] = useState(previousNotes || []);
     const [loading, setLoading] = useState(false)
+    const [paid, setPaid] = useState(false)
+    useEffect(() => {
+        const notePayments = student.payments.filter(payment => payment.type == 'Note Fee')
+        setPaid(notePayments.some(payment => payment.pamount != 0))
+    }, [student])
     const firstPaperNotes = [
         { value: 'vouto', label: '১. ভৌতজগৎ' },
         { value: 'vector', label: '২. ভেক্টর' },
@@ -51,7 +58,7 @@ const EditNote = () => {
         { value: 'ইলেকট্রনিক্স', label: '১৩. আধুনিক পদার্থবিজ্ঞান ও ইলেকট্রনিক্স' },
         { value: 'জীবন', label: '১৪. জীবন বাঁচাতে পদার্থবিজ্ঞান' },
     ];
-    
+
     const toggleOption = (value) => {
         setSelectedValues(prev => {
             if (prev.includes(value)) {
@@ -64,7 +71,7 @@ const EditNote = () => {
 
     const saveNotes = async () => {
         setLoading(true)
-        student.notes =selectedValues;
+        student.notes = selectedValues;
         try {
             const response = await fetch(`https://spoffice-server.vercel.app/addpayment/${student.id}`, {
                 method: 'PUT',
@@ -90,6 +97,13 @@ const EditNote = () => {
 
     return (
         <div className="flex flex-col flex-wrap gap-4">
+            {paid ? <p className='mx-auto flex gap-1 items-center font-semibold bg-green-600 rounded-lg text-white py-1 px-3'>
+                <FaCheckCircle /> Note fee paid
+            </p> : <p className='mx-auto flex gap-1 items-center font-semibold bg-red-600 rounded-lg text-white py-1 px-3'>
+                <ImCross /> Note fee DUE
+            </p>}
+
+
             <div className="mt-4 ">
                 <p className="font-bold underline my-2 mt-5 text-lg text-sky-600">Selected Notes:</p>
                 <ul className='flex flex-wrap gap-2 border-sky-600 border-2 rounded-xl p-3'>
@@ -146,7 +160,7 @@ const EditNote = () => {
             </div>
 
             <div className=' text-center  w-full'>
-                <button onClick={saveNotes} className="font-semibold h-11 w-full bg-blue-100  border-2 rounded-xl   btn-outline btn-info py-2 px-6 text-blue-950"  >{loading?"":"Save"}</button>
+                <button onClick={saveNotes} className="font-semibold h-11 w-full bg-blue-100  border-2 rounded-xl   btn-outline btn-info py-2 px-6 text-blue-950"  >{loading ? "" : "Save"}</button>
                 <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
             </div>
         </div>

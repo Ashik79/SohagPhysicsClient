@@ -128,7 +128,7 @@ function AddPayment() {
             return; // Stop the function here
         }
 
-        if (!lastMonthPaid && !newStudent && pmonth != lastMonth) {
+        if (!lastMonthPaid && !newStudent && pmonth != lastMonth && type =='Monthly') {
             notifyFailed(`Did not paid for ${lastMonthText}`)
             setLoading(false)
             return;
@@ -221,7 +221,7 @@ function AddPayment() {
 
                                 <option >Monthly</option>
                                 <option >Due</option>
-                                <option >Re-admission</option>
+                                <option >Note Fee</option>
 
 
                             </select>
