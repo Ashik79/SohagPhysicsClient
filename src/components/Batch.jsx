@@ -482,7 +482,7 @@ useEffect(()=>{
     <div>
       <form className='mx-auto w-full' onSubmit={handleIdInput}>
         <div className='flex mt-2 flex-col lg:flex-row'>
-          <h1 className='font-bold text-lg lg:w-1/4'>Take Attendance :</h1>
+          <h1 className='font-bold text-lg lg:w-1/4'>Batch Students :</h1>
           <div className='grid grid-cols-2 lg:w-2/3 gap-3'>
 
             <div>

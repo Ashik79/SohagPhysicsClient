@@ -265,7 +265,7 @@ function MonthlyReport() {
 
 
     return (
-        role == 'CEO' ? <div className=''>
+        (role == 'CEO' || role =='Manager') ? <div className=''>
             <h1 className=' text-center lg:text-left md:text-center font-semibold text-2xl text-cyan-500 underline mt-10'>Monthly Report</h1>
             <form className='mx-auto w-full' onSubmit={handleSearch} >
 

@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../Provider';
 
 const Payment = () => {
-const {notifyFailed}=useContext(AuthContext)
+const {notifyFailed,role}=useContext(AuthContext)
   const [id, setId] = useState(null)
   const [loading, setLoading] = useState(false)
   const handleIdInput = async (event) => {
@@ -26,6 +26,7 @@ const {notifyFailed}=useContext(AuthContext)
   };
 
   return (
+    (role =='CEO' || role == 'Cashier') ?
     <div>
       <form className='mx-auto w-full' onSubmit={handleIdInput} >
 
@@ -57,6 +58,8 @@ const {notifyFailed}=useContext(AuthContext)
 
       </form>
       {id && <Navigate to={`/payment/${id}`}></Navigate>}
+    </div>:<div>
+      No Access
     </div>
   );
 };

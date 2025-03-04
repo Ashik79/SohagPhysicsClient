@@ -34,10 +34,12 @@ function ProgramEntry() {
         else if (program == 'Exam' || program == 'Others' || program == 'PBC') {
             setProgramStatus('admission')
         }
-        else if (program == 'ExamDue' || program == 'HscPhyDue' || program == 'OthersDue' || program == 'HscPhyDue' || program == 'SscPhyDue' || program == 'MonthlyDue') {
+        else if (program == 'ExamDue'  || program == 'HscPhyDue' || program == 'OthersDue' || program == 'HscPhyDue' || program == 'SscPhyDue' || program == 'MonthlyDue') {
             setProgramStatus('due')
         }
-
+        else if (program =='Chuti'){
+            setProgramStatus('Chuti')
+        }
     }
 
 
@@ -267,6 +269,41 @@ function ProgramEntry() {
                     }
                 }
             }
+            else if (programStatus == 'Chuti') {
+                const type = 'Chuti'
+                const pamount =  0;
+                const pdata = {
+                    id, type, pamount, payDate, ptaken, date, month, year, program, name
+                }
+
+                user.payments.push(pdata)
+                const Fee = pamount;
+                const note = event.target.dueNote.value;
+             
+              
+                const programData = {
+                    program, Fee, payDate, note
+                }
+
+                user.programs.push(programData)
+
+                const res = await fetch(`https://spoffice-server.vercel.app/addpayment/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'content-type': 'application/json'
+                    },
+                    body: JSON.stringify(user)
+
+                })
+
+                const resData = await res.json()
+                if (resData.modifiedCount) {
+                    setLoading(false)
+                    notifySuccess("Program Added successfully !")
+                    setDisplayUser(user)
+                  
+                }
+            }
         }
         catch (err) {
             console.log(err)
@@ -324,6 +361,7 @@ function ProgramEntry() {
                                 <option value={'SscPhyDue'}>SSC Physics Due</option>
                                 <option value={'Exam'}>Exam Batch </option>
                                 <option value={'ExamDue'}>Exam Batch Due </option>
+                                <option value={'Chuti'}>Chuti </option>
                                 <option value={'Others'}>Others </option>
                                 <option value={'OthersDue'}>Others Due </option>
                             </select>
@@ -417,6 +455,17 @@ function ProgramEntry() {
                         }
                         {
                             programStatus == "due" ? <div>
+                                <p className='font-semibold'>Note  </p>
+                                <input
+
+                                    name='dueNote'
+                                    type="text"
+
+                                    className="input text-lg font-semibold  input-bordered input-info w-full " />
+                            </div> : <></>
+                        }
+                        {
+                            programStatus == "Chuti" ? <div>
                                 <p className='font-semibold'>Note  </p>
                                 <input
 
