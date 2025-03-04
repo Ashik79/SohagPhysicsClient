@@ -340,20 +340,17 @@ function MonthlyReport() {
                             <select name='program' className="select text-lg font-semibold  select-info w-full ">
                                 <option value={''}>All</option>
                                 <option value={'Free'}>Free Class</option>
-                                <option value={'Eight'}>Eight</option>
-                                <option value={'EightDue'}>Eight Due</option>
-                                <option value={'Nine'}>Nine</option>
-                                <option value={'NineDue'}>Nine Due</option>
-                                <option value={'Ten'}>Ten</option>
-                                <option value={'TenDue'}>Ten Due</option>
-                                <option value={'Eleven'}>Eleven</option>
-                                <option value={'ElevenDue'}>Eleven Due</option>
-                                <option value={'Hsc'}>Hsc</option>
-                                <option value={'HscDue'}>Hsc Due</option>
+                                <option value={'HscPhy'}>HSC Physics</option>
+                                <option value={'HscPhyDue'}>HSC Physics Due</option>
+                                <option value={'PBC'}>PBC</option>
+                                <option value={'SscPhy'}>SSC Physics</option>
+                                <option value={'MonthlyDue'}>Monthly Payment Due</option>
 
-
+                                <option value={'SscPhyDue'}>SSC Physics Due</option>
                                 <option value={'Exam'}>Exam Batch </option>
                                 <option value={'ExamDue'}>Exam Batch Due </option>
+                                <option value={'Others'}>Others </option>
+                                <option value={'OthersDue'}>Others Due </option>
 
 
 
