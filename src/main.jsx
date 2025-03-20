@@ -41,6 +41,7 @@ import AttendanceBatch from './components/AttendanceBatch';
 import MonthlyReport from './components/MonthlyReport';
 import Staffs from './components/StuffPart/Staffs';
 import StaffDetails from './components/StuffPart/StaffDetails';
+import EditorDashboard from './components/StudentSite/EditorDashboard';
 
 
 
@@ -140,6 +141,11 @@ const router = createBrowserRouter([
       {
         path:'/note',
         element:<PrivateRoute><Note></Note></PrivateRoute>
+      }
+      ,
+      {
+        path:'/editor',
+        element:<PrivateRoute><EditorDashboard></EditorDashboard></PrivateRoute>
       }
       ,
       {

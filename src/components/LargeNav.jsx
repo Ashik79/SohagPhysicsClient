@@ -28,6 +28,9 @@ function LargeNav() {
                 {
                     (role == 'CEO' || role =='Cashier') ? <NavLink to={'/payment'}><li className='pl-2 hover:bg-gray-200'>Payment Entry</li></NavLink> : ''
                 }
+                {
+                    (role == 'CEO' ) ? <NavLink to={'/editor'}><li className='pl-2 hover:bg-gray-200'>Student Website</li></NavLink> : ''
+                }
 
                 
                 <NavLink to={'/register'}><li className='pl-2 hover:bg-gray-200'>Register</li></NavLink>
