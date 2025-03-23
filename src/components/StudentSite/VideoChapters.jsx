@@ -8,30 +8,26 @@ import ImageUpload from '../ImageUpload';
 import { FaEdit } from "react-icons/fa";
 
 
-function Courses() {
-
+function VideoChapters() {
+  const videoCourse = useLoaderData();
   const { month, year, date, getMonth, notifySuccess, notifyFailed } = useContext(AuthContext)
   const [loading, setLoading] = useState(false)
-  const [allCourses, setAllCourses] = useState([])
-  const [displayCourses, setDisplayCourses] = useState([]);
-  const [editCourse, setEditCourse] = useState({})
+  const [allChapters, setAllChapters] = useState(videoCourse.chapters)
+  const [displayChapters, setDisplayChapters] = useState([]);
+  const [editChapter, setEditChapter] = useState({})
   const [uploadedImageUrl, setUploadedImageUrl] = useState('')
 
 
-  useEffect(() => {
-    fetch('https://spoffice-server.vercel.app/getcourses')
-      .then(res => res.json())
-      .then(data => setAllCourses(data))
 
-  }, [])
 
   useEffect(() => {
-    if (allCourses.length) {
-      let temp = allCourses;
+    if (allChapters.length) {
+      console.log("call hoise")
+      let temp = allChapters;
       temp.sort((a, b) => a.priority - b.priority)
-      setDisplayCourses(temp)
+      setDisplayChapters(temp)
     }
-  }, [allCourses])
+  }, [allChapters])
 
   const handleImageUpload = (url) => {
     setUploadedImageUrl(url);
@@ -41,38 +37,38 @@ function Courses() {
   const [navigate, setNavigate] = useState(false)
 
 
-  const handleAddCourse = e => {
+  const handleAddChapter = e => {
     setLoading(true)
     e.preventDefault()
     const title = e.target.title.value
     const priority = e.target.priority.value
     const thumbnail = uploadedImageUrl ? uploadedImageUrl : '';
-    const chapters = []
+    const videos = []
     const details = {
-      title, chapters, priority, thumbnail
+      title, videos, priority, thumbnail
     }
-    console.log(details)
-    fetch('https://spoffice-server.vercel.app/addCourse', {
-      method: 'POST',
+    const updatedChapters =[...videoCourse.chapters,details]
+    fetch(`https://spoffice-server.vercel.app/courseupdate/${videoCourse._id}`, {
+      method: 'PUT',
       headers: {
         'content-type': 'application/json'
       },
-      body: JSON.stringify(details)
+      body: JSON.stringify({...videoCourse,chapters:updatedChapters})
     })
       .then(res => res.json())
       .then(data => {
         console.log(data)
-        if (data.insertedId) {
-          notifySuccess("Course added Successfully")
-          const newDisplay = [...displayCourses, details]
-          setAllCourses(newDisplay)
+        if (data.modifiedCount) {
+          notifySuccess("Chapter added Successfully")
+          
+          setAllChapters(updatedChapters)
           setLoading(false)
           document.getElementById('my_modal_1').close()
           setUploadedImageUrl('')
           setNavigate(true)
         }
         else {
-          notifyFailed("Failed to add course")
+          notifyFailed("Failed to add Chapter")
           setLoading(false)
         }
       })
@@ -84,19 +80,19 @@ function Courses() {
   }
 
 
-  const handleEditCourse = e => {
-    console.log(editCourse)
+  const handleEditChapter = e => {
+    console.log(editChapter)
     setLoading(true)
     e.preventDefault()
     const title = e.target.title.value
     const priority = e.target.priority.value
-    const thumbnail = uploadedImageUrl ? uploadedImageUrl : editCourse.thumbnail;
-    const chapters =editCourse.chapters;
+    const thumbnail = uploadedImageUrl ? uploadedImageUrl : editChapter.thumbnail;
+    const chapters = editChapter.chapters;
     const details = {
-      title, priority, thumbnail,chapters,
+      title, priority, thumbnail, chapters,
     }
     console.log(details)
-    fetch( `https://spoffice-server.vercel.app/courseupdate/${editCourse._id}`, {
+    fetch(`https://spoffice-server.vercel.app/Chapterupdate/${editChapter._id}`, {
       method: 'PUT',
       headers: {
         'content-type': 'application/json'
@@ -107,18 +103,18 @@ function Courses() {
       .then(data => {
         console.log(data)
         if (data.modifiedCount) {
-          notifySuccess("Course Updated Successfully")
-          const withoutEdited =allCourses.filter(course =>course._id !=editCourse._id)
-          const newDisplay = [...withoutEdited, {...details,_id:editCourse._id}]
-          setAllCourses(newDisplay)
+          notifySuccess("Chapter Updated Successfully")
+          const withoutEdited = allChapters.filter(Chapter => Chapter._id != editChapter._id)
+          const newDisplay = [...withoutEdited, { ...details, _id: editChapter._id }]
+          setAllChapters(newDisplay)
           setLoading(false)
-          setEditCourse({})
+          setEditChapter({})
           document.getElementById('my_modal_2').close()
           setUploadedImageUrl('')
           setNavigate(true)
         }
         else {
-          notifyFailed("Failed to add course")
+          notifyFailed("Failed to add Chapter")
           setLoading(false)
         }
       })
@@ -137,7 +133,7 @@ function Courses() {
 
     Swal.fire({
       title: 'Are You Sure?',
-      text: 'Do you want to delete the Course?',
+      text: 'Do you want to delete the Chapter?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Yes, Delete',
@@ -145,14 +141,14 @@ function Courses() {
     }).then((result) => {
       if (result.isConfirmed) {
         console.log(id)
-        fetch(`https://spoffice-server.vercel.app/course/delete/${id}`, {
+        fetch(`https://spoffice-server.vercel.app/Chapter/delete/${id}`, {
           method: "DELETE"
         })
           .then(res => res.json())
           .then(data => {
             if (data.deletedCount) {
-              notifySuccess("Successfully Deleted Course")
-              setDisplayCourses(prevCourses => prevCourses.filter(Course => Course._id !== id));
+              notifySuccess("Successfully Deleted Chapter")
+              setDisplayChapters(prevChapters => prevChapters.filter(Chapter => Chapter._id !== id));
 
             }
           })
@@ -164,9 +160,9 @@ function Courses() {
   }
 
   const openEditModal = (id) => {
-    
-    const editable = displayCourses.find(course => course._id==id)
-    setEditCourse(editable)
+
+    const editable = displayChapters.find(Chapter => Chapter._id == id)
+    setEditChapter(editable)
     document.getElementById('my_modal_2').showModal()
   }
 
@@ -174,8 +170,8 @@ function Courses() {
     <div>
       {/* Open the modal using document.getElementById('ID').showModal() method */}
       <div className='flex justify-between items-center'>
-        <p className=' font-bold text-xl text-cyan-600 underline lg:text-2xl'>All Video Courses</p>
-        <button className="btn border-2 border-cyan-600 text-cyan-600 font-bold hover:border-black  hover:text-black" onClick={() => document.getElementById('my_modal_1').showModal()}>Add Course</button>
+        <p className=' font-bold text-xl text-cyan-600 underline lg:text-2xl'>All Video Chapters</p>
+        <button className="btn border-2 border-cyan-600 text-cyan-600 font-bold hover:border-black  hover:text-black" onClick={() => document.getElementById('my_modal_1').showModal()}>Add Chapter</button>
       </div>
       {/* add korar modal edit */}
       <dialog id="my_modal_1" className="modal ">
@@ -186,21 +182,21 @@ function Courses() {
               <button className="text-red-600 px-1 lg:text-lg"><IoMdClose /></button>
             </form>
           </div>
-          <form className='mx-auto  w-full' onSubmit={handleAddCourse} >
+          <form className='mx-auto  w-full' onSubmit={handleAddChapter} >
 
 
             {/* students part */}
             <div className='flex  flex-col '>
-              <h1 className='font-bold text-center underline mb-2 text-xl '>Course Details </h1>
+              <h1 className='font-bold text-center underline mb-2 text-xl '>Chapter Details </h1>
               <div className='grid grid-cols-1   gap-3'>
                 <div className='lg:col-span-2 '>
-                  <p className='font-semibold '>Upload Course Thumbnail :</p>
+                  <p className='font-semibold '>Upload Chapter Thumbnail :</p>
                   <ImageUpload onUpload={handleImageUpload}></ImageUpload>
 
                 </div>
 
                 <div>
-                  <p className='font-semibold'>Video Course Name <span className='text-red-700'>*</span> </p>
+                  <p className='font-semibold'>Chapter Name <span className='text-red-700'>*</span> </p>
                   <input
                     required
                     name='title'
@@ -209,7 +205,7 @@ function Courses() {
                     className="input text-lg font-semibold  input-bordered input-info w-full " />
                 </div>
                 <div>
-                  <p className='font-semibold'>Course Priority <span className='text-red-700'>*</span> </p>
+                  <p className='font-semibold'>Chapter Priority <span className='text-red-700'>*</span> </p>
                   <input
                     required
                     onWheel={(e) => e.target.blur()}
@@ -247,35 +243,35 @@ function Courses() {
               <button className="text-red-600 px-1 lg:text-lg"><IoMdClose /></button>
             </form>
           </div>
-          <form className='mx-auto  w-full' onSubmit={handleEditCourse} >
+          <form className='mx-auto  w-full' onSubmit={handleEditChapter} >
 
 
             {/* students part */}
             <div className='flex  flex-col '>
-              <h1 className='font-bold text-center underline mb-2 text-xl '>Course Details </h1>
+              <h1 className='font-bold text-center underline mb-2 text-xl '>Chapter Details </h1>
               <div className='grid grid-cols-1   gap-3'>
                 <div className='lg:col-span-2 '>
-                  <p className='font-semibold '>Change Course Thumbnail :</p>
+                  <p className='font-semibold '>Change Chapter Thumbnail :</p>
                   <ImageUpload onUpload={handleImageUpload}></ImageUpload>
 
                 </div>
 
                 <div>
-                  <p className='font-semibold'>Video Course Name <span className='text-red-700'>*</span> </p>
+                  <p className='font-semibold'>Video Chapter Name <span className='text-red-700'>*</span> </p>
                   <input
                     required
-                    defaultValue={editCourse.title}
+                    defaultValue={editChapter.title}
                     name='title'
                     type="text"
 
                     className="input text-lg font-semibold  input-bordered input-info w-full " />
                 </div>
                 <div>
-                  <p className='font-semibold'>Course Priority <span className='text-red-700'>*</span> </p>
+                  <p className='font-semibold'>Chapter Priority <span className='text-red-700'>*</span> </p>
                   <input
                     required
                     onWheel={(e) => e.target.blur()}
-                    defaultValue={editCourse.priority}
+                    defaultValue={editChapter.priority}
                     name='priority'
                     type="number"
 
@@ -308,28 +304,28 @@ function Courses() {
 
 
 
-      {/* Sob Course dekhai */}
+      {/* Sob Chapter dekhai */}
 
 
 
       {
-        displayCourses.map((Course, index) => <>
+        displayChapters.map((Chapter, index) => <>
           <div key={index} className=' w-full  cursor-pointer  border-b  p-1 border-sky-600 '>
             <div className='flex gap-4' >
-              <Link className=' ' to={`/Course/${Course._id}`}>
+              <Link className=' ' to={`/Chapter/${Chapter._id}`}>
                 <div className=' p-2 rounded-lg border-2 border-orange-600'>
-                  <img className='rounded-lg h-12 w-20 lg:w-40 lg:h-24' src={Course.thumbnail || '/profile.jpg'} alt="" />
+                  <img className='rounded-lg h-12 w-20 lg:w-40 lg:h-24' src={Chapter.thumbnail || '/profile.jpg'} alt="" />
                 </div>
               </Link>
               <div className='w-3/4 flex gap-2 items-center'>
-                <Link className='w-3/4 ' to={`/Course/${Course._id}`}>
+                <Link className='w-3/4 ' to={`/Chapter/${Chapter._id}`}>
                   <div>
-                    <h1 className='text-lg  text-orange-600 lg:text-2xl font-bold'> {Course.title}</h1>
+                    <h1 className='text-lg  text-orange-600 lg:text-2xl font-bold'> {Chapter.title}</h1>
                   </div>
                 </Link>
                 <div className='flex gap-2 w-1/4 justify-end'>
-                  <button onClick={() => openEditModal(Course._id)} className='flex items-center text-lg gap-1 text-blue-600'><FaEdit /></button>
-                  <button onClick={() => handleDelete(Course._id)} className='flex items-center text-lg gap-1 text-red-600'><MdDeleteForever /></button>
+                  <button onClick={() => openEditModal(Chapter._id)} className='flex items-center text-lg gap-1 text-blue-600'><FaEdit /></button>
+                  <button onClick={() => handleDelete(Chapter._id)} className='flex items-center text-lg gap-1 text-red-600'><MdDeleteForever /></button>
 
                 </div>
               </div>
@@ -351,4 +347,4 @@ function Courses() {
   )
 }
 
-export default Courses
+export default VideoChapters

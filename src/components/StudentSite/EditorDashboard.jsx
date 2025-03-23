@@ -5,7 +5,7 @@ import { AuthContext } from '../../Provider';
 import Swal from 'sweetalert2';
 import { IoMdClose } from "react-icons/io";
 
-import Courses from './Courses';
+import Courses from './VideoCourses';
 
 const EditorDashboard = () => {
   const { role, notifySuccess } = useContext(AuthContext)

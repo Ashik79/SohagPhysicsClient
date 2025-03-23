@@ -42,6 +42,7 @@ import MonthlyReport from './components/MonthlyReport';
 import Staffs from './components/StuffPart/Staffs';
 import StaffDetails from './components/StuffPart/StaffDetails';
 import EditorDashboard from './components/StudentSite/EditorDashboard';
+import VideoChapters from './components/StudentSite/VideoChapters';
 
 
 
@@ -276,8 +277,8 @@ const router = createBrowserRouter([
       },
       {
         path:'/course/:id',
-        element:<PrivateRoute><Exam></Exam></PrivateRoute>,
-        loader:({params})=>fetch(`https://spoffice-server.vercel.app/getexam/${params.id}`)
+        element:<PrivateRoute><VideoChapters></VideoChapters></PrivateRoute>,
+        loader:({params})=>fetch(`https://spoffice-server.vercel.app/getvideocourse/${params.id}`)
         
       }
     ],
