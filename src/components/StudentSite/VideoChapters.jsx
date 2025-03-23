@@ -9,7 +9,7 @@ import { FaEdit } from "react-icons/fa";
 
 
 function VideoChapters() {
-  const videoCourse = useLoaderData();
+  const [videoCourse,setVideoCourse] = useState(useLoaderData())
   const { month, year, date, getMonth, notifySuccess, notifyFailed } = useContext(AuthContext)
   const [loading, setLoading] = useState(false)
   const [allChapters, setAllChapters] = useState(videoCourse.chapters)
@@ -47,20 +47,20 @@ function VideoChapters() {
     const details = {
       title, videos, priority, thumbnail
     }
-    const updatedChapters =[...videoCourse.chapters,details]
+    const updatedChapters = [...videoCourse.chapters, details]
     fetch(`https://spoffice-server.vercel.app/courseupdate/${videoCourse._id}`, {
       method: 'PUT',
       headers: {
         'content-type': 'application/json'
       },
-      body: JSON.stringify({...videoCourse,chapters:updatedChapters})
+      body: JSON.stringify({ ...videoCourse, chapters: updatedChapters })
     })
       .then(res => res.json())
       .then(data => {
         console.log(data)
         if (data.modifiedCount) {
           notifySuccess("Chapter added Successfully")
-          
+
           setAllChapters(updatedChapters)
           setLoading(false)
           document.getElementById('my_modal_1').close()
@@ -87,26 +87,27 @@ function VideoChapters() {
     const title = e.target.title.value
     const priority = e.target.priority.value
     const thumbnail = uploadedImageUrl ? uploadedImageUrl : editChapter.thumbnail;
-    const chapters = editChapter.chapters;
+    const videos = editChapter.videos;
     const details = {
-      title, priority, thumbnail, chapters,
+      title, priority, thumbnail, videos,
     }
-    console.log(details)
-    fetch(`https://spoffice-server.vercel.app/Chapterupdate/${editChapter._id}`, {
+    const filteredChapters=displayChapters.filter(chapter => chapter!=editChapter)
+    const updatedChapters =[...filteredChapters,details]
+    const updatedCourse ={...videoCourse,chapters:updatedChapters}
+    fetch(`https://spoffice-server.vercel.app/courseupdate/${videoCourse._id}`, {
       method: 'PUT',
       headers: {
         'content-type': 'application/json'
       },
-      body: JSON.stringify(details)
+      body: JSON.stringify(updatedCourse)
     })
       .then(res => res.json())
       .then(data => {
         console.log(data)
         if (data.modifiedCount) {
           notifySuccess("Chapter Updated Successfully")
-          const withoutEdited = allChapters.filter(Chapter => Chapter._id != editChapter._id)
-          const newDisplay = [...withoutEdited, { ...details, _id: editChapter._id }]
-          setAllChapters(newDisplay)
+          
+          setAllChapters(updatedChapters)
           setLoading(false)
           setEditChapter({})
           document.getElementById('my_modal_2').close()
@@ -129,7 +130,7 @@ function VideoChapters() {
 
 
 
-  const handleDelete = (id) => {
+  const handleDelete = (deletable) => {
 
     Swal.fire({
       title: 'Are You Sure?',
@@ -140,15 +141,22 @@ function VideoChapters() {
       cancelButtonText: 'Cancel',
     }).then((result) => {
       if (result.isConfirmed) {
-        console.log(id)
-        fetch(`https://spoffice-server.vercel.app/Chapter/delete/${id}`, {
-          method: "DELETE"
+        
+        const updatedChapters = displayChapters.filter(chapter => chapter != deletable)
+        const updatedCourse ={...videoCourse,chapters:updatedChapters}
+
+        fetch(`https://spoffice-server.vercel.app/courseupdate/${videoCourse._id}`, {
+          method: 'PUT',
+          headers: {
+            'content-type': 'application/json'
+          },
+          body: JSON.stringify(updatedCourse)
         })
           .then(res => res.json())
           .then(data => {
-            if (data.deletedCount) {
+            if (data.modifiedCount) {
               notifySuccess("Successfully Deleted Chapter")
-              setDisplayChapters(prevChapters => prevChapters.filter(Chapter => Chapter._id !== id));
+              setAllChapters(updatedChapters)
 
             }
           })
@@ -159,9 +167,9 @@ function VideoChapters() {
 
   }
 
-  const openEditModal = (id) => {
+  const openEditModal = (editable) => {
 
-    const editable = displayChapters.find(Chapter => Chapter._id == id)
+    
     setEditChapter(editable)
     document.getElementById('my_modal_2').showModal()
   }
@@ -324,8 +332,8 @@ function VideoChapters() {
                   </div>
                 </Link>
                 <div className='flex gap-2 w-1/4 justify-end'>
-                  <button onClick={() => openEditModal(Chapter._id)} className='flex items-center text-lg gap-1 text-blue-600'><FaEdit /></button>
-                  <button onClick={() => handleDelete(Chapter._id)} className='flex items-center text-lg gap-1 text-red-600'><MdDeleteForever /></button>
+                  <button onClick={() => openEditModal(Chapter)} className='flex items-center text-lg gap-1 text-blue-600'><FaEdit /></button>
+                  <button onClick={() => handleDelete(Chapter)} className='flex items-center text-lg gap-1 text-red-600'><MdDeleteForever /></button>
 
                 </div>
               </div>
