@@ -273,6 +273,12 @@ const router = createBrowserRouter([
         element:<PrivateRoute><Exam></Exam></PrivateRoute>,
         loader:({params})=>fetch(`https://spoffice-server.vercel.app/getexam/${params.id}`)
         
+      },
+      {
+        path:'/course/:id',
+        element:<PrivateRoute><Exam></Exam></PrivateRoute>,
+        loader:({params})=>fetch(`https://spoffice-server.vercel.app/getexam/${params.id}`)
+        
       }
     ],
   },

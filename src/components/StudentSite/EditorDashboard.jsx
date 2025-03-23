@@ -4,21 +4,22 @@ import { FaUserEdit } from "react-icons/fa";
 import { AuthContext } from '../../Provider';
 import Swal from 'sweetalert2';
 import { IoMdClose } from "react-icons/io";
-import Videos from './Videos';
+
+import Courses from './Courses';
 
 const EditorDashboard = () => {
   const { role, notifySuccess } = useContext(AuthContext)
   const [navigate, setNavigate] = useState(false)
   
   
-  const [activeTab, setActiveTab] = useState('details');
+  const [activeTab, setActiveTab] = useState('videos');
   const [loading, setLoading] = useState(false)
  
 
   const renderContent = () => {
     switch (activeTab) {
       case 'videos':
-        return <div><Videos></Videos></div>;
+        return <div><Courses></Courses></div>;
       case 'pdf':
         return <div></div>;
       case 'notice':
