@@ -316,13 +316,13 @@ function Courses() {
         displayCourses.map((Course, index) => <>
           <div key={index} className=' w-full  cursor-pointer  border-b  p-1 border-sky-600 '>
             <div className='flex gap-4' >
-              <Link className=' ' to={`/Course/${Course._id}`}>
+              <Link key={Course._id} className=' ' to={{pathname:`/course/chapters`,state:{Course}}}>
                 <div className=' p-2 rounded-lg border-2 border-orange-600'>
                   <img className='rounded-lg h-12 w-20 lg:w-40 lg:h-24' src={Course.thumbnail || '/profile.jpg'} alt="" />
                 </div>
               </Link>
               <div className='w-3/4 flex gap-2 items-center'>
-                <Link className='w-3/4 ' to={`/course/${Course._id}`}>
+                <Link className='w-3/4 ' to={`/course/chapters`} state={Course} >
                   <div>
                     <h1 className='text-lg  text-orange-600 lg:text-2xl font-bold'> {Course.title}</h1>
                   </div>

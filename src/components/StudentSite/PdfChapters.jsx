@@ -8,13 +8,13 @@ import ImageUpload from '../ImageUpload';
 import { FaEdit } from "react-icons/fa";
 
 
-function VideoChapters() {
+function PdfChapters() {
   const location = useLocation()
   console.log(location)
-  const [videoCourse,setVideoCourse] = useState(location?.state)
+  const [PdfCourse,setPdfCourse] = useState(location?.state||{})
   const { month, year, date, getMonth, notifySuccess, notifyFailed } = useContext(AuthContext)
   const [loading, setLoading] = useState(false)
-  const [allChapters, setAllChapters] = useState(videoCourse.chapters)
+  const [allChapters, setAllChapters] = useState(PdfCourse.chapters)
   const [displayChapters, setDisplayChapters] = useState([]);
   const [editChapter, setEditChapter] = useState({})
   const [uploadedImageUrl, setUploadedImageUrl] = useState('')
@@ -46,17 +46,17 @@ function VideoChapters() {
     const title = e.target.title.value
     const priority = e.target.priority.value
     const thumbnail = uploadedImageUrl ? uploadedImageUrl : '';
-    const videos = []
+    const Pdfs = []
     const details = {
-      title, videos, priority, thumbnail
+      title, Pdfs, priority, thumbnail
     }
-    const updatedChapters = [...videoCourse.chapters, details]
-    fetch(`https://spoffice-server.vercel.app/courseupdate/${videoCourse._id}`, {
+    const updatedChapters = [...PdfCourse.chapters, details]
+    fetch(`https://spoffice-server.vercel.app/pdfcourseupdate/${PdfCourse._id}`, {
       method: 'PUT',
       headers: {
         'content-type': 'application/json'
       },
-      body: JSON.stringify({ ...videoCourse, chapters: updatedChapters })
+      body: JSON.stringify({ ...PdfCourse, chapters: updatedChapters })
     })
       .then(res => res.json())
       .then(data => {
@@ -90,14 +90,14 @@ function VideoChapters() {
     const title = e.target.title.value
     const priority = e.target.priority.value
     const thumbnail = uploadedImageUrl ? uploadedImageUrl : editChapter.thumbnail;
-    const videos = editChapter.videos;
+    const Pdfs = editChapter.Pdfs;
     const details = {
-      title, priority, thumbnail, videos,
+      title, priority, thumbnail, Pdfs,
     }
     const filteredChapters=displayChapters.filter(chapter => chapter!=editChapter)
     const updatedChapters =[...filteredChapters,details]
-    const updatedCourse ={...videoCourse,chapters:updatedChapters}
-    fetch(`https://spoffice-server.vercel.app/courseupdate/${videoCourse._id}`, {
+    const updatedCourse ={...PdfCourse,chapters:updatedChapters}
+    fetch(`https://spoffice-server.vercel.app/pdfcourseupdate/${PdfCourse._id}`, {
       method: 'PUT',
       headers: {
         'content-type': 'application/json'
@@ -146,9 +146,9 @@ function VideoChapters() {
       if (result.isConfirmed) {
         
         const updatedChapters = displayChapters.filter(chapter => chapter != deletable)
-        const updatedCourse ={...videoCourse,chapters:updatedChapters}
+        const updatedCourse ={...PdfCourse,chapters:updatedChapters}
 
-        fetch(`https://spoffice-server.vercel.app/courseupdate/${videoCourse._id}`, {
+        fetch(`https://spoffice-server.vercel.app/pdfcourseupdate/${PdfCourse._id}`, {
           method: 'PUT',
           headers: {
             'content-type': 'application/json'
@@ -181,7 +181,7 @@ function VideoChapters() {
     <div>
       {/* Open the modal using document.getElementById('ID').showModal() method */}
       <div className='flex justify-between items-center'>
-        <p className=' font-bold text-xl text-cyan-600 underline lg:text-2xl'>All Video Chapters</p>
+        <p className=' font-bold text-xl text-cyan-600 underline lg:text-2xl'>All Pdf Chapters</p>
         <button className="btn border-2 border-cyan-600 text-cyan-600 font-bold hover:border-black  hover:text-black" onClick={() => document.getElementById('my_modal_1').showModal()}>Add Chapter</button>
       </div>
       {/* add korar modal edit */}
@@ -268,7 +268,7 @@ function VideoChapters() {
                 </div>
 
                 <div>
-                  <p className='font-semibold'>Video Chapter Name <span className='text-red-700'>*</span> </p>
+                  <p className='font-semibold'>Pdf Chapter Name <span className='text-red-700'>*</span> </p>
                   <input
                     required
                     defaultValue={editChapter.title}
@@ -323,13 +323,13 @@ function VideoChapters() {
         displayChapters.map((Chapter, index) => <>
           <div key={index} className=' w-full  cursor-pointer  border-b  p-1 border-sky-600 '>
             <div className='flex gap-4' >
-              <Link className=' ' to={`/Chapter/${Chapter._id}`}>
+              <Link className=' ' to={`/pdfcourse/chapters/notes`} state={{course:PdfCourse,chapter:Chapter}}>
                 <div className=' p-2 rounded-lg border-2 border-orange-600'>
                   <img className='rounded-lg h-12 w-20 lg:w-40 lg:h-24' src={Chapter.thumbnail || '/profile.jpg'} alt="" />
                 </div>
               </Link>
               <div className='w-3/4 flex gap-2 items-center'>
-                <Link className='w-3/4 ' to={`/Chapter/${Chapter._id}`}>
+                <Link className='w-3/4 ' to={`/pdfcourse/chapters/notes`} state={{course:PdfCourse,chapter:Chapter}}>
                   <div>
                     <h1 className='text-lg  text-orange-600 lg:text-2xl font-bold'> {Chapter.title}</h1>
                   </div>
@@ -358,4 +358,4 @@ function VideoChapters() {
   )
 }
 
-export default VideoChapters
+export default PdfChapters

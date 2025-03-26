@@ -43,6 +43,10 @@ import Staffs from './components/StuffPart/Staffs';
 import StaffDetails from './components/StuffPart/StaffDetails';
 import EditorDashboard from './components/StudentSite/EditorDashboard';
 import VideoChapters from './components/StudentSite/VideoChapters';
+import PdfUploader from './components/StudentSite/PdfUploader';
+import PdfChapters from './components/StudentSite/PdfChapters';
+import PdfNotes from './components/StudentSite/PdfNotes';
+import PDFViewer from './components/StudentSite/PdfViewer';
 
 
 
@@ -265,6 +269,11 @@ const router = createBrowserRouter([
             
       },
       {
+        path:'/pdfupload',
+        element:<PrivateRoute><PdfUploader></PdfUploader></PrivateRoute>,
+            
+      },
+      {
         path:'/monthly-report',
         element:<PrivateRoute><MonthlyReport></MonthlyReport></PrivateRoute>,
             
@@ -276,11 +285,27 @@ const router = createBrowserRouter([
         
       },
       {
-        path:'/course/:id',
+        path:'/course/chapters',
         element:<PrivateRoute><VideoChapters></VideoChapters></PrivateRoute>,
-        loader:({params})=>fetch(`https://spoffice-server.vercel.app/getvideocourse/${params.id}`)
+       
         
-      }
+      },
+      {
+        path:'/pdfcourse/chapters',
+        element:<PrivateRoute><PdfChapters></PdfChapters></PrivateRoute>,
+       
+        
+      },
+      {
+        path:'/pdfcourse/chapters/notes',
+        element:<PrivateRoute><PdfNotes></PdfNotes></PrivateRoute>,
+      
+      },
+      {
+        path:'/pdfcourse/chapters/notes/view',
+        element:<PrivateRoute><PDFViewer></PDFViewer></PrivateRoute>,
+      
+      },
     ],
   },
 ]);

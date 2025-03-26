@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 import { IoMdClose } from "react-icons/io";
 
 import Courses from './VideoCourses';
+import PdfCourses from './PdfCourses';
 
 const EditorDashboard = () => {
   const { role, notifySuccess } = useContext(AuthContext)
@@ -21,7 +22,7 @@ const EditorDashboard = () => {
       case 'videos':
         return <div><Courses></Courses></div>;
       case 'pdf':
-        return <div></div>;
+        return <div><PdfCourses></PdfCourses></div>;
       case 'notice':
         return <div></div>;
       case 'results':
@@ -55,7 +56,7 @@ const EditorDashboard = () => {
         </button>
         <button
           onClick={() => setActiveTab('pdf')}
-          className={`px-2 py-1 whitespace-nowrap ${activeTab === 'programs' ? 'bg-sky-600 text-white' : 'bg-gray-200'} rounded hover:bg-sky-700`}
+          className={`px-2 py-1 whitespace-nowrap ${activeTab === 'pdf' ? 'bg-sky-600 text-white' : 'bg-gray-200'} rounded hover:bg-sky-700`}
         >
           PDF
         </button>
