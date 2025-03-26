@@ -67,9 +67,12 @@ function Nav() {
                             {(role == 'CEO' || role == 'Manager') && <NavLink to={'/monthly-report'}><li className='pl-2 hover:bg-gray-200'>Attendance Sheet</li></NavLink>}
                             {(role == 'CEO' || role == 'Manager') && <NavLink to={'/message'}><li className='pl-2 hover:bg-gray-200'>Message</li></NavLink>}
                             {
-                            (role == 'CEO' || role == 'Cashier') ? <NavLink to={'/payment'}><li className='pl-2 hover:bg-gray-200'>Payment Entry</li></NavLink> : ''
+                                (role == 'CEO' || role == 'Cashier') ? <NavLink to={'/payment'}><li className='pl-2 hover:bg-gray-200'>Payment Entry</li></NavLink> : ''
                             }
-                            
+                            {
+                                (role == 'CEO') ? <NavLink to={'/editor'}><li className='pl-2 hover:bg-gray-200'>Student Website</li></NavLink> : ''
+                            }
+
                             <NavLink to={'/register'}><li className='pl-2 hover:bg-gray-200'>Register</li></NavLink>
                             <NavLink to={'/programentry'}><li className='pl-2 hover:bg-gray-200'>Program Entry</li></NavLink>
                             {role === 'CEO' && <NavLink to={'/adduser'}><li className='pl-2 hover:bg-gray-200'>Add Role</li></NavLink>}
