@@ -51,12 +51,13 @@ function PdfChapters() {
       title, Pdfs, priority, thumbnail
     }
     const updatedChapters = [...PdfCourse.chapters, details]
+    const updatedCourse ={ ...PdfCourse, chapters: updatedChapters }
     fetch(`https://spoffice-server.vercel.app/pdfcourseupdate/${PdfCourse._id}`, {
       method: 'PUT',
       headers: {
         'content-type': 'application/json'
       },
-      body: JSON.stringify({ ...PdfCourse, chapters: updatedChapters })
+      body: JSON.stringify(updatedCourse)
     })
       .then(res => res.json())
       .then(data => {
@@ -65,6 +66,7 @@ function PdfChapters() {
           notifySuccess("Chapter added Successfully")
 
           setAllChapters(updatedChapters)
+          setPdfCourse(updatedCourse)
           setLoading(false)
           document.getElementById('my_modal_1').close()
           setUploadedImageUrl('')
@@ -111,6 +113,7 @@ function PdfChapters() {
           notifySuccess("Chapter Updated Successfully")
           
           setAllChapters(updatedChapters)
+          setPdfCourse(updatedCourse)
           setLoading(false)
           setEditChapter({})
           document.getElementById('my_modal_2').close()
@@ -160,6 +163,7 @@ function PdfChapters() {
             if (data.modifiedCount) {
               notifySuccess("Successfully Deleted Chapter")
               setAllChapters(updatedChapters)
+              setPdfCourse(updatedCourse)
 
             }
           })

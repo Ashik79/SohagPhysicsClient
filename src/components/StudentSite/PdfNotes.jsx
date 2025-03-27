@@ -56,12 +56,13 @@ function PdfNotes() {
     const updatedChapter = { ...chapter, Pdfs: updatedNotes }
     const remainingChapters = PdfCourse.chapters.filter(chapter => chapter != chapter)
     const updatedChapters = [...remainingChapters, updatedChapter]
+    const updatedCourse ={ ...PdfCourse, chapters: updatedChapters }
     fetch(`https://spoffice-server.vercel.app/pdfcourseupdate/${PdfCourse._id}`, {
       method: 'PUT',
       headers: {
         'content-type': 'application/json'
       },
-      body: JSON.stringify({ ...PdfCourse, chapters: updatedChapters })
+      body: JSON.stringify(updatedCourse)
     })
       .then(res => res.json())
       .then(data => {
@@ -70,6 +71,7 @@ function PdfNotes() {
           notifySuccess("Pdf added Successfully")
 
           setAllNotes(updatedNotes)
+          setPdfCourse(updatedCourse)
           setLoading(false)
           document.getElementById('my_modal_1').close()
           setUploadedImageUrl('')
@@ -106,12 +108,13 @@ function PdfNotes() {
     const updatedChapter = { ...chapter, Pdfs: updatedNotes }
     const remainingChapters = PdfCourse.chapters.filter(chapter => chapter != chapter)
     const updatedChapters = [...remainingChapters, updatedChapter]
+    const updatedCourse ={ ...PdfCourse, chapters: updatedChapters }
     fetch(`https://spoffice-server.vercel.app/pdfcourseupdate/${PdfCourse._id}`, {
       method: 'PUT',
       headers: {
         'content-type': 'application/json'
       },
-      body: JSON.stringify({ ...PdfCourse, chapters: updatedChapters })
+      body: JSON.stringify(updatedCourse)
     })
       .then(res => res.json())
       .then(data => {
@@ -120,6 +123,7 @@ function PdfNotes() {
           notifySuccess("Notes Updated Successfully")
 
           setAllNotes(updatedNotes)
+          setPdfCourse(updatedCourse)
           setLoading(false)
           setEditNotes({})
           document.getElementById('my_modal_2').close()
@@ -173,6 +177,7 @@ function PdfNotes() {
             if (data.modifiedCount) {
               notifySuccess("Successfully Deleted Notes")
               setAllNotes(updatedNotes)
+              setPdfCourse(updatedCourse)
 
             }
           })
