@@ -50,8 +50,9 @@ const [firstLoading, setFirstLoading] = useState(true)
     const priority = e.target.priority.value
     const thumbnail = uploadedImageUrl ? uploadedImageUrl : '';
     const chapters = []
+    const id=crypto.randomUUID()
     const details = {
-      title, chapters, priority, thumbnail
+      title, chapters, priority, thumbnail,id
     }
     console.log(details)
     fetch('https://spoffice-server.vercel.app/addpdfcourse', {
@@ -95,10 +96,10 @@ const [firstLoading, setFirstLoading] = useState(true)
     const thumbnail = uploadedImageUrl ? uploadedImageUrl : editCourse.thumbnail;
     const chapters =editCourse.chapters;
     const details = {
-      title, priority, thumbnail,chapters,
+      title, priority, thumbnail,chapters,id:editCourse.id
     }
     console.log(details)
-    fetch( `https://spoffice-server.vercel.app/pdfcourseupdate/${editCourse._id}`, {
+    fetch( `https://spoffice-server.vercel.app/pdfcourseupdate/${editCourse.id}`, {
       method: 'PUT',
       headers: {
         'content-type': 'application/json'
@@ -154,7 +155,7 @@ const [firstLoading, setFirstLoading] = useState(true)
           .then(data => {
             if (data.deletedCount) {
               notifySuccess("Successfully Deleted Course")
-              setDisplayCourses(prevCourses => prevCourses.filter(Course => Course._id !== id));
+              setDisplayCourses(prevCourses => prevCourses.filter(Course => Course.id !== id));
 
             }
           })
@@ -167,7 +168,7 @@ const [firstLoading, setFirstLoading] = useState(true)
 
   const openEditModal = (id) => {
     
-    const editable = displayCourses.find(course => course._id==id)
+    const editable = displayCourses.find(course => course.id==id)
     setEditCourse(editable)
     document.getElementById('my_modal_2').showModal()
   }
@@ -319,20 +320,20 @@ const [firstLoading, setFirstLoading] = useState(true)
       displayCourses.map((Course, index) => <>
         <div key={index} className=' w-full  cursor-pointer  border-b  p-1 border-sky-600 '>
           <div className='flex gap-4' >
-            <Link key={Course._id} className=' ' to={`/pdfcourse/${Course._id}`}>
+            <Link key={Course._id} className=' ' to={`/pdfcourse/${Course.id}`}>
               <div className=' p-2 rounded-lg border-2 border-orange-600'>
                 <img className='rounded-lg h-12 w-20 lg:w-40 lg:h-24' src={Course.thumbnail || '/profile.jpg'} alt="" />
               </div>
             </Link>
             <div className='w-3/4 flex gap-2 items-center'>
-              <Link className='w-3/4 ' to={`/pdfcourse/${Course._id}`} >
+              <Link className='w-3/4 ' to={`/pdfcourse/${Course.id}`} >
                 <div>
                   <h1 className='text-lg  text-orange-600 lg:text-2xl font-bold'> {Course.title}</h1>
                 </div>
               </Link>
               <div className='flex gap-2 w-1/4 justify-end'>
-                <button onClick={() => openEditModal(Course._id)} className='flex items-center text-lg gap-1 text-blue-600'><FaEdit /></button>
-                <button onClick={() => handleDelete(Course._id)} className='flex items-center text-lg gap-1 text-red-600'><MdDeleteForever /></button>
+                <button onClick={() => openEditModal(Course.id)} className='flex items-center text-lg gap-1 text-blue-600'><FaEdit /></button>
+                <button onClick={() => handleDelete(Course.id)} className='flex items-center text-lg gap-1 text-red-600'><MdDeleteForever /></button>
 
               </div>
             </div>
