@@ -73,7 +73,7 @@ function PdfChapters() {
     }
     const updatedChapters = [...PdfCourse.chapters, details]
     const updatedCourse = { ...PdfCourse, chapters: updatedChapters }
-    fetch(`https://spoffice-server.vercel.app/pdfcourseupdate/${PdfCourse._id}`, {
+    fetch(`https://spoffice-server.vercel.app/pdfcourseupdate/${PdfCourse.id}`, {
       method: 'PUT',
       headers: {
         'content-type': 'application/json'
@@ -173,7 +173,7 @@ function PdfChapters() {
         const updatedChapters = displayChapters.filter(chapter => chapter != deletable)
         const updatedCourse = { ...PdfCourse, chapters: updatedChapters }
 
-        fetch(`https://spoffice-server.vercel.app/pdfcourseupdate/${PdfCourse._id}`, {
+        fetch(`https://spoffice-server.vercel.app/pdfcourseupdate/${PdfCourse.id}`, {
           method: 'PUT',
           headers: {
             'content-type': 'application/json'
