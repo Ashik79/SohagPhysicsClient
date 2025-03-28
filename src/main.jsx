@@ -291,8 +291,14 @@ const router = createBrowserRouter([
         
       },
       {
-        path:'/pdfcourse/chapters',
+        path:'/pdfcourse/:id',
         element:<PrivateRoute><PdfChapters></PdfChapters></PrivateRoute>,
+       
+        
+      },
+      {
+        path:'/pdfchapter/:id',
+        element:<PrivateRoute><PdfNotes></PdfNotes></PrivateRoute>,
        
         
       },
