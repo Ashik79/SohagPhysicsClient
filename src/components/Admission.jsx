@@ -169,6 +169,7 @@ function Admission() {
 
                             <select name='batch' className="select text-base font-semibold  select-info w-full ">
 
+                                <option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>
                                 <option value={'Sat 1'}>শনি ৭টা (নিউ টেন SSC 26 - HSC 28)</option>
                                 <option value={'Sat 2'}>শনি ৮টা (নিউ নাইন SSC 27 - HSC 29)</option>
                                 <option value={'Sat 3'}>শনি ৯টা (নিউ টেন SSC 26 - HSC 28)</option>
