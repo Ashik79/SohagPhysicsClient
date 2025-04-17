@@ -129,8 +129,8 @@ function Students() {
                                 className="input text-lg font-semibold  input-bordered input-info w-full " />
                         </div>
 
-                        <div className={` ${role == 'CEO' ? "" : "hidden"}`}>
-                            <p className={`font-semibold ${role == 'CEO' ? "" : "hidden"}`}>Name  </p>
+                        <div>
+                            <p className={`font-semibold`}>Name  </p>
                             <input
 
                                 name='name'
