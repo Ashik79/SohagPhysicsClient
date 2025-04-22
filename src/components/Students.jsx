@@ -55,7 +55,7 @@ function Students() {
             query.gender = gender;
         }
         console.log(query)
-        if (role != 'CEO' && !query.phone && !query.id) {
+        if (role != 'CEO' && !query.phone && !query.id && !name) {
             notifyFailed("Input Can't be blank")
             setLoading(false)
             return
