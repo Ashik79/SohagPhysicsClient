@@ -42,11 +42,14 @@ import MonthlyReport from './components/MonthlyReport';
 import Staffs from './components/StuffPart/Staffs';
 import StaffDetails from './components/StuffPart/StaffDetails';
 import EditorDashboard from './components/StudentSite/EditorDashboard';
-import VideoChapters from './components/StudentSite/VideoChapters';
+
 import PdfUploader from './components/StudentSite/PdfUploader';
 import PdfChapters from './components/StudentSite/PdfChapters';
 import PdfNotes from './components/StudentSite/PdfNotes';
 import PDFViewer from './components/StudentSite/PdfViewer';
+import VideoChapters from './components/StudentSite/VideoChapters';
+import Videofiles from './components/StudentSite/VideoFiles';
+import VideoPlayer from './components/StudentSite/VideoPlayer';
 
 
 
@@ -297,8 +300,20 @@ const router = createBrowserRouter([
         
       },
       {
+        path:'/videocourse/:id',
+        element:<PrivateRoute><VideoChapters></VideoChapters></PrivateRoute>,
+       
+        
+      },
+      {
         path:'/pdfchapter/:id',
         element:<PrivateRoute><PdfNotes></PdfNotes></PrivateRoute>,
+       
+        
+      },
+      {
+        path:'/videochapter/:id',
+        element:<PrivateRoute><Videofiles></Videofiles></PrivateRoute>,
        
         
       },
@@ -308,8 +323,18 @@ const router = createBrowserRouter([
       
       },
       {
+        path:'/videocourse/chapters/files',
+        element:<PrivateRoute><Videofiles></Videofiles></PrivateRoute>,
+      
+      },
+      {
         path:'/pdfcourse/chapters/notes/view',
         element:<PrivateRoute><PDFViewer></PDFViewer></PrivateRoute>,
+      
+      },
+      {
+        path:'/videocourse/chapters/file/view',
+        element:<PrivateRoute><VideoPlayer></VideoPlayer></PrivateRoute>,
       
       },
     ],

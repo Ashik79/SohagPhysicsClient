@@ -1,16 +1,23 @@
+import { useState } from "react";
+import { useLocation } from "react-router-dom";
+
 const getYouTubeVideoId = (url) => {
     const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
     const match = url.match(regex);
     return match ? match[1] : null;
   };
   
-  const VideoPlayer = ({videoUrl}) => {
+  const VideoPlayer = () => {
     
-  
-    const videoId = getYouTubeVideoId(videoUrl);
+   const location =useLocation()
+    const [fileUrl,setFileUrl] =useState(location?.state?.url ||"")
+    const videoId = getYouTubeVideoId(fileUrl);
+    if (!videoId) {
+      return <p className="text-red-500">Invalid Video link</p>;
+    }
   
     return (
-      <div className="video-container w-full h-screen flex flex-col">
+      <div className="video-container w-full h-60 md:h-72 lg:h-96 flex flex-col">
         {videoId ? (
           <iframe
            className="flex-grow w-full"

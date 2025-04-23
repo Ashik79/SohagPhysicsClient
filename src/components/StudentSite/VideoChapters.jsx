@@ -1,24 +1,42 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../../Provider'
-import { Link, Navigate, useLoaderData, useLocation } from 'react-router-dom'
+import { Link, Navigate, useLoaderData, useLocation, useParams } from 'react-router-dom'
 import { IoMdClose } from "react-icons/io";
 import { MdDeleteForever } from "react-icons/md";
 import Swal from 'sweetalert2';
 import ImageUpload from '../ImageUpload';
 import { FaEdit } from "react-icons/fa";
+import LoadingPage from '../OtherPages.jsx/LoadingPage';
 
 
 function VideoChapters() {
-  const location = useLocation()
-  console.log(location)
-  const [videoCourse,setVideoCourse] = useState(location?.state)
+  const params = useParams()
+  console.log(params.id)
+  const [firstLoading, setFirstLoading] = useState(true)
+  const [VideoCourse, setVideoCourse] = useState({})
   const { month, year, date, getMonth, notifySuccess, notifyFailed } = useContext(AuthContext)
   const [loading, setLoading] = useState(false)
-  const [allChapters, setAllChapters] = useState(videoCourse.chapters)
+  const [allChapters, setAllChapters] = useState([])
   const [displayChapters, setDisplayChapters] = useState([]);
   const [editChapter, setEditChapter] = useState({})
   const [uploadedImageUrl, setUploadedImageUrl] = useState('')
 
+
+  useEffect(() => {
+
+
+    fetch(`https://spoffice-server.vercel.app/getVideocourse/${params.id}`)
+      .then(res => res.json())
+      .then(data => {
+        console.log(data)
+        setVideoCourse(data)
+        setAllChapters(data.chapters)
+        setFirstLoading(false)
+
+
+      })
+
+  }, [])
 
 
   useEffect(() => {
@@ -28,8 +46,10 @@ function VideoChapters() {
       temp.sort((a, b) => a.priority - b.priority)
       setDisplayChapters(temp)
     }
-    
- 
+    else{
+      setDisplayChapters(allChapters)
+    }
+
   }, [allChapters])
 
   const handleImageUpload = (url) => {
@@ -46,17 +66,19 @@ function VideoChapters() {
     const title = e.target.title.value
     const priority = e.target.priority.value
     const thumbnail = uploadedImageUrl ? uploadedImageUrl : '';
-    const videos = []
+    const Videos = []
+    const id = crypto.randomUUID()
     const details = {
-      title, videos, priority, thumbnail
+      title, Videos, priority, thumbnail, id
     }
-    const updatedChapters = [...videoCourse.chapters, details]
-    fetch(`https://spoffice-server.vercel.app/courseupdate/${videoCourse._id}`, {
+    const updatedChapters = [...VideoCourse.chapters, details]
+    const updatedCourse = { ...VideoCourse, chapters: updatedChapters }
+    fetch(`https://spoffice-server.vercel.app/Videocourseupdate/${VideoCourse.id}`, {
       method: 'PUT',
       headers: {
         'content-type': 'application/json'
       },
-      body: JSON.stringify({ ...videoCourse, chapters: updatedChapters })
+      body: JSON.stringify(updatedCourse)
     })
       .then(res => res.json())
       .then(data => {
@@ -65,6 +87,7 @@ function VideoChapters() {
           notifySuccess("Chapter added Successfully")
 
           setAllChapters(updatedChapters)
+          setVideoCourse(updatedCourse)
           setLoading(false)
           document.getElementById('my_modal_1').close()
           setUploadedImageUrl('')
@@ -90,27 +113,29 @@ function VideoChapters() {
     const title = e.target.title.value
     const priority = e.target.priority.value
     const thumbnail = uploadedImageUrl ? uploadedImageUrl : editChapter.thumbnail;
-    const videos = editChapter.videos;
+    const Videos = editChapter.Videos;
     const details = {
-      title, priority, thumbnail, videos,
+      title, priority, thumbnail, Videos,id:editChapter.id
     }
-    const filteredChapters=displayChapters.filter(chapter => chapter!=editChapter)
-    const updatedChapters =[...filteredChapters,details]
-    const updatedCourse ={...videoCourse,chapters:updatedChapters}
-    fetch(`https://spoffice-server.vercel.app/courseupdate/${videoCourse._id}`, {
+    const filteredChapters = displayChapters.filter(chapter => chapter != editChapter)
+    const updatedChapters = [...filteredChapters, details]
+    const updatedCourse = { ...VideoCourse, chapters: updatedChapters }
+    fetch(`https://spoffice-server.vercel.app/updateVideochapter/${editChapter.id}`, {
+  
       method: 'PUT',
       headers: {
         'content-type': 'application/json'
       },
-      body: JSON.stringify(updatedCourse)
+      body: JSON.stringify(details)
     })
       .then(res => res.json())
       .then(data => {
         console.log(data)
         if (data.modifiedCount) {
           notifySuccess("Chapter Updated Successfully")
-          
+
           setAllChapters(updatedChapters)
+          setVideoCourse(updatedCourse)
           setLoading(false)
           setEditChapter({})
           document.getElementById('my_modal_2').close()
@@ -144,11 +169,11 @@ function VideoChapters() {
       cancelButtonText: 'Cancel',
     }).then((result) => {
       if (result.isConfirmed) {
-        
-        const updatedChapters = displayChapters.filter(chapter => chapter != deletable)
-        const updatedCourse ={...videoCourse,chapters:updatedChapters}
 
-        fetch(`https://spoffice-server.vercel.app/courseupdate/${videoCourse._id}`, {
+        const updatedChapters = displayChapters.filter(chapter => chapter != deletable)
+        const updatedCourse = { ...VideoCourse, chapters: updatedChapters }
+
+        fetch(`https://spoffice-server.vercel.app/Videocourseupdate/${VideoCourse.id}`, {
           method: 'PUT',
           headers: {
             'content-type': 'application/json'
@@ -160,6 +185,7 @@ function VideoChapters() {
             if (data.modifiedCount) {
               notifySuccess("Successfully Deleted Chapter")
               setAllChapters(updatedChapters)
+              setVideoCourse(updatedCourse)
 
             }
           })
@@ -172,12 +198,13 @@ function VideoChapters() {
 
   const openEditModal = (editable) => {
 
-    
+
     setEditChapter(editable)
     document.getElementById('my_modal_2').showModal()
   }
 
   return (
+    firstLoading?<LoadingPage></LoadingPage>:
     <div>
       {/* Open the modal using document.getElementById('ID').showModal() method */}
       <div className='flex justify-between items-center'>
@@ -323,13 +350,13 @@ function VideoChapters() {
         displayChapters.map((Chapter, index) => <>
           <div key={index} className=' w-full  cursor-pointer  border-b  p-1 border-sky-600 '>
             <div className='flex gap-4' >
-              <Link className=' ' to={`/Chapter/${Chapter._id}`}>
+              <Link className=' ' to={`/videochapter/${Chapter.id}`}>
                 <div className=' p-2 rounded-lg border-2 border-orange-600'>
                   <img className='rounded-lg h-12 w-20 lg:w-40 lg:h-24' src={Chapter.thumbnail || '/profile.jpg'} alt="" />
                 </div>
               </Link>
               <div className='w-3/4 flex gap-2 items-center'>
-                <Link className='w-3/4 ' to={`/Chapter/${Chapter._id}`}>
+                <Link className='w-3/4 ' to={`/videochapter/${Chapter.id}`} >
                   <div>
                     <h1 className='text-lg  text-orange-600 lg:text-2xl font-bold'> {Chapter.title}</h1>
                   </div>

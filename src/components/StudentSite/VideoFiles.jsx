@@ -9,28 +9,28 @@ import { FaEdit } from "react-icons/fa";
 import LoadingPage from '../OtherPages.jsx/LoadingPage';
 
 
-function PdfNotes() {
+function Videofiles() {
   const params = useParams()
   console.log(params.id)
   const [firstLoading, setFirstLoading] = useState(true)
   const { month, year, date, getMonth, notifySuccess, notifyFailed } = useContext(AuthContext)
   const [loading, setLoading] = useState(false)
   const [chapter, setChapter] = useState({})
-  const [allNotes, setAllNotes] = useState([])
-  const [displayNotes, setDisplayNotes] = useState([]);
-  const [editNotes, setEditNotes] = useState({})
+  const [allfiles, setAllfiles] = useState([])
+  const [displayfiles, setDisplayfiles] = useState([]);
+  const [editfiles, setEditfiles] = useState({})
   const [uploadedImageUrl, setUploadedImageUrl] = useState('')
 
   useEffect(() => {
 
 
-    fetch(`https://spoffice-server.vercel.app/getpdfchapter/${params.id}`)
+    fetch(`https://spoffice-server.vercel.app/getVideochapter/${params.id}`)
 
       .then(res => res.json())
       .then(data => {
         console.log(data.chapters[0])
         setChapter(data.chapters[0])
-        setAllNotes(data.chapters[0].Pdfs)
+        setAllfiles(data.chapters[0].Videos)
         setFirstLoading(false)
 
 
@@ -39,18 +39,18 @@ function PdfNotes() {
   }, [])
 
   useEffect(() => {
-    if (allNotes.length) {
+    if (allfiles.length) {
       console.log("call hoise")
-      let temp = allNotes;
+      let temp = allfiles;
       temp.sort((a, b) => a.priority - b.priority)
-      setDisplayNotes(temp)
+      setDisplayfiles(temp)
     }
     else{
-      setDisplayNotes(allNotes)
+      setDisplayfiles(allfiles)
     }
 
 
-  }, [allNotes])
+  }, [allfiles])
 
   const handleImageUpload = (url) => {
     setUploadedImageUrl(url);
@@ -60,7 +60,7 @@ function PdfNotes() {
   const [navigate, setNavigate] = useState(false)
 
 
-  const handleAddNotes = e => {
+  const handleAddfiles = e => {
     setLoading(true)
     e.preventDefault()
     const title = e.target.title.value
@@ -71,11 +71,11 @@ function PdfNotes() {
     const details = {
       title, url, priority, thumbnail, id
     }
-    const updatedNotes = [...displayNotes, details]
-    const updatedChapter = { ...chapter, Pdfs: updatedNotes }
+    const updatedfiles = [...displayfiles, details]
+    const updatedChapter = { ...chapter, Videos: updatedfiles }
 
 
-    fetch(`https://spoffice-server.vercel.app/updatepdfchapter/${params.id}`, {
+    fetch(`https://spoffice-server.vercel.app/updateVideochapter/${params.id}`, {
       method: 'PUT',
       headers: {
         'content-type': 'application/json'
@@ -86,9 +86,9 @@ function PdfNotes() {
       .then(data => {
         console.log(data)
         if (data.modifiedCount) {
-          notifySuccess("Pdf added Successfully")
+          notifySuccess("Video added Successfully")
 
-          setAllNotes(updatedNotes)
+          setAllfiles(updatedfiles)
           setChapter(updatedChapter)
           setLoading(false)
           document.getElementById('my_modal_1').close()
@@ -96,7 +96,7 @@ function PdfNotes() {
           setNavigate(true)
         }
         else {
-          notifyFailed("Failed to add Notes")
+          notifyFailed("Failed to add files")
           setLoading(false)
         }
       })
@@ -108,25 +108,25 @@ function PdfNotes() {
   }
 
 
-  const handleEditNotes = e => {
-    console.log(editNotes)
+  const handleEditfiles = e => {
+    console.log(editfiles)
     setLoading(true)
     e.preventDefault()
     const title = e.target.title.value
     const url = e.target.url.value
     const priority = e.target.priority.value
-    const thumbnail = uploadedImageUrl ? uploadedImageUrl : editNotes.thumbnail;
+    const thumbnail = uploadedImageUrl ? uploadedImageUrl : editfiles.thumbnail;
 
     const details = {
-      title, priority, thumbnail, url,id:editNotes.id
+      title, priority, thumbnail, url,id:editfiles.id
     }
-    const remainingNotes = displayNotes.filter(note => note != editNotes)
+    const remainingfiles = displayfiles.filter(file => file != editfiles)
 
-    const updatedNotes = [...remainingNotes, details]
-    const updatedChapter = { ...chapter, Pdfs: updatedNotes }
+    const updatedfiles = [...remainingfiles, details]
+    const updatedChapter = { ...chapter, Videos: updatedfiles }
    
-    fetch(`https://spoffice-server.vercel.app/updatepdffile/${editNotes.id}`, {
-    // fetch(`http://localhost:5000/updatepdffile/${editNotes.id}`, {
+    fetch(`https://spoffice-server.vercel.app/updateVideofile/${editfiles.id}`, {
+    // fetch(`http://localhost:5000/updateVideofile/${editfiles.id}`, {
       method: 'PUT',
       headers: {
         'content-type': 'application/json'
@@ -137,18 +137,18 @@ function PdfNotes() {
       .then(data => {
         console.log(data)
         if (data.modifiedCount) {
-          notifySuccess("Notes Updated Successfully")
+          notifySuccess("files Updated Successfully")
 
-          setAllNotes(updatedNotes)
+          setAllfiles(updatedfiles)
           setChapter(updatedChapter)
           setLoading(false)
-          setEditNotes({})
+          setEditfiles({})
           document.getElementById('my_modal_2').close()
           setUploadedImageUrl('')
           setNavigate(true)
         }
         else {
-          notifyFailed("Failed to add Notes")
+          notifyFailed("Failed to add files")
           setLoading(false)
         }
       })
@@ -167,7 +167,7 @@ function PdfNotes() {
 
     Swal.fire({
       title: 'Are You Sure?',
-      text: 'Do you want to delete the Notes?',
+      text: 'Do you want to delete the files?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Yes, Delete',
@@ -175,12 +175,12 @@ function PdfNotes() {
     }).then((result) => {
       if (result.isConfirmed) {
 
-        const updatedNotes = displayNotes.filter(Notes => Notes != deletable)
+        const updatedfiles = displayfiles.filter(files => files != deletable)
 
-        console.log('updatednotes',updatedNotes)
-        const updatedChapter = { ...chapter, Pdfs: updatedNotes }
+        console.log('updatedfiles',updatedfiles)
+        const updatedChapter = { ...chapter, Videos: updatedfiles }
 
-        fetch(`https://spoffice-server.vercel.app/updatepdfchapter/${params.id}`, {
+        fetch(`https://spoffice-server.vercel.app/updateVideochapter/${params.id}`, {
           method: 'PUT',
           headers: {
             'content-type': 'application/json'
@@ -190,8 +190,8 @@ function PdfNotes() {
           .then(res => res.json())
           .then(data => {
             if (data.modifiedCount) {
-              notifySuccess("Successfully Deleted Notes")
-              setAllNotes(updatedNotes)
+              notifySuccess("Successfully Deleted files")
+              setAllfiles(updatedfiles)
               setChapter(updatedChapter)
 
             }
@@ -206,7 +206,7 @@ function PdfNotes() {
   const openEditModal = (editable) => {
 
 
-    setEditNotes(editable)
+    setEditfiles(editable)
     document.getElementById('my_modal_2').showModal()
   }
 
@@ -215,8 +215,8 @@ function PdfNotes() {
       : <div>
         {/* Open the modal using document.getElementById('ID').showModal() method */}
         <div className='flex justify-between items-center'>
-          <p className=' font-bold text-xl text-cyan-600 underline lg:text-2xl'>All Pdf Notes</p>
-          <button className="btn border-2 border-cyan-600 text-cyan-600 font-bold hover:border-black  hover:text-black" onClick={() => document.getElementById('my_modal_1').showModal()}>Add PDF</button>
+          <p className=' font-bold text-xl text-cyan-600 underline lg:text-2xl'>All Video files</p>
+          <button className="btn border-2 border-cyan-600 text-cyan-600 font-bold hover:border-black  hover:text-black" onClick={() => document.getElementById('my_modal_1').showModal()}>Add Video</button>
         </div>
         {/* add korar modal edit */}
         <dialog id="my_modal_1" className="modal ">
@@ -227,21 +227,21 @@ function PdfNotes() {
                 <button className="text-red-600 px-1 lg:text-lg"><IoMdClose /></button>
               </form>
             </div>
-            <form className='mx-auto  w-full' onSubmit={handleAddNotes} >
+            <form className='mx-auto  w-full' onSubmit={handleAddfiles} >
 
 
               {/* students part */}
               <div className='flex  flex-col '>
-                <h1 className='font-bold text-center underline mb-2 text-xl '>PDF Details </h1>
+                <h1 className='font-bold text-center underline mb-2 text-xl '>Video Details </h1>
                 <div className='grid grid-cols-1   gap-3'>
                   <div className='lg:col-span-2 '>
-                    <p className='font-semibold '>Upload Pdf Cover page:</p>
+                    <p className='font-semibold '>Upload Video Cover page:</p>
                     <ImageUpload onUpload={handleImageUpload}></ImageUpload>
 
                   </div>
 
                   <div>
-                    <p className='font-semibold'>Pdf Name <span className='text-red-700'>*</span> </p>
+                    <p className='font-semibold'>Video Title <span className='text-red-700'>*</span> </p>
                     <input
                       required
                       name='title'
@@ -251,7 +251,7 @@ function PdfNotes() {
                   </div>
 
                   <div>
-                    <p className='font-semibold'>Drive Url <span className='text-red-700'>*</span> </p>
+                    <p className='font-semibold'>Youtube Url <span className='text-red-700'>*</span> </p>
                     <input
                       required
                       name='url'
@@ -260,7 +260,7 @@ function PdfNotes() {
                       className="input text-lg font-semibold  input-bordered input-info w-full " />
                   </div>
                   <div>
-                    <p className='font-semibold'>PDF Priority <span className='text-red-700'>*</span> </p>
+                    <p className='font-semibold'>Video Priority <span className='text-red-700'>*</span> </p>
                     <input
                       required
                       onWheel={(e) => e.target.blur()}
@@ -298,45 +298,45 @@ function PdfNotes() {
                 <button className="text-red-600 px-1 lg:text-lg"><IoMdClose /></button>
               </form>
             </div>
-            <form className='mx-auto  w-full' onSubmit={handleEditNotes} >
+            <form className='mx-auto  w-full' onSubmit={handleEditfiles} >
 
 
               {/* students part */}
               <div className='flex  flex-col '>
-                <h1 className='font-bold text-center underline mb-2 text-xl '>Notes Details </h1>
+                <h1 className='font-bold text-center underline mb-2 text-xl '>file Details </h1>
                 <div className='grid grid-cols-1   gap-3'>
                   <div className='lg:col-span-2 '>
-                    <p className='font-semibold '>Change Notes Thumbnail :</p>
+                    <p className='font-semibold '>Change file Thumbnail :</p>
                     <ImageUpload onUpload={handleImageUpload}></ImageUpload>
 
                   </div>
 
                   <div>
-                    <p className='font-semibold'>Pdf Notes Name <span className='text-red-700'>*</span> </p>
+                    <p className='font-semibold'>Video file Name <span className='text-red-700'>*</span> </p>
                     <input
                       required
-                      defaultValue={editNotes.title}
+                      defaultValue={editfiles.title}
                       name='title'
                       type="text"
 
                       className="input text-lg font-semibold  input-bordered input-info w-full " />
                   </div>
                   <div>
-                    <p className='font-semibold'>Drive Url <span className='text-red-700'>*</span> </p>
+                    <p className='font-semibold'>Youtube Url <span className='text-red-700'>*</span> </p>
                     <input
                       required
-                      defaultValue={editNotes.url}
+                      defaultValue={editfiles.url}
                       name='url'
                       type="text"
                       placeholder='Share permission: Anyone with the link'
                       className="input text-lg font-semibold  input-bordered input-info w-full " />
                   </div>
                   <div>
-                    <p className='font-semibold'>Notes Priority <span className='text-red-700'>*</span> </p>
+                    <p className='font-semibold'>Video file Priority <span className='text-red-700'>*</span> </p>
                     <input
                       required
                       onWheel={(e) => e.target.blur()}
-                      defaultValue={editNotes.priority}
+                      defaultValue={editfiles.priority}
                       name='priority'
                       type="number"
 
@@ -369,28 +369,28 @@ function PdfNotes() {
 
 
 
-        {/* Sob Notes dekhai */}
+        {/* Sob files dekhai */}
 
 
 
         {
-          displayNotes.map((Notes, index) => <>
+          displayfiles.map((files, index) => <>
             <div key={index} className=' w-full  cursor-pointer  border-b  p-1 border-sky-600 '>
               <div className='flex gap-4' >
-                <Link className=' ' to={`/pdfcourse/chapters/notes/view`} state={{ url: Notes.url }}>
+                <Link className=' ' to={`/videocourse/chapters/file/view`} state={{ url: files.url }}>
                   <div className=' p-2 rounded-lg border-2 border-orange-600'>
-                    <img className='rounded-lg h-12 w-20 lg:w-40 lg:h-24' src={Notes.thumbnail || '/profile.jpg'} alt="" />
+                    <img className='rounded-lg h-12 w-20 lg:w-40 lg:h-24' src={files.thumbnail || '/profile.jpg'} alt="" />
                   </div>
                 </Link>
                 <div className='w-3/4 flex gap-2 items-center'>
-                  <Link className='w-3/4 ' to={`/pdfcourse/chapters/notes/view`} state={{ url: Notes.url }}>
+                  <Link className='w-3/4 ' to={`/videocourse/chapters/file/view`} state={{ url: files.url }}>
                     <div>
-                      <h1 className='text-lg  text-orange-600 lg:text-2xl font-bold'> {Notes.title}</h1>
+                      <h1 className='text-lg  text-orange-600 lg:text-2xl font-bold'> {files.title}</h1>
                     </div>
                   </Link>
                   <div className='flex gap-2 w-1/4 justify-end'>
-                    <button onClick={() => openEditModal(Notes)} className='flex items-center text-lg gap-1 text-blue-600'><FaEdit /></button>
-                    <button onClick={() => handleDelete(Notes)} className='flex items-center text-lg gap-1 text-red-600'><MdDeleteForever /></button>
+                    <button onClick={() => openEditModal(files)} className='flex items-center text-lg gap-1 text-blue-600'><FaEdit /></button>
+                    <button onClick={() => handleDelete(files)} className='flex items-center text-lg gap-1 text-red-600'><MdDeleteForever /></button>
 
                   </div>
                 </div>
@@ -412,4 +412,4 @@ function PdfNotes() {
   )
 }
 
-export default PdfNotes
+export default Videofiles
