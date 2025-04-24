@@ -17,24 +17,24 @@ function LargeNav() {
                 <NavLink to={'/exams'}><li className='pl-2 hover:bg-gray-200'>Exams</li></NavLink>
                 <NavLink to={'/note'}><li className='pl-2 hover:bg-gray-200'>Notes</li></NavLink>
                 {role === 'CEO' && <NavLink to={'/coupons'}><li className='pl-2 hover:bg-gray-200'>Coupons</li></NavLink>}
-                {(role == 'CEO' || role =='Manager') && <NavLink to={'/batch'}><li className='pl-2 hover:bg-gray-200'>Batch Students</li></NavLink>}
+                {(role == 'CEO' || role == 'Manager') && <NavLink to={'/batch'}><li className='pl-2 hover:bg-gray-200'>Batch Students</li></NavLink>}
                 {
-                   (role == 'CEO' || role =='Manager')? <NavLink to={'/download'}><li className='pl-2 hover:bg-gray-200'>Download Info</li></NavLink> : ''
+                    (role == 'CEO' || role == 'Manager') ? <NavLink to={'/download'}><li className='pl-2 hover:bg-gray-200'>Download Info</li></NavLink> : ''
                 }
-                {(role == 'CEO' || role =='Manager') && <NavLink to={'/monthly-report'}><li className='pl-2 hover:bg-gray-200'>Attendance Sheet</li></NavLink>}
+                {(role == 'CEO' || role == 'Manager') && <NavLink to={'/monthly-report'}><li className='pl-2 hover:bg-gray-200'>Attendance Sheet</li></NavLink>}
                 {
-                    (role == 'CEO' || role =='Manager') ? <NavLink to={'/message'}><li className='pl-2 hover:bg-gray-200'>Message</li></NavLink> : ''
-                }
-                {
-                    (role == 'CEO' || role =='Cashier') ? <NavLink to={'/payment'}><li className='pl-2 hover:bg-gray-200'>Payment Entry</li></NavLink> : ''
+                    (role == 'CEO' || role == 'Manager') ? <NavLink to={'/message'}><li className='pl-2 hover:bg-gray-200'>Message</li></NavLink> : ''
                 }
                 {
-                    (role == 'CEO' ) ? <NavLink to={'/editor'}><li className='pl-2 hover:bg-gray-200'>Student Website</li></NavLink> : ''
+                    (role == 'CEO' || role == 'Cashier') ? <NavLink to={'/payment'}><li className='pl-2 hover:bg-gray-200'>Payment Entry</li></NavLink> : ''
+                }
+                {
+                    (role == 'CEO') ? <NavLink to={'/editor'}><li className='pl-2 hover:bg-gray-200'>Student Website</li></NavLink> : ''
                 }
 
-                
+
                 <NavLink to={'/register'}><li className='pl-2 hover:bg-gray-200'>Register</li></NavLink>
-                <NavLink to={'/programentry'}><li className='pl-2 hover:bg-gray-200'>Program Entry</li></NavLink>
+                {role == 'CEO' && <NavLink to={'/programentry'}><li className='pl-2 hover:bg-gray-200'>Program Entry</li></NavLink>}
                 {
                     role == 'CEO' ? <NavLink to={'/adduser'}><li className='pl-2 hover:bg-gray-200'>Add Role</li></NavLink> : ''
                 }

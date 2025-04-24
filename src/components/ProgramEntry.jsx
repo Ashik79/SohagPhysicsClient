@@ -318,6 +318,7 @@ function ProgramEntry() {
 
 
     return (
+        role =='CEO'?
         <div>
             <div className='mx-auto flex mt-2 flex-col gap-5 lg:flex-row w-full' >
 
@@ -493,7 +494,7 @@ function ProgramEntry() {
 
 
             {navigate ? <Navigate to={`/payment`}></Navigate> : <></>}
-        </div>
+        </div> :<div>No Access</div>
     )
 }
 

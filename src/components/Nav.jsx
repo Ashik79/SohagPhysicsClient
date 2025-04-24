@@ -74,7 +74,7 @@ function Nav() {
                             }
 
                             <NavLink to={'/register'}><li className='pl-2 hover:bg-gray-200'>Register</li></NavLink>
-                            <NavLink to={'/programentry'}><li className='pl-2 hover:bg-gray-200'>Program Entry</li></NavLink>
+                           {role =='CEO' &&  <NavLink to={'/programentry'}><li className='pl-2 hover:bg-gray-200'>Program Entry</li></NavLink>}
                             {role === 'CEO' && <NavLink to={'/adduser'}><li className='pl-2 hover:bg-gray-200'>Add Role</li></NavLink>}
                         </ul>
                     </div>
