@@ -192,7 +192,7 @@ function Download() {
                                 <option value={'Sat 7'}>শনি ৩টা (HSC 26)</option>
                                 <option value={'Sat 8'}>শনি ৪টা (HSC 25)</option>
                                 <option value={'Sat 9'}>শনি ৫টা (HSC 26)</option>
-                                <option value={'Sat 10'}>শনি ৬.১৫ টা (নিউ নাইন SSC 27 - HSC 29)</option>
+                                <option value={'Sat 10'}>শনি ৬টা (HSC 26)</option>
                                 <option value={'Sat 11'}>শনি ৭.১৫ টা (নিউ টেন SSC 26 - HSC 28)</option>
                                 <option value={'Sun 1'}>রবি ৭টা (HSC 25)</option>
                                 <option value={'Sun 2'}>রবি ৮টা (HSC 26)</option>
