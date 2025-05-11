@@ -463,15 +463,11 @@ function MonthlyReport() {
                         <p className='text-xl font-semibold'>Total Students Found <span className='font-bold text-red-600 text-2xl border-sky-600 border-2 rounded-full  px-2'>{students.length}</span></p>
 
                         <button onClick={handleDownload} className='flex items-center justify-center gap-1  border-2 font-bold text-sky-600 hover:bg-slate-400 py-1 mt-3 w-full hover:text-white  rounded-lg border-sky-600'><IoCloudDownloadOutline /> Download PDF</button>
-
-                    </div>
-                    <div className='text-sky-600 text-center mt-8'>
-                        <hr />
-                        
-
+                        <div className="divider divider-primary">OR</div>
                         <button onClick={handleExcel} className='flex items-center justify-center gap-1  border-2 font-bold text-sky-600 hover:bg-slate-400 py-1 mt-3 w-full hover:text-white  rounded-lg border-sky-600'><IoCloudDownloadOutline /> Download Excell</button>
 
                     </div>
+                    
                     </div>
                      : <></>
             }
