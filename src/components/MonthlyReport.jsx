@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react'
 import { AuthContext } from '../Provider';
 import { IoCloudDownloadOutline } from "react-icons/io5";
+import * as XLSX from 'xlsx';
 
 import { jsPDF } from "jspdf";
 import "jspdf-autotable"; // Importing jsPDF autoTable plugin if necessary
@@ -102,40 +103,53 @@ function MonthlyReport() {
 
 
 
+   
+//Download as excell file
 
-    // const handleDownload = async () => {
+    const handleExcel = () => {
+        if (students.length === 0) {
+            notifyFailed('No student data to export.');
+            return;
+        }
 
+        const data = students.map((student, index) => {
+            const row = {
+                // "Sl No": index + 1,
+                "Roll": student.id,
+                "Name": student.name,
+                "Phone": student.phone,
+                "Program": student.programs.length
+                    ? student.programs[student.programs.length - 1].program
+                    : "Free Class",
+                "Payment": student.payments.find(
+                    payment =>
+                        payment.pmonth == paymentMonth && payment.pyear == paymentYear
+                )
+                    ? "Paid"
+                    : "Unpaid"
+            };
 
-    //     try {
+            // Add attendance per day
+            for (let i = 1; i <= 31; i++) {
+                const date = `${i}-${paymentMonth}-${paymentYear}`;
+                row[`Day ${i}`] = student.attendances.some(att => att.date === date)
+                    ? "P"
+                    : "";
+            }
 
-    //         // const downloadResponse = await fetch('https://spoffice-server.vercel.app/download/monthly', {
-    //         const downloadResponse = await fetch('http://localhost:5000/download/monthly', {
+            return row;
+        });
 
-    //             method: 'POST',
-    //             headers: {
-    //                 'content-type': 'application/json'
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Monthly Report");
 
-    //             },
-    //             body: JSON.stringify({students,month:paymentMonth,year:paymentYear})
-    //         })
+        XLSX.writeFile(
+            workbook,
+            `Attendance Sheet - ${batch} - ${getMonth(paymentMonth)}, ${paymentYear}.xlsx`
+        );
+    };
 
-    //         if (downloadResponse.ok) {
-    //             const blob = await downloadResponse.blob();
-    //             const url = window.URL.createObjectURL(blob);
-    //             const a = document.createElement('a');
-    //             a.href = url;
-    //             a.download = `monthly-report.pdf`;
-    //             document.body.appendChild(a);
-    //             a.click();
-    //             a.remove();
-    //         } else {
-    //             console.error('Failed to download Info');
-    //         }
-    //     }
-    //     catch (err) {
-    //         console.log(err)
-    //     }
-    // }
 
 
 
@@ -145,10 +159,10 @@ function MonthlyReport() {
             const doc = new jsPDF("landscape");
 
             let isFirstPage = true; // Track if it's the first page for adding title and logo
-            
+
             // Table headers
             const headers = [
-                "Sl No", "Roll", "Name", "Phone","Program", "Payment", ...Array.from({ length: 31 }, (_, i) => (i + 1).toString())
+                "Sl No", "Roll", "Name", "Phone", "Program", "Payment", ...Array.from({ length: 31 }, (_, i) => (i + 1).toString())
             ];
 
             // Table data rows for students
@@ -157,18 +171,18 @@ function MonthlyReport() {
                 student.id,
                 student.name,
                 student.phone,
-                (student.programs.length)?student.programs[student.programs.length-1].program:"Free Class",
-                student.payments.find(payment => payment.pmonth ==paymentMonth && payment.pyear==paymentYear )?
-                "Paid":"Unpaid",
+                (student.programs.length) ? student.programs[student.programs.length - 1].program : "Free Class",
+                student.payments.find(payment => payment.pmonth == paymentMonth && payment.pyear == paymentYear) ?
+                    "Paid" : "Unpaid",
                 ...Array.from({ length: 31 }, (_, i) => {
                     const date = `${i + 1}-${paymentMonth}-${paymentYear}`;
                     return student.attendances.some((att) => att.date === date) ? "P" : "";
                 }),
-                 // Empty comments column
+                // Empty comments column
             ]);
 
             // Column width configuration (fixed widths)
-           
+
 
             // Fetch the logo image as a base64 URL
             const fetchLogo = async () => {
@@ -202,7 +216,7 @@ function MonthlyReport() {
                         (acc, curr) => ({ ...acc, ...curr }),
                         {}
                     ), // Day columns
-                   
+
                 },
                 theme: "grid",
                 headStyles: {
@@ -240,7 +254,7 @@ function MonthlyReport() {
                 },
                 pageBreak: "auto",
             });
-            
+
 
             // Save the generated PDF
             doc.save(`Attendance sheet of batch ${students[0].batch} ${getMonth(paymentMonth)},${paymentYear}.pdf`);
@@ -265,7 +279,7 @@ function MonthlyReport() {
 
 
     return (
-        (role == 'CEO' || role =='Manager') ? <div className=''>
+        (role == 'CEO' || role == 'Manager') ? <div className=''>
             <h1 className=' text-center lg:text-left md:text-center font-semibold text-2xl text-cyan-500 underline mt-10'>Monthly Report</h1>
             <form className='mx-auto w-full' onSubmit={handleSearch} >
 
@@ -443,13 +457,23 @@ function MonthlyReport() {
 
             {
                 students.length ?
-                    <div className='text-sky-600 text-center mt-8'>
+                    <div>
+                        <div className='text-sky-600 text-center mt-8'>
                         <hr />
                         <p className='text-xl font-semibold'>Total Students Found <span className='font-bold text-red-600 text-2xl border-sky-600 border-2 rounded-full  px-2'>{students.length}</span></p>
 
-                        <button onClick={handleDownload} className='flex items-center justify-center gap-1  border-2 font-bold text-sky-600 hover:bg-slate-400 py-1 mt-3 w-full hover:text-white  rounded-lg border-sky-600'><IoCloudDownloadOutline /> Download</button>
+                        <button onClick={handleDownload} className='flex items-center justify-center gap-1  border-2 font-bold text-sky-600 hover:bg-slate-400 py-1 mt-3 w-full hover:text-white  rounded-lg border-sky-600'><IoCloudDownloadOutline /> Download PDF</button>
 
-                    </div> : <></>
+                    </div>
+                    <div className='text-sky-600 text-center mt-8'>
+                        <hr />
+                        
+
+                        <button onClick={handleExcel} className='flex items-center justify-center gap-1  border-2 font-bold text-sky-600 hover:bg-slate-400 py-1 mt-3 w-full hover:text-white  rounded-lg border-sky-600'><IoCloudDownloadOutline /> Download Excell</button>
+
+                    </div>
+                    </div>
+                     : <></>
             }
 
 
