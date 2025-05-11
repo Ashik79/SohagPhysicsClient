@@ -37,21 +37,11 @@ const Attendance = ({ students }) => {
       setLoading(false);
     } else {
 
-      const response = await fetch(`https://spoffice-server.vercel.app/student/${id}`);
 
+      notifyFailed("No student Found !");
+      setStudent(null);
+      setLoading(false);
 
-      const student = await response.json();
-    
-      
-      if (student.id) {
-        setStudent(student)
-        setLoading(false)
-      }
-      else {
-        notifyFailed("No student Found !");
-        setStudent(null);
-        setLoading(false);
-      }
     }
   };
 

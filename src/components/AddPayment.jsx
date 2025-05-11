@@ -190,7 +190,7 @@ function AddPayment() {
     };
 
     return (
-        (role =='CEO' || role == 'Cashier') ?<div>
+       <div>
         <form className='mx-auto w-full' onSubmit={handlePayment} >
 
             {/* students part */}
@@ -342,9 +342,7 @@ function AddPayment() {
         </div>
         {navigate ? <Navigate to={`/payment`}></Navigate> : <></>}
 
-    </div> : <div>
-        No Access
-    </div>
+    </div> 
         
     )
 }
