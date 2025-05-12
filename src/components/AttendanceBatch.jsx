@@ -103,12 +103,15 @@ function AttendanceBatch() {
                                 <option value={'Sun 9'}>রবি ৫টা (HSC 26) </option>
                                 <option value={'Sun 10'}>রবি ৬টা (নিউ নাইন SSC 27 - HSC 29) </option>
                                 <option value={'Sun 11'}>রবি ৭টা (নিউ টেন SSC 26 - HSC 28) </option>
-                                <option>Exam Batch HSC 25</option>
+                                <option>HSC 26 Admission cancel</option>
+                                <option>HSC 27 Admission cancel</option>
+                                <option>SSC 26 class 10 Admission cancel</option>
+                                <option>SSC 27 class 9 Admission cancel</option>
                                 <option>Exam Batch HSC 26</option>
                                 <option>Exam Batch (নিউ নাইন SSC 27 - HSC 29)</option>
                                 <option>Exam Batch (নিউ টেন SSC 26 - HSC 28)</option>
-                                <option>Admission Cancelled</option>
-                                <option>Inactive</option>
+                                
+                                
                                 <option>SSC 25 (Physics Olympiad)</option>
                                 <option>Class 9 (SSC 27) Phy Champ</option>
                                 <option>Class 10 (SSC 26) Phy Champ</option>
