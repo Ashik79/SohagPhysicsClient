@@ -27,7 +27,16 @@ function MonthlyReport() {
         setPaymentYear(event.target.value);
     };
 
-    console.log(date)
+    const sortArray = arr => {
+        let ar = arr;
+        if (ar.length) {
+            ar.sort((a, b) => parseInt(a.id) - parseInt(b.id)
+            )
+            return ar
+        }
+        else return []
+    }
+
 
 
 
@@ -103,16 +112,16 @@ function MonthlyReport() {
 
 
 
-   
-//Download as excell file
+
+    //Download as excell file
 
     const handleExcel = () => {
         if (students.length === 0) {
             notifyFailed('No student data to export.');
             return;
         }
-
-        const data = students.map((student, index) => {
+        const sortedStudents = sortArray(students)
+        const data = sortedStudents.map((student, index) => {
             const row = {
                 // "Sl No": index + 1,
                 "Roll": student.id,
@@ -166,7 +175,8 @@ function MonthlyReport() {
             ];
 
             // Table data rows for students
-            const tableData = students.map((student, index) => [
+            const sortedStudents=sortArray(students)
+            const tableData = sortedStudents.map((student, index) => [
                 index + 1,
                 student.id,
                 student.name,
@@ -326,8 +336,8 @@ function MonthlyReport() {
                                 <option>Exam Batch HSC 26</option>
                                 <option>Exam Batch (নিউ নাইন SSC 27 - HSC 29)</option>
                                 <option>Exam Batch (নিউ টেন SSC 26 - HSC 28)</option>
-                                
-                                
+
+
                                 <option>SSC 25 (Physics Olympiad)</option>
                                 <option>Class 9 (SSC 27) Phy Champ</option>
                                 <option>Class 10 (SSC 26) Phy Champ</option>
@@ -462,17 +472,17 @@ function MonthlyReport() {
                 students.length ?
                     <div>
                         <div className='text-sky-600 text-center mt-8'>
-                        <hr />
-                        <p className='text-xl font-semibold'>Total Students Found <span className='font-bold text-red-600 text-2xl border-sky-600 border-2 rounded-full  px-2'>{students.length}</span></p>
+                            <hr />
+                            <p className='text-xl font-semibold'>Total Students Found <span className='font-bold text-red-600 text-2xl border-sky-600 border-2 rounded-full  px-2'>{students.length}</span></p>
 
-                        <button onClick={handleDownload} className='flex items-center justify-center gap-1  border-2 font-bold text-sky-600 hover:bg-slate-400 py-1 mt-3 w-full hover:text-white  rounded-lg border-sky-600'><IoCloudDownloadOutline /> Download PDF</button>
-                        <div className="divider divider-primary">OR</div>
-                        <button onClick={handleExcel} className='flex items-center justify-center gap-1  border-2 font-bold text-sky-600 hover:bg-slate-400 py-1 mt-3 w-full hover:text-white  rounded-lg border-sky-600'><IoCloudDownloadOutline /> Download Excell</button>
+                            <button onClick={handleDownload} className='flex items-center justify-center gap-1  border-2 font-bold text-sky-600 hover:bg-slate-400 py-1 mt-3 w-full hover:text-white  rounded-lg border-sky-600'><IoCloudDownloadOutline /> Download PDF</button>
+                            <div className="divider divider-primary">OR</div>
+                            <button onClick={handleExcel} className='flex items-center justify-center gap-1  border-2 font-bold text-sky-600 hover:bg-slate-400 py-1 mt-3 w-full hover:text-white  rounded-lg border-sky-600'><IoCloudDownloadOutline /> Download Excell</button>
+
+                        </div>
 
                     </div>
-                    
-                    </div>
-                     : <></>
+                    : <></>
             }
 
 
