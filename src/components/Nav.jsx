@@ -6,7 +6,7 @@ import { MdLogout } from "react-icons/md";
 function Nav() {
     const { loggedUser, role, logout, loggedPhoto } = useContext(AuthContext);
     const [photo, setPhoto] = useState(null);  // Initially set to null
-
+console.log(loggedUser)
     // Ensure the photo is updated based on loggedPhoto or localStorage
     useEffect(() => {
         if (loggedPhoto) {
@@ -52,7 +52,11 @@ function Nav() {
                         <ul onClick={() => handleSelect()}
                             tabIndex={0}
                             className={`menu menu-lg gap-2 text-lg bg-gray-100 dropdown-content rounded-box z-[1] mt-3 w-52 p-2 shadow ${disabled ? 'hidden' : ''}`}>
+                            {
+                                loggedUser !='Sohag Prodhan' &&
+
                             <NavLink to={'/overview'}><li className='pl-2 hover:bg-gray-200 '>Payment Overview</li></NavLink>
+                            }
                             {role === 'CEO' && <NavLink to={'/studentoverview'}><li className='pl-2 hover:bg-gray-200 '>Student Overview</li></NavLink>}
                             <NavLink to={'/finder'}><li className='pl-2 hover:bg-gray-200 '>Finder</li></NavLink>
                             {role === 'CEO' && <NavLink to={'/staffs'}><li className='pl-2 hover:bg-gray-200'>Staffs</li></NavLink>}
