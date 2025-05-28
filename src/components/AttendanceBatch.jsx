@@ -79,26 +79,26 @@ function AttendanceBatch() {
                             <p className='font-semibold'>Batch </p>
 
                             <select name='batch' className="select text-lg font-semibold  select-info w-full ">
-                                <option value={'Sat 1'}>শনি ৭টা (নিউ টেন SSC 26 - HSC 28)</option>
-                                <option value={'Sat 2'}>শনি ৮টা (নিউ নাইন SSC 27 - HSC 29)</option>
+                                <option value={'Sat 1'}>শনি ৭টা (HSC 27)</option>
+                                <option value={'Sat 2'}>শনি ৮টা (HSC 27)</option>
                                 <option value={'Sat 3'}>শনি ৯টা (নিউ টেন SSC 26 - HSC 28)</option>
                                 <option value={'Sat 4'}>শনি ১০টা (নিউ নাইন SSC 27 - HSC 29)</option>
                                 <option value={'Sat 5'}>শনি ১১টা </option>
                                
                                 <option value={'Sat 6'}>শনি ২টা (HSC 26)</option>
                                 <option value={'Sat 7'}>শনি ৩টা (HSC 26)</option>
-                                <option value={'Sat 8'}>শনি ৪টা (HSC 25)</option>
+                                <option value={'Sat 8'}>শনি ৪টা (HSC 27)</option>
                                 <option value={'Sat 9'}>শনি ৫টা (HSC 26)</option>
-                                <option value={'Sat 10'}>শনি ৬টা (HSC 26)</option>
+                                <option value={'Sat 10'}>শনি ৬.১৫টা (HSC 27)</option>
                                 <option value={'Sat 11'}>শনি ৭.১৫ টা (নিউ টেন SSC 26 - HSC 28)</option>
-                                <option value={'Sun 1'}>রবি ৭টা (HSC 25)</option>
+                                <option value={'Sun 1'}>রবি ৭টা (HSC 27)</option>
                                 <option value={'Sun 2'}>রবি ৮টা (HSC 26)</option>
-                                <option value={'Sun 3'}>রবি ৯টা (HSC 26)</option>
+                                <option value={'Sun 3'}>রবি ৯টা (HSC 27)</option>
                                 <option value={'Sun 4'}>রবি ১০টা (Nine & Ten combined)</option>
                                 <option value={'Sun 5'}>রবি ১১টা </option>
                                
                                 <option value={'Sun 6'}>রবি ২টা (HSC 26) </option>
-                                <option value={'Sun 7'}>রবি ৩টা (HSC 25) </option>
+                                <option value={'Sun 7'}>রবি ৩টা (HSC 27) </option>
                                 <option value={'Sun 8'}>রবি ৪টা (HSC 26) </option>
                                 <option value={'Sun 9'}>রবি ৫টা (HSC 26) </option>
                                 <option value={'Sun 10'}>রবি ৬টা (নিউ নাইন SSC 27 - HSC 29) </option>
