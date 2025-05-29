@@ -6,7 +6,7 @@ import { FaDownload } from "react-icons/fa";
 
 const PaymentComponent = () => {
 
-  const { date, month, year, role, notifyFailed,loggedUser } = useContext(AuthContext)
+  const { date, month, year, role, notifyFailed, loggedUser } = useContext(AuthContext)
   const [loading, setLoading] = useState(false)
   const [mloading, setmLoading] = useState(false)
   const [ploading, setpLoading] = useState(false)
@@ -42,11 +42,120 @@ const PaymentComponent = () => {
         setLoading(false)
       })
   };
+  const handleReportDownload = async () => {
+    try {
+      // Create jsPDF instance with landscape orientation
+      const doc = new jsPDF("landscape");
 
+      let isFirstPage = true; // Track if it's the first page for adding title and logo
+
+      // Table headers
+      const headers = [
+        "Sl No", "Roll", "Name", "Date", "Amount", "Payment Type",
+      ];
+
+      // Table data rows for students
+      const sortedStudents = sortArray(students)
+      const tableData = sortedStudents.map((student, index) => {
+        const payment = student.payments.find(payment => payment.pmonth == paymentMonth && payment.pyear == paymentYear);
+        return [
+          index + 1,
+          student.id,
+          student.name,
+          student.phone,
+          (student.programs.length) ? student.programs[student.programs.length - 1].program : "Free Class",
+          payment ?
+            getFirstName(payment.ptaken) : "Unpaid",
+
+
+        ]
+      })
+
+      // Column width configuration (fixed widths)
+
+
+      // Fetch the logo image as a base64 URL
+      const fetchLogo = async () => {
+        const logoUrl = "/logo.png"; // Replace with the correct URL to your logo
+        const response = await fetch(logoUrl);
+        const blob = await response.blob();
+        const reader = new FileReader();
+        return new Promise((resolve, reject) => {
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      };
+
+      // Wait for the logo to be loaded before generating the PDF
+      const logoUrlBase64 = await fetchLogo();
+
+      // Add table using autoTable plugin
+      doc.autoTable({
+        head: [headers],
+        body: tableData,
+        startY: 40,
+        columnStyles: {
+          0: { cellWidth: 10 }, // Sl No
+          1: { cellWidth: 15 }, // Roll
+          2: { cellWidth: 30 }, // Name
+          3: { cellWidth: 25 }, // Phone
+          4: { cellWidth: 27 }, // Program
+          5: { cellWidth: 18 }, // Payment
+          ...Array.from({ length: 31 }, (_, i) => ({ [i + 6]: { cellWidth: 5 } })).reduce(
+            (acc, curr) => ({ ...acc, ...curr }),
+            {}
+          ), // Day columns
+
+        },
+        theme: "grid",
+        headStyles: {
+          fillColor: [242, 242, 242],
+          textColor: [0, 0, 0],
+          fontStyle: "bold",
+          halign: "center",
+          minCellHeight: 5,
+          cellPadding: 1,
+          lineWidth: 0.5,
+          lineColor: [200, 200, 200],
+        },
+        bodyStyles: {
+          minCellHeight: 4,
+          cellPadding: 1,
+          lineWidth: 0.5,
+          lineColor: [200, 200, 200],
+        },
+        margin: { top: 10, bottom: 10, left: 10, right: 10 },
+        didDrawPage: (data) => {
+          if (isFirstPage) {
+            doc.addImage(logoUrlBase64, "PNG", 10, 10, 30, 30);
+            const pageWidth = doc.internal.pageSize.width;
+            doc.setFontSize(16);
+            doc.text("Sohag Physics", pageWidth / 2, 20, { align: "center" });
+            doc.setFontSize(12);
+            doc.text(
+              `Attendance Sheet for ${batch} - ${getMonth(paymentMonth)}, ${paymentYear}`,
+              pageWidth / 2,
+              30,
+              { align: "center" }
+            );
+            isFirstPage = false;
+          }
+        },
+        pageBreak: "auto",
+      });
+
+
+      // Save the generated PDF
+      doc.save(`Attendance sheet of batch ${students[0].batch} ${getMonth(paymentMonth)},${paymentYear}.pdf`);
+    } catch (err) {
+      console.log("Error generating PDF:", err);
+    }
+  };
   const handleDownload = async (type) => {
-    
+
     const array = data.paymentArray.filter(payment => payment.type == type)
-    if (type == 'Monthly'){
+    if (type == 'Monthly') {
       setmLoading(true)
     }
     if (type == 'Exam Fee') {
@@ -181,7 +290,7 @@ const PaymentComponent = () => {
                 className="block w-full bg-white border border-gray-300 rounded py-2 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
               >
                 <option value={loggedUser}>{loggedUser}</option>
-                
+
               </select>
             </div>
           }
@@ -201,7 +310,7 @@ const PaymentComponent = () => {
           <div className='w-full py-2 flex flex-col items-center justify-center gap-3  lg:w-1/4 border-2 border-sky-900 rounded-xl shadow-xl bg-gray-200'>
             <p>Monthly Payments : {data.monthlyCount}</p>
             <p className='flex items-center gap-2'> Total : <span className='font-bold flex items-center gap-1  text-sky-800'>{data.monthly} <TbCurrencyTaka /></span></p>
-            <button className='text-blue-700 h-11' onClick={() => handleDownload("Monthly")}>{!mloading?<FaDownload />:""}</button>
+            <button className='text-blue-700 h-11' onClick={() => handleDownload("Monthly")}>{!mloading ? <FaDownload /> : ""}</button>
             <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${mloading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> </p>
           </div>
           <div className='w-full py-2 flex flex-col border-2 border-sky-900 rounded-xl shadow-xl bg-gray-200   justify-center gap-3  px-2  lg:w-1/2'>
@@ -209,14 +318,14 @@ const PaymentComponent = () => {
             <div className='flex flex-col items-center '>
               <p className='lg:w-1/2 flex items-center gap-2'>Exam Fee : <span className='font-bold flex items-center gap-1  text-sky-800'>{data.exam} <TbCurrencyTaka /></span></p>
               <p className='lg:w-1/2 flex items-center gap-2'>Note Fee : <span className='font-bold  flex items-center gap-1 text-sky-800'>{data.note} <TbCurrencyTaka /></span></p>
-              <button className='text-blue-700 h-11' onClick={() => handleDownload("Exam Fee")}>{!ploading?<FaDownload />:""}</button>
+              <button className='text-blue-700 h-11' onClick={() => handleDownload("Exam Fee")}>{!ploading ? <FaDownload /> : ""}</button>
               <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${ploading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> </p>
 
             </div>
           </div>
           <div className='w-full py-2 flex flex-col justify-center border-2 border-sky-900 rounded-xl shadow-xl bg-gray-200 items-center  gap-3 lg:w-1/4'>
             <p>Other : <span className='font-bold flex items-center gap-1  text-sky-800'>{data.other} <TbCurrencyTaka /></span></p>
-            <button className='text-blue-700 h-11' onClick={() => handleDownload("other")}>{!oloading?<FaDownload />:""}</button>
+            <button className='text-blue-700 h-11' onClick={() => handleDownload("other")}>{!oloading ? <FaDownload /> : ""}</button>
             <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${oloading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> </p>
           </div>
         </div></> : <></>}
