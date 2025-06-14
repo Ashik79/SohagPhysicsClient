@@ -17,15 +17,15 @@ function MonthlyReport() {
     const [loading, setLoading] = useState(false)
 
     const getFirstName = fullname => {
-        const nameParts =fullname.trim().split(' ')
-        if (nameParts[0].toLowerCase()=='md'){
+        const nameParts = fullname.trim().split(' ')
+        if (nameParts[0].toLowerCase() == 'md') {
             return nameParts[1]
         }
         return nameParts[1]
 
     }
 
-  
+
     const handleMonthChange = (event) => {
         setPaymentMonth(event.target.value);
     };
@@ -129,12 +129,12 @@ function MonthlyReport() {
         }
         const sortedStudents = sortArray(students)
         const data = sortedStudents.map((student, index) => {
-            const payment =student.payments.find(
-                    payment =>
-                        payment.pmonth == paymentMonth && payment.pyear == paymentYear
-                )
+            const payment = student.payments.find(
+                payment =>
+                    payment.pmonth == paymentMonth && payment.pyear == paymentYear
+            )
 
-            
+
             const row = {
                 // "Sl No": index + 1,
                 "Roll": student.id,
@@ -143,7 +143,7 @@ function MonthlyReport() {
                 "Program": student.programs.length
                     ? student.programs[student.programs.length - 1].program
                     : "Free Class",
-                "Payment":payment 
+                "Payment": payment
                     ? getFirstName(payment.ptaken)
                     : "Unpaid"
             };
@@ -187,21 +187,21 @@ function MonthlyReport() {
             // Table data rows for students
             const sortedStudents = sortArray(students)
             const tableData = sortedStudents.map((student, index) => {
-                const payment =student.payments.find(payment => payment.pmonth == paymentMonth && payment.pyear == paymentYear);
+                const payment = student.payments.find(payment => payment.pmonth == paymentMonth && payment.pyear == paymentYear);
                 return [
                     index + 1,
-                student.id,
-                student.name,
-                student.phone,
-                (student.programs.length) ? student.programs[student.programs.length - 1].program : "Free Class",
-                payment ?
-                    getFirstName(payment.ptaken) : "Unpaid",
-                ...Array.from({ length: 31 }, (_, i) => {
-                    const date = `${i + 1}-${paymentMonth}-${paymentYear}`;
-                    return student.attendances.some((att) => att.date === date) ? "P" : "";
-                }),
-                // Empty comments column
-           
+                    student.id,
+                    student.name,
+                    student.phone,
+                    (student.programs.length) ? student.programs[student.programs.length - 1].program : "Free Class",
+                    payment ?
+                        getFirstName(payment.ptaken) : "Unpaid",
+                    ...Array.from({ length: 31 }, (_, i) => {
+                        const date = `${i + 1}-${paymentMonth}-${paymentYear}`;
+                        return student.attendances.some((att) => att.date === date) ? "P" : "";
+                    }),
+                    // Empty comments column
+
                 ]
             })
 
@@ -463,6 +463,10 @@ function MonthlyReport() {
                                 <option>2024</option>
                                 <option>2025</option>
                                 <option>2026</option>
+                                <option>2027</option>
+                                <option>2028</option>
+                                <option>2029</option>
+                                <option>2030</option>
                             </select>
                         </div>
 
