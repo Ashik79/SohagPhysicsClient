@@ -6,7 +6,7 @@ import { MdLogout } from "react-icons/md";
 function Nav() {
     const { loggedUser, role, logout, loggedPhoto } = useContext(AuthContext);
     const [photo, setPhoto] = useState(null);  // Initially set to null
-console.log(loggedUser)
+    console.log(loggedUser)
     // Ensure the photo is updated based on loggedPhoto or localStorage
     useEffect(() => {
         if (loggedPhoto) {
@@ -53,9 +53,9 @@ console.log(loggedUser)
                             tabIndex={0}
                             className={`menu menu-lg gap-2 text-lg bg-gray-100 dropdown-content rounded-box z-[1] mt-3 w-52 p-2 shadow ${disabled ? 'hidden' : ''}`}>
                             {
-                                loggedUser !='Sohag Prodhan' &&
+                                loggedUser != 'Sohag Prodhan' &&
 
-                            <NavLink to={'/overview'}><li className='pl-2 hover:bg-gray-200 '>Payment Overview</li></NavLink>
+                                <NavLink to={'/overview'}><li className='pl-2 hover:bg-gray-200 '>Payment Overview</li></NavLink>
                             }
                             {role === 'CEO' && <NavLink to={'/studentoverview'}><li className='pl-2 hover:bg-gray-200 '>Student Overview</li></NavLink>}
                             <NavLink to={'/finder'}><li className='pl-2 hover:bg-gray-200 '>Finder</li></NavLink>
@@ -70,14 +70,17 @@ console.log(loggedUser)
                             {(role == 'CEO' || role == 'Manager') && <NavLink to={'/download'}><li className='pl-2 hover:bg-gray-200'>Download Info</li></NavLink>}
                             {(role == 'CEO' || role == 'Manager') && <NavLink to={'/monthly-report'}><li className='pl-2 hover:bg-gray-200'>Attendance Sheet</li></NavLink>}
                             {(role == 'CEO' || role == 'Manager') && <NavLink to={'/message'}><li className='pl-2 hover:bg-gray-200'>Message</li></NavLink>}
-                           <NavLink to={'/payment'}><li className='pl-2 hover:bg-gray-200'>Payment Entry</li></NavLink> 
-                            
+                            {
+                                (role == 'CEO') ? <NavLink to={'/payment'}><li className='pl-2 hover:bg-gray-200'>Payment Entry</li></NavLink> : ''
+                            }
+
+
                             {
                                 (role == 'CEO') ? <NavLink to={'/editor'}><li className='pl-2 hover:bg-gray-200'>Student Website</li></NavLink> : ''
                             }
 
                             <NavLink to={'/register'}><li className='pl-2 hover:bg-gray-200'>Register</li></NavLink>
-                           {role =='CEO' &&  <NavLink to={'/programentry'}><li className='pl-2 hover:bg-gray-200'>Program Entry</li></NavLink>}
+                            {role == 'CEO' && <NavLink to={'/programentry'}><li className='pl-2 hover:bg-gray-200'>Program Entry</li></NavLink>}
                             {role === 'CEO' && <NavLink to={'/adduser'}><li className='pl-2 hover:bg-gray-200'>Add Role</li></NavLink>}
                         </ul>
                     </div>

@@ -190,160 +190,160 @@ function AddPayment() {
     };
 
     return (
-       <div>
-        <form className='mx-auto w-full' onSubmit={handlePayment} >
+        role == 'CEO' ? <div>
+            <form className='mx-auto w-full' onSubmit={handlePayment} >
 
-            {/* students part */}
-            <div className='flex mt-2 flex-col gap-5 lg:flex-row'>
-                <div className='lg:w-2/5'>
-                    <h1 className='font-bold text-2xl '>Payment Entry :</h1>
-                    <p className='font-semibold'>Payment Information</p> <hr />
-                    <div className='flex py-3 px-2 items-center my-2 justify-between'>
-                        <p className='font-bold text-3xl'>{name} <span className='bg-sky-100 text-sky-500 font-semibold text-xl px-4 rounded-xl py-1'>{id}</span></p>
-                        <div className="dropdown dropdown-end">
-                            <div tabIndex={0} role="button" className="rounded-full p-1 bg-sky-200  font-semibold"><BsThreeDotsVertical /></div>
-                            <ul onClick={() => { handleSelect() }} tabIndex={0} className={`dropdown-content ${disabled ? 'hidden' : ''} menu bg-sky-100 text-sky-600 font-semibold rounded-box z-[1] w-52 p-2 shadow `}>
-                                <li><Link to={`/students/${user.id}`}><CgProfile /> Profile</Link></li>
-                                <li className=''><Link to={`/attendance/${user.id}`}> <FaMoneyBillTransfer /> Attendance</Link></li>
+                {/* students part */}
+                <div className='flex mt-2 flex-col gap-5 lg:flex-row'>
+                    <div className='lg:w-2/5'>
+                        <h1 className='font-bold text-2xl '>Payment Entry :</h1>
+                        <p className='font-semibold'>Payment Information</p> <hr />
+                        <div className='flex py-3 px-2 items-center my-2 justify-between'>
+                            <p className='font-bold text-3xl'>{name} <span className='bg-sky-100 text-sky-500 font-semibold text-xl px-4 rounded-xl py-1'>{id}</span></p>
+                            <div className="dropdown dropdown-end">
+                                <div tabIndex={0} role="button" className="rounded-full p-1 bg-sky-200  font-semibold"><BsThreeDotsVertical /></div>
+                                <ul onClick={() => { handleSelect() }} tabIndex={0} className={`dropdown-content ${disabled ? 'hidden' : ''} menu bg-sky-100 text-sky-600 font-semibold rounded-box z-[1] w-52 p-2 shadow `}>
+                                    <li><Link to={`/students/${user.id}`}><CgProfile /> Profile</Link></li>
+                                    <li className=''><Link to={`/attendance/${user.id}`}> <FaMoneyBillTransfer /> Attendance</Link></li>
 
-                            </ul>
+                                </ul>
+                            </div>
                         </div>
+                        <div className='flex flex-col items-center my-2 justify-center rounded-lg py-3  border-sky-400 border'>
+                            <p className='text-3xl text-sky-500 font-semibold flex gap-1 items-center '>{monthlyAmount} <span className='text-3xl'><TbCurrencyTaka /></span></p>
+                            <p className='font-semibold'>Monthly</p>
+                        </div>
+
+                        <p className='font-semibold my-2'>Last month status</p>
+                        {lastMonthPaid ? <><p className='text-sky-600 flex items-center border rounded-xl border-sky-600 gap-2 py-1 px-5 font-semibold text-lg'><span className='text-green-700 font-bold'><FiCheckCircle /></span> Paid for {lastMonthText}</p></> : newStudent ? <p className='text-blue-600 border border-blue-600 rounded-xl flex items-center gap-2 py-1 px-5 font-semibold text-lg'>New Student</p> : <><p className='text-red-600 border border-red-600 rounded-xl flex items-center gap-2 py-1 px-5 font-semibold text-lg'><ImCross /> Not paid for {lastMonthText}</p></>}
                     </div>
-                    <div className='flex flex-col items-center my-2 justify-center rounded-lg py-3  border-sky-400 border'>
-                        <p className='text-3xl text-sky-500 font-semibold flex gap-1 items-center '>{monthlyAmount} <span className='text-3xl'><TbCurrencyTaka /></span></p>
-                        <p className='font-semibold'>Monthly</p>
-                    </div>
-
-                    <p className='font-semibold my-2'>Last month status</p>
-                    {lastMonthPaid ? <><p className='text-sky-600 flex items-center border rounded-xl border-sky-600 gap-2 py-1 px-5 font-semibold text-lg'><span className='text-green-700 font-bold'><FiCheckCircle /></span> Paid for {lastMonthText}</p></> : newStudent ? <p className='text-blue-600 border border-blue-600 rounded-xl flex items-center gap-2 py-1 px-5 font-semibold text-lg'>New Student</p> : <><p className='text-red-600 border border-red-600 rounded-xl flex items-center gap-2 py-1 px-5 font-semibold text-lg'><ImCross /> Not paid for {lastMonthText}</p></>}
-                </div>
-                <div className='grid grid-cols-1  lg:w-3/5  gap-3'>
+                    <div className='grid grid-cols-1  lg:w-3/5  gap-3'>
 
 
 
-                    <div>
-                        <p className='font-semibold'>Payment Type <span className='text-red-700'>*</span> </p>
-                        <select name='type'
-                            onChange={handleOptionChange}
-                            defaultValue={month} className="select select-inf text-lg font-semibold w-full ">
-
-                            <option >Monthly</option>
-                            <option >Due</option>
-                            <option >Note Fee</option>
-
-
-                        </select>
-                    </div>
-                    {
-                        role == "CEO" && <div>
-                            <p className='font-semibold'>Amount <span className='text-red-700'>*</span> </p>
-                            <input
-                                required
-                                name='pamount'
-                                defaultValue={monthlyAmount}
-                                type="number"
-                                onWheel={(e) => e.target.blur()}
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
-                        </div>}
-                    {role != 'CEO' && paymentType == 'Monthly' &&
                         <div>
-                            <p className='font-semibold'>Amount <span className='text-red-700'>*</span> </p>
-                            <input
-                                required
-                                name='pamount'
-                                value={monthlyAmount}
-                                type="number"
-                                onWheel={(e) => e.target.blur()}
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
-                        </div>
-                    }
-                    {role != 'CEO' && paymentType == 'Note Fee' &&
-                        <div>
-                            <p className='font-semibold'>Amount <span className='text-red-700'>*</span> </p>
-                            <input
-                                required
-                                name='pamount'
-                               
-                                type="number"
-                                onWheel={(e) => e.target.blur()}
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
-                        </div>
-                    }
-                    <div className='flex flex-col lg:flex-row gap-2 justify-between'>
-                        <div className='w-full lg:w-1/2'>
-                            <p className='font-semibold'>Month <span className='text-red-700'>*</span> </p>
-                            <select name='pmonth' defaultValue={month} className="select text-lg font-semibold   select-info w-full ">
+                            <p className='font-semibold'>Payment Type <span className='text-red-700'>*</span> </p>
+                            <select name='type'
+                                onChange={handleOptionChange}
+                                defaultValue={month} className="select select-inf text-lg font-semibold w-full ">
 
-                                <option value={1}>January</option>
-                                <option value={2}>February</option>
-                                <option value={3}>March</option>
-                                <option value={4}>April</option>
-                                <option value={5}>May</option>
-                                <option value={6}>June</option>
-                                <option value={7}>July</option>
-                                <option value={8}>August</option>
-                                <option value={9}>September</option>
-                                <option value={10}>October</option>
-                                <option value={11}>November</option>
-                                <option value={12}>December</option>
-
-                            </select>
-                        </div>
-                        <div className='w-full lg:w-1/2'>
-                            <p className='font-semibold'>Year <span className='text-red-700'>*</span> </p>
-                            <select name='pyear' defaultValue={year} className="select text-lg font-semibold  select-info w-full ">
-
-                                <option value={2022}>2022</option>
-                                <option value={2023}>2023</option>
-                                <option value={2024}>2024</option>
-                                <option value={2025}>2025</option>
-                                <option value={2026}>2026</option>
-                                <option value={2027}>2027</option>
-                                <option value={2028}>2028</option>
-                                <option value={2029}>2029</option>
-                                <option value={2030}>2030</option>
+                                <option >Monthly</option>
+                                <option >Due</option>
+                                <option >Note Fee</option>
 
 
                             </select>
                         </div>
-                        <div>
-                            <p className='font-semibold'>Coupon  </p>
-                            <input
+                        {
+                            role == "CEO" && <div>
+                                <p className='font-semibold'>Amount <span className='text-red-700'>*</span> </p>
+                                <input
+                                    required
+                                    name='pamount'
+                                    defaultValue={monthlyAmount}
+                                    type="number"
+                                    onWheel={(e) => e.target.blur()}
+                                    className="input text-lg font-semibold  input-bordered input-info w-full " />
+                            </div>}
+                        {role != 'CEO' && paymentType == 'Monthly' &&
+                            <div>
+                                <p className='font-semibold'>Amount <span className='text-red-700'>*</span> </p>
+                                <input
+                                    required
+                                    name='pamount'
+                                    value={monthlyAmount}
+                                    type="number"
+                                    onWheel={(e) => e.target.blur()}
+                                    className="input text-lg font-semibold  input-bordered input-info w-full " />
+                            </div>
+                        }
+                        {role != 'CEO' && paymentType == 'Note Fee' &&
+                            <div>
+                                <p className='font-semibold'>Amount <span className='text-red-700'>*</span> </p>
+                                <input
+                                    required
+                                    name='pamount'
 
-                                name='coupon'
+                                    type="number"
+                                    onWheel={(e) => e.target.blur()}
+                                    className="input text-lg font-semibold  input-bordered input-info w-full " />
+                            </div>
+                        }
+                        <div className='flex flex-col lg:flex-row gap-2 justify-between'>
+                            <div className='w-full lg:w-1/2'>
+                                <p className='font-semibold'>Month <span className='text-red-700'>*</span> </p>
+                                <select name='pmonth' defaultValue={month} className="select text-lg font-semibold   select-info w-full ">
 
-                                type="text"
+                                    <option value={1}>January</option>
+                                    <option value={2}>February</option>
+                                    <option value={3}>March</option>
+                                    <option value={4}>April</option>
+                                    <option value={5}>May</option>
+                                    <option value={6}>June</option>
+                                    <option value={7}>July</option>
+                                    <option value={8}>August</option>
+                                    <option value={9}>September</option>
+                                    <option value={10}>October</option>
+                                    <option value={11}>November</option>
+                                    <option value={12}>December</option>
 
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                </select>
+                            </div>
+                            <div className='w-full lg:w-1/2'>
+                                <p className='font-semibold'>Year <span className='text-red-700'>*</span> </p>
+                                <select name='pyear' defaultValue={year} className="select text-lg font-semibold  select-info w-full ">
+
+                                    <option value={2022}>2022</option>
+                                    <option value={2023}>2023</option>
+                                    <option value={2024}>2024</option>
+                                    <option value={2025}>2025</option>
+                                    <option value={2026}>2026</option>
+                                    <option value={2027}>2027</option>
+                                    <option value={2028}>2028</option>
+                                    <option value={2029}>2029</option>
+                                    <option value={2030}>2030</option>
+
+
+                                </select>
+                            </div>
+                            <div>
+                                <p className='font-semibold'>Coupon  </p>
+                                <input
+
+                                    name='coupon'
+
+                                    type="text"
+
+                                    className="input text-lg font-semibold  input-bordered input-info w-full " />
+                            </div>
+
+                        </div>
+                        <div className='flex  mt-2 flex-col lg:flex-row'>
+
+                            <div className=' text-center  w-full'>
+                                <input className="font-semibold h-11 w-full bg-blue-100  border-2 rounded-xl   btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Confirm"}`} />
+                                <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
+                            </div>
                         </div>
 
                     </div>
-                    <div className='flex  mt-2 flex-col lg:flex-row'>
-
-                        <div className=' text-center  w-full'>
-                            <input className="font-semibold h-11 w-full bg-blue-100  border-2 rounded-xl   btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Confirm"}`} />
-                            <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
-                        </div>
-                    </div>
-
                 </div>
+
+
+                {
+                    <div className=''>{showReceipt && <MonthlyReciept data={pdata} />}</div>
+                }
+            </form>
+            <div className="mt-8">
+                <h2 className="text-2xl font-bold mb-4">Recent Payments</h2>
+                {reversedPayments.map((payment, index) => (
+                    <PaymentCard key={index} payment={payment} />
+                ))}
             </div>
+            {navigate ? <Navigate to={`/payment`}></Navigate> : <></>}
 
+        </div> : <div>No Access</div>
 
-            {
-                <div className=''>{showReceipt && <MonthlyReciept data={pdata} />}</div>
-            }
-        </form>
-        <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-4">Recent Payments</h2>
-            {reversedPayments.map((payment, index) => (
-                <PaymentCard key={index} payment={payment} />
-            ))}
-        </div>
-        {navigate ? <Navigate to={`/payment`}></Navigate> : <></>}
-
-    </div> 
-        
     )
 }
 
