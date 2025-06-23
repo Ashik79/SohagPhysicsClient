@@ -34,7 +34,7 @@ function Nav() {
         <div>
             <div className="navbar bg-slate-100">
                 <div className="navbar-start">
-                    <div className="dropdown text-lg font-semibold">
+                    <div className="dropdown text-base font-semibold">
                         <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -51,7 +51,7 @@ function Nav() {
                         </div>
                         <ul onClick={() => handleSelect()}
                             tabIndex={0}
-                            className={`menu menu-lg gap-2 text-lg bg-gray-100 dropdown-content rounded-box z-[1] mt-3 w-52 p-2 shadow ${disabled ? 'hidden' : ''}`}>
+                            className={`menu menu-lg gap-2 text-base bg-gray-100 dropdown-content rounded-box z-[1] mt-3 w-52 p-2 shadow ${disabled ? 'hidden' : ''}`}>
                             {
                                 loggedUser != 'Sohag Prodhan' &&
 
@@ -67,8 +67,8 @@ function Nav() {
                             <NavLink to={'/note'}><li className='pl-2 hover:bg-gray-200'>Notes</li></NavLink>
                             {role === 'CEO' && <NavLink to={'/coupons'}><li className='pl-2 hover:bg-gray-200'>Coupons</li></NavLink>}
                             {(role == 'CEO' || role == 'Manager') && <NavLink to={'/batch'}><li className='pl-2 hover:bg-gray-200'>Batch Students</li></NavLink>}
-                            {(role == 'CEO' || role == 'Manager') && <NavLink to={'/download'}><li className='pl-2 hover:bg-gray-200'>Download Info</li></NavLink>}
-                            {(role == 'CEO' || role == 'Manager') && <NavLink to={'/monthly-report'}><li className='pl-2 hover:bg-gray-200'>Attendance Sheet</li></NavLink>}
+                            {(role == 'CEO' || role == 'Manager') && <NavLink to={'/download'}><li className='pl-2 hover:bg-gray-200'>Download Center</li></NavLink>}
+                           
                             {(role == 'CEO' || role == 'Manager') && <NavLink to={'/message'}><li className='pl-2 hover:bg-gray-200'>Message</li></NavLink>}
                             {
                                 (role == 'CEO') ? <NavLink to={'/payment'}><li className='pl-2 hover:bg-gray-200'>Payment Entry</li></NavLink> : ''
@@ -98,7 +98,7 @@ function Nav() {
                         </div>
                     </div>
                     <div>
-                        <button className='text-lg' onClick={() => logout()}><MdLogout /></button>
+                        <button className='text-base' onClick={() => logout()}><MdLogout /></button>
                     </div>
                 </div>
             </div>

@@ -25,7 +25,7 @@ import TakeAttendance from './components/TakeAttendance';
 import Exams from './components/Exams';
 import Exam from './components/Exam';
 import Message from './components/Message';
-import Download from './components/Download';
+
 import ProgramEntry from './components/ProgramEntry';
 import Programs from './components/Programs';
 import Coupons from './components/Coupons';
@@ -38,7 +38,7 @@ import PrintReceipt from './components/PrintReceipt';
 import MyEntry from './components/StuffPart/MyEntry';
 import Monitor from './components/StuffPart/Monitor';
 import AttendanceBatch from './components/AttendanceBatch';
-import MonthlyReport from './components/MonthlyReport';
+
 import Staffs from './components/StuffPart/Staffs';
 import StaffDetails from './components/StuffPart/StaffDetails';
 import EditorDashboard from './components/StudentSite/EditorDashboard';
@@ -50,6 +50,7 @@ import PDFViewer from './components/StudentSite/PdfViewer';
 import VideoChapters from './components/StudentSite/VideoChapters';
 import Videofiles from './components/StudentSite/VideoFiles';
 import VideoPlayer from './components/StudentSite/VideoPlayer';
+import DownloadCenter from './components/Download/DownloadCenter';
 
 
 
@@ -268,7 +269,7 @@ const router = createBrowserRouter([
      
       {
         path:'/download',
-        element:<PrivateRoute><Download></Download></PrivateRoute>,
+        element:<PrivateRoute><DownloadCenter></DownloadCenter></PrivateRoute>,
             
       },
       {
@@ -276,11 +277,11 @@ const router = createBrowserRouter([
         element:<PrivateRoute><PdfUploader></PdfUploader></PrivateRoute>,
             
       },
-      {
-        path:'/monthly-report',
-        element:<PrivateRoute><MonthlyReport></MonthlyReport></PrivateRoute>,
+      // {
+      //   path:'/monthly-report',
+      //   element:<PrivateRoute><MonthlyReport></MonthlyReport></PrivateRoute>,
             
-      },
+      // },
       {
         path:'/exam/:id',
         element:<PrivateRoute><Exam></Exam></PrivateRoute>,

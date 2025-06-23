@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react'
-import { AuthContext } from '../Provider';
+import { AuthContext } from '../../Provider';
 import { IoCloudDownloadOutline } from "react-icons/io5";
 import * as XLSX from 'xlsx';
 
@@ -56,16 +56,14 @@ function MonthlyReport() {
         const level = e.target.class.value;
         const program = e.target.program.value;
         const session = e.target.session.value;
-        const discounted = e.target.discounted.value;
+      
         if (level) {
             query.level = level;
         }
         if (batch) query.batch = batch;
 
         if (session) query.session = session;
-        if (discounted) {
-            query.discounted = discounted;
-        }
+       
 
         try {
             const res = await fetch('https://spoffice-server.vercel.app/students', {
@@ -304,19 +302,19 @@ function MonthlyReport() {
 
     return (
         (role == 'CEO' || role == 'Manager') ? <div className=''>
-            <h1 className=' text-center lg:text-left md:text-center font-semibold text-2xl text-cyan-500 underline mt-10'>Monthly Report</h1>
+            <h1 className=' text-center lg:text-left md:text-center font-semibold text-xl text-cyan-500 underline mt-10'>Monthly Report</h1>
             <form className='mx-auto w-full' onSubmit={handleSearch} >
 
                 {/* students part */}
                 <div className='flex mt-2 flex-col lg:flex-row'>
-                    <h1 className='font-bold text-lg lg:w-1/4'>Searching Options :</h1>
+                    <h1 className='font-bold text-base lg:w-1/4'>Searching Options :</h1>
                     <div className='grid grid-cols-1 lg:w-2/3 lg:grid-cols-2 gap-3'>
 
 
                         <div>
                             <p className='font-semibold'>Batch </p>
 
-                            <select name='batch' className="select text-lg font-semibold  select-info w-full ">
+                            <select name='batch' className="select text-base font-semibold  select-info w-full ">
 
                                 <option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>
                                 <option value={'Sat 1'}>শনি ৭টা (HSC 27)</option>
@@ -361,7 +359,7 @@ function MonthlyReport() {
                         <div>
                             <p className='font-semibold'>Class  </p>
 
-                            <select name='class' className="select text-lg font-semibold  select-info w-full ">
+                            <select name='class' className="select text-base font-semibold  select-info w-full ">
 
                                 <option value={""}>All</option>
                                 <option>Eight</option>
@@ -379,7 +377,7 @@ function MonthlyReport() {
 
                         <div>
                             <p className='font-semibold'>Program  </p>
-                            <select name='program' className="select text-lg font-semibold  select-info w-full ">
+                            <select name='program' className="select text-base font-semibold  select-info w-full ">
                                 <option value={''}>All</option>
                                 <option value={'Free'}>Free Class</option>
                                 <option value={'HscPhy'}>HSC Physics</option>
@@ -399,21 +397,10 @@ function MonthlyReport() {
 
                             </select>
                         </div>
-                        <div >
-                            <p className='font-semibold'>Discounted Students  </p>
-                            <select name='discounted' className="select text-lg font-semibold  select-info w-full ">
-                                <option value={''}>Not Applicable</option>
-                                <option value={true}>Discounted</option>
-
-
-
-
-
-                            </select>
-                        </div>
-                        <div className='lg:col-span-2'>
+                        
+                        <div className=''>
                             <p className='font-semibold'>Session  </p>
-                            <select name='session' className="select text-lg font-semibold  select-info w-full ">
+                            <select name='session' className="select text-base font-semibold  select-info w-full ">
 
 
                                 <option value={""}>All</option>
@@ -437,7 +424,7 @@ function MonthlyReport() {
                                 defaultValue={month}
                                 name='month'
 
-                                className="select text-lg font-semibold  select-info w-full"
+                                className="select text-base font-semibold  select-info w-full"
                             >
 
                                 <option value="1">January</option>
@@ -458,7 +445,7 @@ function MonthlyReport() {
 
                         <div>
                             <p className='font-semibold'>Year  </p>
-                            <select onChange={handleYearChange} defaultValue={year} name='year' className="select text-lg font-semibold  select-info w-full ">
+                            <select onChange={handleYearChange} defaultValue={year} name='year' className="select text-base font-semibold  select-info w-full ">
 
                                 <option>2024</option>
                                 <option>2025</option>
@@ -475,9 +462,9 @@ function MonthlyReport() {
                 </div>
 
                 <div className='flex mt-10 flex-col w-full lg:flex-row'>
-                    <h1 className='font-bold text-lg lg:w-1/4'></h1>
+                    <h1 className='font-bold text-base lg:w-1/4'></h1>
                     <div className='lg:w-2/3 text-center'>
-                        <input className=" text-lg font-semibold h-11 w-full bg-blue-100  border-2 rounded-xl    btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Find Info"}`} />
+                        <input className=" text-base font-semibold h-11 w-full bg-blue-100  border-2 rounded-xl    btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Find Info"}`} />
                         <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
                     </div>
                 </div>
@@ -491,7 +478,7 @@ function MonthlyReport() {
                     <div>
                         <div className='text-sky-600 text-center mt-8'>
                             <hr />
-                            <p className='text-xl font-semibold'>Total Students Found <span className='font-bold text-red-600 text-2xl border-sky-600 border-2 rounded-full  px-2'>{students.length}</span></p>
+                            <p className='text-base font-semibold'>Total Students Found <span className='font-bold text-red-600 text-2xl border-sky-600 border-2 rounded-full  px-2'>{students.length}</span></p>
 
                             <button onClick={handleDownload} className='flex items-center justify-center gap-1  border-2 font-bold text-sky-600 hover:bg-slate-400 py-1 mt-3 w-full hover:text-white  rounded-lg border-sky-600'><IoCloudDownloadOutline /> Download PDF</button>
                             <div className="divider divider-primary">OR</div>

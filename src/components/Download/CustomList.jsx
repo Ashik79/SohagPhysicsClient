@@ -1,8 +1,8 @@
 import React, { useContext, useState } from 'react'
-import { AuthContext } from '../Provider';
+import { AuthContext } from '../../Provider';
 import { IoCloudDownloadOutline } from "react-icons/io5";
 
-function Download() {
+function CustomList() {
     const { notifyFailed, month, year, notifySuccess, role, date } = useContext(AuthContext)
     const [students, setStudents] = useState([])
     const [paymentStatus, setPaymentStatus] = useState('All');
@@ -180,19 +180,19 @@ function Download() {
 
     return (
         (role == 'CEO' || role == 'Manager') ? <div className=''>
-            <h1 className=' text-center lg:text-left md:text-center font-semibold text-2xl text-cyan-500 underline mt-10'>Download</h1>
+            <h1 className=' text-center lg:text-left md:text-center font-semibold text-xl  text-cyan-500 underline mt-10'>Custom List</h1>
             <form className='mx-auto w-full' onSubmit={handleSearch} >
 
                 {/* students part */}
                 <div className='flex mt-2 flex-col lg:flex-row'>
-                    <h1 className='font-bold text-lg lg:w-1/4'>Searching Options :</h1>
+                    <h1 className='font-bold text-base lg:w-1/4'>Searching Options :</h1>
                     <div className='grid grid-cols-1 lg:w-2/3 lg:grid-cols-2 gap-3'>
 
 
                         <div>
                             <p className='font-semibold'>Batch </p>
 
-                            <select name='batch' className="select text-lg font-semibold  select-info w-full ">
+                            <select name='batch' className="select text-base font-semibold  select-info w-full ">
                                 <option value={""}>All</option>
                                 <option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>
                                 <option value={'Sat 1'}>শনি ৭টা (HSC 27)</option>
@@ -237,7 +237,7 @@ function Download() {
 
                         <div>
                             <p className='font-semibold'>Program  </p>
-                            <select name='program' className="select text-lg font-semibold  select-info w-full ">
+                            <select name='program' className="select text-base font-semibold  select-info w-full ">
                                 <option value={''}>All</option>
                                 <option value={'Free'}>Free Class</option>
                                 <option value={'HscPhy'}>HSC Physics</option>
@@ -256,7 +256,7 @@ function Download() {
                         </div>
                         <div>
                             <p className='font-semibold'>Session  </p>
-                            <select name='session' className="select text-lg font-semibold  select-info w-full ">
+                            <select name='session' className="select text-base font-semibold  select-info w-full ">
 
 
                                 <option value={""}>All</option>
@@ -274,8 +274,8 @@ function Download() {
                         </div>
 
                         <div className='lg:col-span-2'>
-                            <p className='font-semibold'>Payment  </p>
-                            <select onChange={handleStatusChange}  className="select text-lg font-semibold  select-info w-full ">
+                            <p className='font-semibold'>Payment Status </p>
+                            <select onChange={handleStatusChange}  className="select text-base font-semibold  select-info w-full ">
 
 
                                 <option >All</option>
@@ -295,7 +295,7 @@ function Download() {
                                     defaultValue={month}
                                     name='month'
 
-                                    className="select text-lg font-semibold  select-info w-full"
+                                    className="select text-base font-semibold  select-info w-full"
                                 >
 
                                     <option value="1">January</option>
@@ -317,7 +317,7 @@ function Download() {
                             paymentStatus != 'All' &&
                             <div>
                                 <p className='font-semibold'>Year  </p>
-                                <select onChange={handleYearChange} defaultValue={year} name='year' className="select text-lg font-semibold  select-info w-full ">
+                                <select onChange={handleYearChange} defaultValue={year} name='year' className="select text-base font-semibold  select-info w-full ">
 
                                     <option>2024</option>
                                     <option>2025</option>
@@ -326,8 +326,8 @@ function Download() {
                             </div>
                         }
                         <div className='lg:col-span-2'>
-                            <p className='font-semibold'>Attendance  </p>
-                            <select onChange={handleAttendanceStatusChange} className="select text-lg font-semibold  select-info w-full ">
+                            <p className='font-semibold'>Attendance Status </p>
+                            <select onChange={handleAttendanceStatusChange} className="select text-base font-semibold  select-info w-full ">
 
 
                                 <option >All</option>
@@ -350,7 +350,7 @@ function Download() {
                                         defaultValue={date}
                                         name='adate'
 
-                                        className="select text-lg font-semibold  select-info w-full"
+                                        className="select text-base font-semibold  select-info w-full"
                                     >
 
                                         {[...Array(31)].map((_, i) => (
@@ -371,7 +371,7 @@ function Download() {
                                         defaultValue={month}
                                         name='amonth'
 
-                                        className="select text-lg font-semibold  select-info w-full"
+                                        className="select text-base font-semibold  select-info w-full"
                                     >
 
                                         <option value="1">January</option>
@@ -393,7 +393,7 @@ function Download() {
                                 attendanceStatus != 'All' &&
                                 <div className='w-1/3'>
                                     <p className='font-semibold'>Year  </p>
-                                    <select onChange={handleAttendanceYearChange} defaultValue={year} name='ayear' className="select text-lg font-semibold  select-info w-full ">
+                                    <select onChange={handleAttendanceYearChange} defaultValue={year} name='ayear' className="select text-base font-semibold  select-info w-full ">
 
                                         <option>2024</option>
                                         <option>2025</option>
@@ -408,9 +408,9 @@ function Download() {
                 </div>
 
                 <div className='flex mt-10 flex-col w-full lg:flex-row'>
-                    <h1 className='font-bold text-lg lg:w-1/4'></h1>
+                    <h1 className='font-bold text-base lg:w-1/4'></h1>
                     <div className='lg:w-2/3 text-center'>
-                        <input className=" text-lg font-semibold h-11 w-full bg-blue-100  border-2 rounded-xl    btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Find Info"}`} />
+                        <input className=" text-base font-semibold h-11 w-full bg-blue-100  border-2 rounded-xl    btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Find Info"}`} />
                         <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
                     </div>
                 </div>
@@ -435,4 +435,4 @@ function Download() {
     )
 }
 
-export default Download
+export default CustomList
