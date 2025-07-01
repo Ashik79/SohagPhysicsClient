@@ -12,28 +12,33 @@ function User() {
     //function for formating the time
 
     function formatGMTtoLocal(dateString) {
-        // Parse the input date string as a UTC date
         const utcDate = new Date(dateString);
 
-        // Create a new date in GMT+6
-        // 6 hours in milliseconds = 6 * 60 * 60 * 1000
-        const gmtPlus6Date = new Date(utcDate.getTime() + (6 * 60 * 60 * 1000));
+        // Get UTC timestamp
+        const utcTimestamp = utcDate.getTime();
 
-        // Format the date parts
+        // Calculate offset for GMT+6 manually (in milliseconds)
+        const offset = 6 * 60 * 60 * 1000;
+
+        // Create new Date in GMT+6
+        const gmtPlus6Date = new Date(utcTimestamp + offset);
+
+        // Format using UTC parts to avoid local timezone messing you up
         const options = {
             day: '2-digit',
             month: 'short',
             year: 'numeric',
             hour: '2-digit',
             minute: '2-digit',
-            hour12: true
+            hour12: true,
+            timeZone: 'Etc/GMT-6' // IMPORTANT: negative because Etc/GMT sign is reversed
         };
 
-        // Use Intl.DateTimeFormat for consistent formatting
-        const formatted = new Intl.DateTimeFormat('en-US', options).format(gmtPlus6Date);
-
-        return formatted.replace(',', ''); // Optional: clean up comma if needed
+        return new Intl.DateTimeFormat('en-US', options).format(utcDate);
     }
+
+
+
 
     return (
         mainRole == "CEO" ? <div className='mt-5'>
