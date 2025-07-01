@@ -44,6 +44,9 @@ function LargeNav() {
                 {
                     role == 'CEO' ? <NavLink to={'/adduser'}><li className='pl-2 hover:bg-gray-200'>Add Role</li></NavLink> : ''
                 }
+                {
+                    role == 'CEO' ? <NavLink to={'/user-management'}><li className='pl-2 hover:bg-gray-200'>User Management</li></NavLink> : ''
+                }
 
             </ul>
         </div>

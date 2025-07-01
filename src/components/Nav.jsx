@@ -6,7 +6,7 @@ import { MdLogout } from "react-icons/md";
 function Nav() {
     const { loggedUser, role, logout, loggedPhoto } = useContext(AuthContext);
     const [photo, setPhoto] = useState(null);  // Initially set to null
-    console.log(loggedUser)
+   
     // Ensure the photo is updated based on loggedPhoto or localStorage
     useEffect(() => {
         if (loggedPhoto) {
@@ -19,7 +19,7 @@ function Nav() {
             }
         }
     }, [loggedPhoto]);
-    console.log(photo)
+   
     const [disabled, setDisabled] = useState(false);
 
     const handleSelect = e => {
@@ -38,7 +38,7 @@ function Nav() {
                         <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="h-5 w-5"
+                                className="h-4 w-4"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor">
@@ -68,7 +68,7 @@ function Nav() {
                             {role === 'CEO' && <NavLink to={'/coupons'}><li className='pl-2 hover:bg-gray-200'>Coupons</li></NavLink>}
                             {(role == 'CEO' || role == 'Manager') && <NavLink to={'/batch'}><li className='pl-2 hover:bg-gray-200'>Batch Students</li></NavLink>}
                             {(role == 'CEO' || role == 'Manager') && <NavLink to={'/download'}><li className='pl-2 hover:bg-gray-200'>Download Center</li></NavLink>}
-                           
+
                             {(role == 'CEO' || role == 'Manager') && <NavLink to={'/message'}><li className='pl-2 hover:bg-gray-200'>Message</li></NavLink>}
                             {
                                 (role == 'CEO') ? <NavLink to={'/payment'}><li className='pl-2 hover:bg-gray-200'>Payment Entry</li></NavLink> : ''
@@ -82,18 +82,21 @@ function Nav() {
                             <NavLink to={'/register'}><li className='pl-2 hover:bg-gray-200'>Register</li></NavLink>
                             {role == 'CEO' && <NavLink to={'/programentry'}><li className='pl-2 hover:bg-gray-200'>Program Entry</li></NavLink>}
                             {role === 'CEO' && <NavLink to={'/adduser'}><li className='pl-2 hover:bg-gray-200'>Add Role</li></NavLink>}
+                            {
+                                role == 'CEO' ? <NavLink to={'/user-management'}><li className='pl-2 hover:bg-gray-200'>User Management</li></NavLink> : ''
+                            }
                         </ul>
                     </div>
-                    <Link to={'/'}><img className='w-24 rounded-full lg:w-36' src={`/logo.png`} alt="Logo" /></Link>
+                    <Link to={'/'}><img className='w-16 rounded-full lg:w-24' src={`/logo.png`} alt="Logo" /></Link>
 
                 </div>
                 <div className='navbar-end flex gap-4 justify-end items-center'>
                     <div className=' justify-end gap-1 lg:gap-3 flex items-center'>
                         {/* Fallback to a default image if photo is not available */}
-                        <img className='w-12 h-12 rounded-full border-2 border-sky-600 ' src={`${photo ? photo : 'profile.jpg'} `} alt="Profile" />
+                        <img className='w-8 h-8 lg:w-12 lg:h-12 rounded-full border-2 border-sky-600 ' src={`${photo ? photo : 'profile.jpg'} `} alt="Profile" />
                         <div className='flex flex-col items-end'>
-                            <h1 className='font-semibold lg:text-xl text-right '>{loggedUser}</h1>
-                            <p className='text-sm text-gray-600'>{role}</p>
+                            <h1 className='font-semibold text-sm lg:text-base text-right '>{loggedUser}</h1>
+                            <p className='text-xs lg:text-sm text-gray-600'>{role}</p>
 
                         </div>
                     </div>

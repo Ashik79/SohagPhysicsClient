@@ -1,19 +1,19 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import { IoMdClose } from "react-icons/io";
-import Swal from 'sweetalert2';
+
 import { AuthContext } from '../Provider';
 import { MdDeleteForever } from "react-icons/md";
-import { template } from 'lodash';
+
 import * as XLSX from 'xlsx';
 import { IoCloudDownloadOutline } from "react-icons/io5";
 
 function Exam() {
-    const { notifySuccess, notifyFailed,getMonth } = useContext(AuthContext);
+    const { notifySuccess, notifyFailed, getMonth } = useContext(AuthContext);
     const [exam, setExam] = useState(useLoaderData())
     console.log(exam);
     const { title, session, batch, program, date, results: examResults, mcqTotal, writenTotal, day, month, year } = exam;
-const tarikh =`${day} ${getMonth(month)}, ${year}`
+    const tarikh = `${day} ${getMonth(month)}, ${year}`
     const [displayResults, setDisplayResults] = useState(examResults)
     const [file, setFile] = useState(null)
     const [loading, setLoading] = useState(false)
@@ -27,7 +27,7 @@ const tarikh =`${day} ${getMonth(month)}, ${year}`
         sortedResults.forEach((result, index) => {
             // If the current student's marks are the same as the previous student's, they share the same rank
             if ((result.mcqMarks + result.writenMarks) != previousMarks) {
-                rank ++; // Update rank based on the index
+                rank++; // Update rank based on the index
             }
 
             result.merit = rank; // Assign the rank (merit) to the student
@@ -67,8 +67,8 @@ const tarikh =`${day} ${getMonth(month)}, ${year}`
 
         const id = e.target.id.value;
         const examId = exam._id
-        const mcqMarks = e.target.mcqMarks.value?parseFloat(e.target.mcqMarks.value):0;
-        const writenMarks =e.target.writenMarks.value? parseFloat(e.target.writenMarks.value):0;
+        const mcqMarks = e.target.mcqMarks.value ? parseFloat(e.target.mcqMarks.value) : 0;
+        const writenMarks = e.target.writenMarks.value ? parseFloat(e.target.writenMarks.value) : 0;
         const total = mcqMarks + writenMarks;
 
 
@@ -638,7 +638,7 @@ const tarikh =`${day} ${getMonth(month)}, ${year}`
                         <div className=' w-2/3 flex text-gray-500 font-semibold'>
                             <p className='w-1/3 ml-6'>{result.mcqMarks}</p>
                             <p className='w-1/3 ml-10'>{result.writenMarks}</p>
-                            <p className='w-1/3 ml-10'>{result.mcqMarks+result.writenMarks}</p>
+                            <p className='w-1/3 ml-10'>{result.mcqMarks + result.writenMarks}</p>
                             <p className='w-1/3 ml-10'>{result.merit}</p>
                         </div>
 

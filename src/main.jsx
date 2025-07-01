@@ -51,6 +51,8 @@ import VideoChapters from './components/StudentSite/VideoChapters';
 import Videofiles from './components/StudentSite/VideoFiles';
 import VideoPlayer from './components/StudentSite/VideoPlayer';
 import DownloadCenter from './components/Download/DownloadCenter';
+import ManagementContainer from './components/UserManagement/ManagementContainer';
+import User from './components/UserManagement/User';
 
 
 
@@ -277,11 +279,16 @@ const router = createBrowserRouter([
         element:<PrivateRoute><PdfUploader></PdfUploader></PrivateRoute>,
             
       },
-      // {
-      //   path:'/monthly-report',
-      //   element:<PrivateRoute><MonthlyReport></MonthlyReport></PrivateRoute>,
+      {
+        path:'/user-management',
+        element:<PrivateRoute><ManagementContainer></ManagementContainer></PrivateRoute>,
             
-      // },
+      },
+      {
+        path:'/user-management/user',
+        element:<PrivateRoute><User></User></PrivateRoute>,
+            
+      },
       {
         path:'/exam/:id',
         element:<PrivateRoute><Exam></Exam></PrivateRoute>,
