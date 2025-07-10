@@ -13,6 +13,7 @@ function MonthlyReport() {
     const [paymentMonth, setPaymentMonth] = useState(month)
     const [paymentYear, setPaymentYear] = useState(year)
     const [batch, setBatch] = useState('')
+    const [session,setSession] =useState('')
 
     const [loading, setLoading] = useState(false)
 
@@ -56,6 +57,7 @@ function MonthlyReport() {
         const level = e.target.class.value;
         const program = e.target.program.value;
         const session = e.target.session.value;
+        setSession(session)
       
         if (level) {
             query.level = level;
@@ -163,7 +165,7 @@ function MonthlyReport() {
 
         XLSX.writeFile(
             workbook,
-            `Attendance Sheet - ${batch} - ${getMonth(paymentMonth)}, ${paymentYear}.xlsx`
+            `Attendance Sheet -Batch: ${batch} - Session:${session?session:'All'} ,Month: ${getMonth(paymentMonth)}, ${paymentYear}.xlsx`
         );
     };
 
@@ -266,7 +268,7 @@ function MonthlyReport() {
                         doc.text("Sohag Physics", pageWidth / 2, 20, { align: "center" });
                         doc.setFontSize(12);
                         doc.text(
-                            `Attendance Sheet for ${batch} - ${getMonth(paymentMonth)}, ${paymentYear}`,
+                            `Attendance Sheet for Batch: ${batch} , Session: ${session?session:'All'} , Month: ${getMonth(paymentMonth)}, ${paymentYear}`,
                             pageWidth / 2,
                             30,
                             { align: "center" }
@@ -279,7 +281,7 @@ function MonthlyReport() {
 
 
             // Save the generated PDF
-            doc.save(`Attendance sheet of batch ${students[0].batch} ${getMonth(paymentMonth)},${paymentYear}.pdf`);
+            doc.save(`Attendance sheet of batch: ${students[0].batch}, Session: ${session?session:'All'}, Month: ${getMonth(paymentMonth)},${paymentYear}.pdf`);
         } catch (err) {
             console.log("Error generating PDF:", err);
         }
