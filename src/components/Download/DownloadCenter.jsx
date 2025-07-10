@@ -6,6 +6,7 @@ import PresentList from './PresentList'
 import AbsentList from './AbsentList'
 import CustomList from './CustomList'
 import MonthlyReport from './MonthlyReport'
+import PaymentReport from './PaymentReport'
 
 function DownloadCenter() {
     const [downlaodOption, setDownlaodOption] = useState("phone")
@@ -20,6 +21,7 @@ const loadedComponent = ()=>{
         case "present":return <div><PresentList></PresentList></div>
         case "absent":return <div><AbsentList></AbsentList></div>
         case "report":return <div><MonthlyReport></MonthlyReport></div>
+        case "payment":return <div><PaymentReport></PaymentReport></div>
         case "custom":return <div><CustomList></CustomList></div>
     }
 }
@@ -40,6 +42,7 @@ const loadedComponent = ()=>{
                     <option value={"present"}>Present List</option>
                     <option value={"absent"}>Absent List</option>
                     <option value={"report"}>Monthly Report</option>
+                    <option value={"payment"}>Payment Report</option>
                     <option value={"custom"}>Custom Sheet</option>
                 </select>
             </div>
