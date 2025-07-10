@@ -118,7 +118,7 @@ function ProgramEntry() {
                 const type = 'regular';
                 const Fee = noteFee + examFee
                 const programData = {
-                    program, monthlyAmount, type, payDate, Fee
+                    program, monthlyAmount, type, payDate, Fee,entryBy:loggedUser
                 }
                 user.programs.push(programData)
 
@@ -172,7 +172,7 @@ function ProgramEntry() {
 
 
                 const programData = {
-                    program, Fee, payDate
+                    program, Fee, payDate,entryBy:loggedUser
                 }
 
                 user.programs.push(programData)
@@ -227,7 +227,7 @@ function ProgramEntry() {
                     user.monthlyAmount = 800;
                 }
                 const programData = {
-                    program, Fee, payDate, due, note
+                    program, Fee, payDate, due, note,entryBy:loggedUser
                 }
 
                 user.programs.push(programData)
@@ -282,7 +282,7 @@ function ProgramEntry() {
              
               
                 const programData = {
-                    program, Fee, payDate, note
+                    program, Fee, payDate, note,entryBy:loggedUser
                 }
 
                 user.programs.push(programData)

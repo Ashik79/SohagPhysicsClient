@@ -46,20 +46,23 @@ const ProgramList = ({ student }) => {
             <div>
                 {programs.length > 0 ? (
                     <ul>
-                        {programs.map((exam, index) => (
+                        {programs.map((pg, index) => (
                             <li key={index} className="p-2 border w-full border-sky-600 rounded-xl px-5 py-2 mb-2">
                                 <div className='flex justify-between items-center'>
-                                    <p><strong>Title:</strong> {exam.program}</p>
-                                    <button onClick={() => handleDelete(exam.program)} className={`text-xl text-red-600 ${role == "CEO" ? "" : "hidden"}`}><RiDeleteBin5Line /></button>
+                                    <p><strong>Title:</strong> {pg.program}</p>
+                                    <button onClick={() => handleDelete(pg.program)} className={`text-xl text-red-600 ${role == "CEO" ? "" : "hidden"}`}><RiDeleteBin5Line /></button>
                                 </div>
 
-                               <p><strong>Program Fee:</strong> {exam.Fee}</p> 
-                                <p><strong>Enrolement:</strong> {exam.payDate}</p>
+                               <p><strong>Program Fee:</strong> {pg.Fee}</p> 
+                                <p><strong>Enrolement:</strong> {pg.payDate}</p>
                                 {
-                                    exam.due?<p className='text-red-600'><strong>Due:</strong> {exam.due}</p>:<></>
+                                    pg.due?<p className='text-red-600'><strong>Due:</strong> {pg.due}</p>:<></>
                                 }
                                 {
-                                    exam.note?<p><strong>Note:</strong> {exam.note}</p>:<></>
+                                    pg.note?<p><strong>Note:</strong> {pg.note}</p>:<></>
+                                }
+                                {
+                                    pg.entryBy?<p><strong>Entry By:</strong> {pg.entryBy}</p>:<></>
                                 }
 
                             </li>
