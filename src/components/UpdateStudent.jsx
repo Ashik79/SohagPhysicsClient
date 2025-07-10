@@ -5,7 +5,7 @@ import ImageUpload from './ImageUpload';
 
 function UpdateStudent() {
 
-    const { month, year, date, notifySuccess, notifyFailed, role } = useContext(AuthContext)
+    const { month, year, date, notifySuccess, notifyFailed, role,loggedUser } = useContext(AuthContext)
     const [navigate, setNavigate] = useState(false)
     const [uploadedImageUrl, setUploadedImageUrl] = useState('');
     const student = useLoaderData()
@@ -54,7 +54,7 @@ function UpdateStudent() {
 
         //sob data diye object banai
         const formData = {
-            id, monthlyAmount, batch, name,note,image, school, college, session, target, phone, address, reference, gname, gphone, gender
+            id, monthlyAmount, batch, name,note,image, school, college, session, target, phone, address, reference, gname, gphone, gender,lastEdit:loggedUser
         }
         console.log(formData)
 
