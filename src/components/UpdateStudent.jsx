@@ -9,7 +9,7 @@ function UpdateStudent() {
     const [navigate, setNavigate] = useState(false)
     const [uploadedImageUrl, setUploadedImageUrl] = useState('');
     const student = useLoaderData()
-    const { address, batch, college, gender, gname, gphone, id, monthlyAmount, name, phone, program, reference, school, session, target, group } = student
+    const { address, batch, college, gender, gname, gphone, id, monthlyAmount, name, phone, program, reference, school,note, session, target, group } = student
 
     const [error, setError] = useState('')
     const handleImageUpload = (url) => {
@@ -45,6 +45,7 @@ function UpdateStudent() {
         const gname = e.target.gname.value;
         const gphone = e.target.gphone.value;
         const gender = e.target.gender.value;
+        const note = e.target.note.value;
 
 
 
@@ -53,7 +54,7 @@ function UpdateStudent() {
 
         //sob data diye object banai
         const formData = {
-            id, monthlyAmount, batch, name,image, school, college, session, target, phone, address, reference, gname, gphone, gender
+            id, monthlyAmount, batch, name,note,image, school, college, session, target, phone, address, reference, gname, gphone, gender
         }
         console.log(formData)
 
@@ -258,6 +259,14 @@ function UpdateStudent() {
                                 name='reference'
                                 type="text"
                                 defaultValue={reference}
+                                className="input text-lg font-semibold  input-bordered input-info w-full " />
+                        </div>
+                        <div>
+                            <p className='font-semibold'>Note (মন্তব্য)  </p>
+                            <input
+                                name='note'
+                                type="text"
+                                defaultValue={note}
                                 className="input text-lg font-semibold  input-bordered input-info w-full " />
                         </div>
                     </div>

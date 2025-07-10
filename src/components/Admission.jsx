@@ -47,6 +47,7 @@ function Admission() {
         const address = e.target.address.value;
         const reference = e.target.reference.value;
         const gname = e.target.gname.value;
+        const note = e.target.note.value;
         const gphone = e.target.gphone.value;
         const gender = e.target.gender.value;
 
@@ -65,7 +66,7 @@ function Admission() {
 
         //sob data diye object banai
         const formData = {
-            id, batch, name,image, school, college, programs, session, target, phone, address, reference, gname, gphone, gender, admissionDate, payments, admittedBy, admissionMonth, admissionYear, attendances, exams
+            id, batch, name,image, school, note, college, programs, session, target, phone, address, reference, gname, gphone, gender, admissionDate, payments, admittedBy, admissionMonth, admissionYear, attendances, exams
         }
         console.log(formData)
 
@@ -134,25 +135,25 @@ function Admission() {
 
     return (
         <div className=''>
-            <h1 className=' text-center lg:text-left md:text-center font-semibold text-2xl text-cyan-500 underline mt-10'>Registration Form</h1>
+            <h1 className=' text-center lg:text-left md:text-center font-semibold text-xl text-cyan-500 underline mt-10'>Registration Form</h1>
             <form className='mx-auto w-full' onSubmit={handleAdmission} onKeyPress={handleKeyPress}>
 
                 {/* students part */}
                 <div className='flex mt-2 flex-col lg:flex-row'>
-                    <h1 className='font-bold text-lg lg:w-1/4'>Student's Information :</h1>
+                    <h1 className='font-bold text-base lg:text-lg lg:w-1/4'>Student's Information :</h1>
                     <div className='grid grid-cols-1 lg:w-2/3 lg:grid-cols-2 gap-3'>
                         <div className='lg:col-span-2'>
                             <ImageUpload onUpload={handleImageUpload}></ImageUpload>
 
                         </div>
                         <div>
-                            <p className='font-semibold'>ID <span className='text-red-700'>*</span> <span className='text-sm text-gray-500'>Must be 6 digits</span></p>
+                            <p className='font-semibold'>ID <span className='text-red-700'>*</span> <span className='text-xs text-gray-500'>Must be 6 digits</span></p>
                             <input
                                 onWheel={(e) => e.target.blur()}
                                 required
                                 name='id'
                                 type="number"
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                className="input text-sm lg:text-base font-semibold  input-bordered input-info w-full " />
                         </div>
 
                         <div>
@@ -162,7 +163,7 @@ function Admission() {
                                 name='name'
                                 type="text"
 
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                className="input text-sm lg:text-base font-semibold  input-bordered input-info w-full " />
                         </div>
                         <div>
                             <p className='font-semibold'>Batch <span className='text-red-700'>*</span> </p>
@@ -220,7 +221,7 @@ function Admission() {
                                 name='phone'
                                 type="text"
 
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                className="input text-sm lg:text-base font-semibold  input-bordered input-info w-full " />
                         </div>
 
                         <div>
@@ -230,7 +231,7 @@ function Admission() {
                                 name='school'
                                 type="text"
 
-                                className="input input-bordered text-lg font-semibold  input-info w-full " />
+                                className="input input-bordered text-sm lg:text-base font-semibold  input-info w-full " />
                         </div>
                         <div>
                             <p className='font-semibold'>College Name </p>
@@ -238,11 +239,11 @@ function Admission() {
                                 name='college'
                                 type="text"
 
-                                className="input input-bordered text-lg font-semibold  input-info w-full " />
+                                className="input input-bordered text-sm lg:text-base font-semibold  input-info w-full " />
                         </div>
                         <div>
                             <p className='font-semibold'>Gender </p>
-                            <select name='gender' className="select text-lg font-semibold  select-info w-full ">
+                            <select name='gender' className="select text-sm lg:text-base font-semibold  select-info w-full ">
 
                                 <option>Male</option>
                                 <option>Female</option>
@@ -253,7 +254,7 @@ function Admission() {
 
                         <div>
                             <p className='font-semibold'>Session <span className='text-red-700'>*</span> </p>
-                            <select name='session' className="select text-lg font-semibold  select-info w-full ">
+                            <select name='session' className="select text-sm lg:text-base font-semibold  select-info w-full ">
 
 
                                 <option>2023</option>
@@ -270,7 +271,7 @@ function Admission() {
                         </div>
                         <div>
                             <p className='font-semibold'>Target </p>
-                            <select name='target' className="select text-lg font-semibold  select-info w-full ">
+                            <select name='target' className="select text-sm lg:text-base font-semibold  select-info w-full ">
 
                                 <option>Medical</option>
                                 <option>Varsity</option>
@@ -287,7 +288,7 @@ function Admission() {
                                 name='address'
                                 type="text"
 
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                className="input text-sm lg:text-base font-semibold  input-bordered input-info w-full " />
                         </div>
                         <div>
                             <p className='font-semibold'>referenced by  </p>
@@ -295,15 +296,23 @@ function Admission() {
                                 name='reference'
                                 type="text"
 
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                className="input text-sm lg:text-base font-semibold  input-bordered input-info w-full " />
+                        </div>
+                        <div>
+                            <p className='font-semibold'>Note (মন্তব্য)  </p>
+                            <input
+                                name='note'
+                                type="text"
+
+                                className="input text-sm lg:text-base font-semibold  input-bordered input-info w-full " />
                         </div>
                     </div>
                 </div>
 
                 {/* Guardian Part */}
                 <div className='flex mt-10 flex-col lg:flex-row'>
-                    <h1 className='font-bold text-lg lg:w-1/4'>Guardian's Information :</h1>
-                    <div className='grid grid-cols-1 lg:w-2/3 lg:grid-cols-2 gap-3'>
+                    <h1 className='font-bold text-base lg:text-lg lg:w-1/4'>Guardian's Information :</h1>
+                    <div className='grid grid-cols-1 text-sm lg:text-base lg:w-2/3 lg:grid-cols-2 gap-3'>
 
                         <div>
                             <p className='font-semibold'>Guardian Name  </p>
@@ -312,7 +321,7 @@ function Admission() {
                                 name='gname'
                                 type="text"
 
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                className="input text-sm lg:text-base font-semibold  input-bordered input-info w-full " />
                         </div>
 
 
@@ -324,15 +333,15 @@ function Admission() {
                                 name='gphone'
                                 type="text"
 
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                className="input text-sm lg:text-base font-semibold  input-bordered input-info w-full " />
                         </div>
 
                     </div>
                 </div>
                 <div className='flex mt-10 flex-col lg:flex-row'>
-                    <h1 className='font-bold text-lg lg:w-1/4'></h1>
+                    <h1 className='font-bold text-sm lg:text-base lg:w-1/4'></h1>
                     <div className='lg:w-2/3 text-center'>
-                        <input className=" text-lg font-semibold  w-full bg-blue-100  border-2 rounded-xl  h-11  btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? '' : 'Register'}`} />
+                        <input className=" text-sm lg:text-base font-semibold  w-full bg-blue-100  border-2 rounded-xl  h-11  btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? '' : 'Register'}`} />
                         <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
                     </div>
                 </div>
