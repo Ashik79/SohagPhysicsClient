@@ -6,6 +6,7 @@ const Payment = () => {
 const {notifyFailed,role}=useContext(AuthContext)
   const [id, setId] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [student,setStudent] =useState({})
   const handleIdInput = async (event) => {
     event.preventDefault();
     setLoading(true)
@@ -16,6 +17,7 @@ const {notifyFailed,role}=useContext(AuthContext)
     if (student.id) {
       setId(id)
       setLoading(false)
+      setStudent(student)
 
     }
     else {
@@ -57,7 +59,7 @@ const {notifyFailed,role}=useContext(AuthContext)
         </div>
 
       </form>
-      {id && <Navigate to={`/payment/${id}`}></Navigate>}
+      {id && <Navigate to={`/payment/${id}`} state={student}></Navigate>}
     </div>
   );
 };
