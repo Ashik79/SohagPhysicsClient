@@ -91,7 +91,7 @@ function AddPayment() {
 
 
                 }
-                if (parseInt(lastMonthlyPayment.pmonth == parseInt(month) && parseInt(lastMonthlyPayment.pyear == parseInt(year)))) {
+                if ((parseInt(lastMonthlyPayment.pmonth) == parseInt(month)) && ( parseInt(lastMonthlyPayment.pyear) == parseInt(year))) {
                     setUnpaidMonths([])
                 }
             }
