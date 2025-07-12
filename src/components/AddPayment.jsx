@@ -49,23 +49,11 @@ function AddPayment() {
     useEffect(() => {
 
 
+        if (user.id && user.payments.length) {
 
-        if (user.payments.length) {
             const examPayment = user.payments.find(payment => payment.type == "Exam Fee")
-            if (examPayment) {
-                const parts = examPayment.payDate.split('-')
 
-                setEnrollment(
-                    {
-                        day: parseInt(parts[0]),
-                        month: parseInt(parts[1]),
-                        year: parseInt(parts[2])
-                    })
-            }
-            else {
-                notifyFailed("Program entry needed for payment.")
-                setCondition(false)
-            }
+
             const allMonthlyPayments = []
             user.payments.forEach(payment => {
                 if (payment.type == "Monthly") {
@@ -80,40 +68,44 @@ function AddPayment() {
             let bulb = false;
             const unpaid = []
             const yearArray = [2024, 2025, 2026, 2027, 2028, 2029, 2030]
-            for (let i = 0; i < 7; i++) {
+            if (lastMonthlyPayment) {
+                for (let i = 0; i < 7; i++) {
 
-                for (let j = 1; j <= 12; j++) {
+                    for (let j = 1; j <= 12; j++) {
 
 
-                    if (bulb) {
-                        const obj = { month: j, monthName: getMonth(j), year: yearArray[i] }
-                        unpaid.push(obj)
-                        if (j == parseInt(month) && yearArray[i] == parseInt(year)) {
-                            bulb = false
-                            setUnpaidMonths(unpaid)
+                        if (bulb) {
+                            const obj = { month: j, monthName: getMonth(j), year: yearArray[i] }
+                            unpaid.push(obj)
+                            if (j == parseInt(month) && yearArray[i] == parseInt(year)) {
+                                bulb = false
+                                setUnpaidMonths(unpaid)
+                            }
+
                         }
 
+                        if (j == parseInt(lastMonthlyPayment.pmonth) && yearArray[i] == parseInt(lastMonthlyPayment.pyear)) {
+                            bulb = true
+                        }
                     }
 
-                    if (j == parseInt(lastMonthlyPayment.pmonth) && yearArray[i] == parseInt(lastMonthlyPayment.pyear)) {
-                        bulb = true
-                    }
+
                 }
-
-
-            }
-            if (parseInt(lastMonthlyPayment.pmonth == parseInt(month) && parseInt(lastMonthlyPayment.pyear == parseInt(year)))) {
-                setUnpaidMonths([])
+                if (parseInt(lastMonthlyPayment.pmonth == parseInt(month) && parseInt(lastMonthlyPayment.pyear == parseInt(year)))) {
+                    setUnpaidMonths([])
+                }
             }
             setFirstLoading(false)
 
         }
-        else {
+        else if (user.id && !user.payments.length) {
+
             notifyFailed("Program entry needed for payment.")
             setNoProgram(true)
+            setFirstLoading(false)
         }
 
-    }, [month, user]);
+    }, [user]);
 
 
     const { monthlyAmount, name, id, payments, phone } = user;
@@ -234,7 +226,7 @@ function AddPayment() {
                 const smsData = await smsResponse.json();
                 if (smsData.response_code === 202) {
                     notifySuccess("Payment Successful!");
-
+                    setNewStudent(false)
                 }
             }
         } catch (error) {
@@ -272,19 +264,22 @@ function AddPayment() {
                                     <p className='font-semibold'>Monthly</p>
                                 </div>
 
-                                <div className='p-2 border-sky-400 border rounded-lg text-center'>
-                                    {unpaidMonths.length ? <p className='font-semibold my-2'>Unpaid Months: <span className='text-red-600 font-bold'>{unpaidMonths.length}</span></p> : <p className=' font-semibold text-green-700'>All Payments Clear</p>}
-                                    <div className={`p-1 text-sm lg:text-base ${unpaidMonths.length && 'h-28'} overflow-auto`}>
-                                        {
-                                            unpaidMonths.map((unpaid, index) => <div className='border border-red-600 rounded-lg my-1 flex justify-center gap-3 items-center text-red-600 font-semibold' key={index}>
-                                                <div>{unpaid.monthName}</div>
-                                                <div>
-                                                    {unpaid.year}
-                                                </div>
-                                            </div>)
-                                        }
-                                    </div>
-                                </div>
+                                {newStudent ? <div className='text-sky-600 text-sm lg:text-base p-1 px-5 text-start border border-sky-600 rounded-lg my-1 font-semibold'>
+                                    New Student
+                                </div> :
+                                    <div className='p-2 border-sky-400 border rounded-lg text-center'>
+                                        {unpaidMonths.length ? <p className='font-semibold my-2'>Unpaid Months: <span className='text-red-600 font-bold'>{unpaidMonths.length}</span></p> : <p className=' font-semibold text-green-700'>All Payments Clear</p>}
+                                        <div className={`p-1 text-sm lg:text-base ${unpaidMonths.length && 'h-28'} overflow-auto`}>
+                                            {
+                                                unpaidMonths.map((unpaid, index) => <div className='border border-red-600 rounded-lg my-1 flex justify-center gap-3 items-center text-red-600 font-semibold' key={index}>
+                                                    <div>{unpaid.monthName}</div>
+                                                    <div>
+                                                        {unpaid.year}
+                                                    </div>
+                                                </div>)
+                                            }
+                                        </div>
+                                    </div>}
 
                             </div>
                             <div className='grid grid-cols-1  lg:w-3/5  gap-3'>
@@ -411,6 +406,7 @@ function AddPayment() {
                         ))}
                     </div>
                     {navigate ? <Navigate to={`/payment`}></Navigate> : <></>}
+                    {noProgram && <Navigate to={`/programentry/${user.id}`}></Navigate>}
 
                 </div>
             : <div>No Access</div>

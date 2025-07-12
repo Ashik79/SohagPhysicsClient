@@ -25,14 +25,14 @@ function TakeAttendance({ student, today }) {
 
     useEffect(() => {
 
-        if(student.payments.length ==0){
+        if (student.payments.length == 0) {
             setNewStudent(true)
         }
         // Check if the student is present today
         const isPresentToday = student.attendances.some(attendance => attendance.date === today);
         setPresent(isPresentToday);
         setDisplayStudent(student)
-
+        const examPayment = student.payments.find(payment => payment.type == "Exam Fee")
         const examLength = student.exams ? student.exams.length : 0;
         if (examLength) setExam(student.exams[examLength - 1])
         if (student.payments.length) {
@@ -44,45 +44,49 @@ function TakeAttendance({ student, today }) {
                     allMonthlyPayments.push(payment)
                 }
             })
-
+            if (examPayment && allMonthlyPayments.length == 0) {
+                setNewStudent(true)
+            }
             const lastMonthlyPayment = allMonthlyPayments[allMonthlyPayments.length - 1]
 
             let bulb = false;
             const unpaid = []
             const yearArray = [2024, 2025, 2026, 2027, 2028, 2029, 2030]
-            for (let i = 0; i < 7; i++) {
+            if (lastMonthlyPayment) {
+                for (let i = 0; i < 7; i++) {
 
-                for (let j = 1; j <= 12; j++) {
+                    for (let j = 1; j <= 12; j++) {
 
 
-                    if (bulb) {
-                        const obj = { month: j, monthName: getMonth(j), year: yearArray[i] }
-                        unpaid.push(obj)
-                        if (j == parseInt(month) && yearArray[i] == parseInt(year)) {
-                            bulb = false
-                            setUnpaidMonths(unpaid)
+                        if (bulb) {
+                            const obj = { month: j, monthName: getMonth(j), year: yearArray[i] }
+                            unpaid.push(obj)
+                            if (j == parseInt(month) && yearArray[i] == parseInt(year)) {
+                                bulb = false
+                                setUnpaidMonths(unpaid)
+                            }
+
                         }
 
+                        if (j == parseInt(lastMonthlyPayment.pmonth) && yearArray[i] == parseInt(lastMonthlyPayment.pyear)) {
+                            bulb = true
+                        }
                     }
 
-                    if (j == parseInt(lastMonthlyPayment.pmonth) && yearArray[i] == parseInt(lastMonthlyPayment.pyear)) {
-                        bulb = true
-                    }
+
                 }
-
-
+                if (parseInt(lastMonthlyPayment.pmonth == parseInt(month) && parseInt(lastMonthlyPayment.pyear == parseInt(year)))) {
+                    setUnpaidMonths([])
+                }
             }
-            if (parseInt(lastMonthlyPayment.pmonth == parseInt(month) && parseInt(lastMonthlyPayment.pyear == parseInt(year)))) {
-                setUnpaidMonths([])
-            }
-            setFirstLoading(false)
+            
 
         }
 
         const length = student.attendances ? student.attendances.length : 0;
         if (length) setLastAttendanceDate(student.attendances[length - 1].date)
         else (setLastAttendanceDate("Not Found"))
-    }, [student, month,student.attendances, today]);
+    }, [student, month, student.attendances, today]);
 
     const handleAttendance = (e) => {
         e.preventDefault();
@@ -183,22 +187,22 @@ function TakeAttendance({ student, today }) {
                         )}
 
                         {/* Last month status */}
-                       {newStudent?<div className='text-sky-600 text-sm lg:text-base p-1 px-5 text-start border border-sky-600 rounded-lg my-1 font-semibold'>
-                        New Student
-                       </div>:
-                        <div className='p-2 border-sky-400 border rounded-lg text-center'>
-                            {unpaidMonths.length ? <p className='font-semibold my-2'>Unpaid Months: <span className='text-red-600 font-bold'>{unpaidMonths.length}</span></p> : <p className=' font-semibold text-green-700'>All Payments Clear</p>}
-                            <div className={`p-1 text-sm lg:text-base ${unpaidMonths.length && 'h-28'} overflow-auto`}>
-                                {
-                                    unpaidMonths.map((unpaid, index) => <div className='border border-red-600 rounded-lg my-1 flex justify-center gap-3 items-center text-red-600 font-semibold' key={index}>
-                                        <div>{unpaid.monthName}</div>
-                                        <div>
-                                            {unpaid.year}
-                                        </div>
-                                    </div>)
-                                }
-                            </div>
-                        </div>}
+                        {newStudent ? <div className='text-sky-600 text-sm lg:text-base p-1 px-5 text-start border border-sky-600 rounded-lg my-1 font-semibold'>
+                            New Student
+                        </div> :
+                            <div className='p-2 border-sky-400 mt-2 border rounded-lg text-center'>
+                                {unpaidMonths.length ? <p className='font-semibold my-2'>Unpaid Months: <span className='text-red-600 font-bold'>{unpaidMonths.length}</span></p> : <p className=' font-semibold text-green-700'>All Payments Clear</p>}
+                                <div className={`p-1 text-sm lg:text-base ${unpaidMonths.length && 'h-28'} overflow-auto`}>
+                                    {
+                                        unpaidMonths.map((unpaid, index) => <div className='border border-red-600 rounded-md my-1 flex justify-center gap-3 items-center text-red-600 font-semibold' key={index}>
+                                            <div>{unpaid.monthName}</div>
+                                            <div>
+                                                {unpaid.year}
+                                            </div>
+                                        </div>)
+                                    }
+                                </div>
+                            </div>}
                         <p className='text-sky-600 flex items-center border rounded-xl my-2 border-sky-600 gap-2 py-1 px-3 font-semibold text-sm lg:text-base'><span className='text-green-700 font-bold'></span> Batch : {student.batch}</p>
 
                         {exam.title ?
