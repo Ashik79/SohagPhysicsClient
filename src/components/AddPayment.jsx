@@ -15,7 +15,7 @@ function AddPayment() {
 
     const [user, setUser] = useState(useLoaderData())
     const [firstLoading, setFirstLoading] = useState(true)
-
+    const [noProgram, setNoProgram] = useState(false)
     const { month, date, year, loggedUser, getMonth, notifySuccess, notifyFailed, role } = useContext(AuthContext)
     const [showReceipt, setShowReceipt] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -48,7 +48,7 @@ function AddPayment() {
 
     useEffect(() => {
 
-      
+
 
         if (user.payments.length) {
             const examPayment = user.payments.find(payment => payment.type == "Exam Fee")
@@ -108,6 +108,10 @@ function AddPayment() {
             setFirstLoading(false)
 
         }
+        else {
+            notifyFailed("Program entry needed for payment.")
+            setNoProgram(true)
+        }
 
     }, [month, user]);
 
@@ -124,21 +128,6 @@ function AddPayment() {
     const lastMonthText = getMonth(lastMonth)
 
 
-
-
-
-    // useEffect(() => {
-
-    //     user.payments.forEach(payment => {
-    //         if (payment.type == "Monthly" && parseInt(payment.pmonth) == lastMonth && parseInt(payment.pyear) == lastYear) {
-    //             setLastMonthPaid(true);
-    //         }
-    //     });
-    //     if (!lastMonthPaid) {
-    //         const haveMonthly = payments.some(payment => payment.type == "Monthly")
-    //         if (!haveMonthly) { setNewStudent(true) }
-    //     }
-    // }, [user.payments, month, user]);
 
     const handlePayment = async (event) => {
         event.preventDefault();

@@ -17,9 +17,17 @@ function TakeAttendance({ student, today }) {
     const [lastMonthPaid, setLastMonthPaid] = useState(false);
     const [thisMonthPaid, setThisMonthPaid] = useState(false);
     const [exam, setExam] = useState({})
-const [lastAttendanceDate,setLastAttendanceDate]=useState("Not Found")
+    const [lastAttendanceDate, setLastAttendanceDate] = useState("Not Found")
+    const [newStudent, setNewStudent] = useState(false)
+    const [unpaidMonths, setUnpaidMonths] = useState([])
+    // Check payment statuses for last and this month
+
 
     useEffect(() => {
+
+        if(student.payments.length ==0){
+            setNewStudent(true)
+        }
         // Check if the student is present today
         const isPresentToday = student.attendances.some(attendance => attendance.date === today);
         setPresent(isPresentToday);
@@ -27,25 +35,54 @@ const [lastAttendanceDate,setLastAttendanceDate]=useState("Not Found")
 
         const examLength = student.exams ? student.exams.length : 0;
         if (examLength) setExam(student.exams[examLength - 1])
+        if (student.payments.length) {
 
-        
-    }, [student.attendances, today, student]);
 
-    // Check payment statuses for last and this month
-    useEffect(() => {
-        const lastMonth = month == 1 ? 12 : month - 1;
-        const thisMonth = month;
-        let lastYear = month == 1 ? year - 1 : year;
-        // Check last month payments
-        setLastMonthPaid(student.payments.some(payment => payment.type === "Monthly" && payment.pmonth == lastMonth && payment.pyear == lastYear));
+            const allMonthlyPayments = []
+            student.payments.forEach(payment => {
+                if (payment.type == "Monthly") {
+                    allMonthlyPayments.push(payment)
+                }
+            })
 
-        // Check this month payments
-        setThisMonthPaid(student.payments.some(payment => payment.type === "Monthly" && payment.pmonth == thisMonth && payment.pyear == year));
+            const lastMonthlyPayment = allMonthlyPayments[allMonthlyPayments.length - 1]
+
+            let bulb = false;
+            const unpaid = []
+            const yearArray = [2024, 2025, 2026, 2027, 2028, 2029, 2030]
+            for (let i = 0; i < 7; i++) {
+
+                for (let j = 1; j <= 12; j++) {
+
+
+                    if (bulb) {
+                        const obj = { month: j, monthName: getMonth(j), year: yearArray[i] }
+                        unpaid.push(obj)
+                        if (j == parseInt(month) && yearArray[i] == parseInt(year)) {
+                            bulb = false
+                            setUnpaidMonths(unpaid)
+                        }
+
+                    }
+
+                    if (j == parseInt(lastMonthlyPayment.pmonth) && yearArray[i] == parseInt(lastMonthlyPayment.pyear)) {
+                        bulb = true
+                    }
+                }
+
+
+            }
+            if (parseInt(lastMonthlyPayment.pmonth == parseInt(month) && parseInt(lastMonthlyPayment.pyear == parseInt(year)))) {
+                setUnpaidMonths([])
+            }
+            setFirstLoading(false)
+
+        }
 
         const length = student.attendances ? student.attendances.length : 0;
-        if(length) setLastAttendanceDate(student.attendances[length-1].date)
+        if (length) setLastAttendanceDate(student.attendances[length - 1].date)
         else (setLastAttendanceDate("Not Found"))
-    }, [student, month]);
+    }, [student, month,student.attendances, today]);
 
     const handleAttendance = (e) => {
         e.preventDefault();
@@ -89,10 +126,10 @@ const [lastAttendanceDate,setLastAttendanceDate]=useState("Not Found")
                 {/* Student Information */}
                 <div className='flex mt-5 flex-col gap-5 lg:flex-row'>
                     <div className='w-full'>
-                        
+
                         <hr />
                         <div className='flex py-3 px-2 items-center my-2 justify-between'>
-                            <p className='font-bold text-2xl'>{student.name} <span className='bg-sky-100 text-sky-600 font-semibold text-lg px-4 rounded-xl py-1'>{student.id}</span></p>
+                            <p className='font-bold text-2xl'>{student.name} <span className='bg-sky-100 text-sky-600 font-semibold text-sm lg:text-base px-4 rounded-xl py-1'>{student.id}</span></p>
                             <div className="dropdown dropdown-end">
                                 <div tabIndex={0} role="button" className="rounded-full p-1 bg-sky-200 font-semibold">
                                     <BsThreeDotsVertical />
@@ -136,27 +173,33 @@ const [lastAttendanceDate,setLastAttendanceDate]=useState("Not Found")
                         {/* Payment Status */}
                         <p className='font-semibold my-2'>This month status</p>
                         {thisMonthPaid ? (
-                            <p className='text-sky-600 flex items-center border rounded-xl border-sky-600 gap-2 py-1 px-5 font-semibold text-lg'>
+                            <p className='text-sky-600 flex items-center border rounded-xl border-sky-600 gap-2 py-1 px-5 font-semibold text-sm lg:text-base'>
                                 <span className='text-green-700 font-bold'><FiCheckCircle /></span> Paid for {getMonth(month)}
                             </p>
                         ) : (
-                            <p className='text-red-600 border border-red-600 rounded-xl flex items-center gap-2 py-1 px-5 font-semibold text-lg'>
+                            <p className='text-red-600 border border-red-600 rounded-xl flex items-center gap-2 py-1 px-5 font-semibold text-sm lg:text-base'>
                                 <ImCross /> Not paid for {getMonth(month)}
                             </p>
                         )}
 
                         {/* Last month status */}
-                        <p className='font-semibold my-2'>Last month status</p>
-                        {lastMonthPaid ? (
-                            <p className='text-sky-600 flex items-center border rounded-xl border-sky-600 gap-2 py-1 px-5 font-semibold text-lg'>
-                                <span className='text-green-700 font-bold'><FiCheckCircle /></span> Paid for {getMonth(month === 1 ? 12 : month - 1)}
-                            </p>
-                        ) : (
-                            <p className='text-red-600 border border-red-600 rounded-xl flex items-center gap-2 py-1 px-5 font-semibold text-lg'>
-                                <ImCross /> Not paid for {getMonth(month === 1 ? 12 : month - 1)}
-                            </p>
-                        )}
-                        <p className='text-sky-600 flex items-center border rounded-xl my-2 border-sky-600 gap-2 py-1 px-5 font-semibold text-lg'><span className='text-green-700 font-bold'></span> Batch : {student.batch}</p>
+                       {newStudent?<div className='text-sky-600 text-sm lg:text-base p-1 px-5 text-start border border-sky-600 rounded-lg my-1 font-semibold'>
+                        New Student
+                       </div>:
+                        <div className='p-2 border-sky-400 border rounded-lg text-center'>
+                            {unpaidMonths.length ? <p className='font-semibold my-2'>Unpaid Months: <span className='text-red-600 font-bold'>{unpaidMonths.length}</span></p> : <p className=' font-semibold text-green-700'>All Payments Clear</p>}
+                            <div className={`p-1 text-sm lg:text-base ${unpaidMonths.length && 'h-28'} overflow-auto`}>
+                                {
+                                    unpaidMonths.map((unpaid, index) => <div className='border border-red-600 rounded-lg my-1 flex justify-center gap-3 items-center text-red-600 font-semibold' key={index}>
+                                        <div>{unpaid.monthName}</div>
+                                        <div>
+                                            {unpaid.year}
+                                        </div>
+                                    </div>)
+                                }
+                            </div>
+                        </div>}
+                        <p className='text-sky-600 flex items-center border rounded-xl my-2 border-sky-600 gap-2 py-1 px-3 font-semibold text-sm lg:text-base'><span className='text-green-700 font-bold'></span> Batch : {student.batch}</p>
 
                         {exam.title ?
                             <div className='border rounded-xl border-sky-600 py-1 px-5'>
