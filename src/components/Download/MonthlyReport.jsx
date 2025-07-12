@@ -181,7 +181,7 @@ function MonthlyReport() {
 
             // Table headers
             const headers = [
-                "Sl No", "Roll", "Name", "Phone", "Program", "Payment", ...Array.from({ length: 31 }, (_, i) => (i + 1).toString())
+                "Sl No", "Roll", "Name", "Phone", "Program", "Payment","session", ...Array.from({ length: 31 }, (_, i) => (i + 1).toString())
             ];
 
             // Table data rows for students
@@ -196,6 +196,7 @@ function MonthlyReport() {
                     (student.programs.length) ? student.programs[student.programs.length - 1].program : "Free Class",
                     payment ?
                         getFirstName(payment.ptaken) : "Unpaid",
+                        student.session,
                     ...Array.from({ length: 31 }, (_, i) => {
                         const date = `${i + 1}-${paymentMonth}-${paymentYear}`;
                         return student.attendances.some((att) => att.date === date) ? "P" : "";
@@ -230,13 +231,14 @@ function MonthlyReport() {
                 body: tableData,
                 startY: 40,
                 columnStyles: {
-                    0: { cellWidth: 10 }, // Sl No
+                    0: { cellWidth: 7 }, // Sl No
                     1: { cellWidth: 15 }, // Roll
                     2: { cellWidth: 30 }, // Name
                     3: { cellWidth: 25 }, // Phone
-                    4: { cellWidth: 27 }, // Program
-                    5: { cellWidth: 18 }, // Payment
-                    ...Array.from({ length: 31 }, (_, i) => ({ [i + 6]: { cellWidth: 5 } })).reduce(
+                    4: { cellWidth: 18 }, // Program
+                    5: { cellWidth: 18 }, // payment
+                    6: { cellWidth: 10 }, // session
+                    ...Array.from({ length: 31 }, (_, i) => ({ [i + 7]: { cellWidth: 5 } })).reduce(
                         (acc, curr) => ({ ...acc, ...curr }),
                         {}
                     ), // Day columns
