@@ -175,18 +175,7 @@ function TakeAttendance({ student, today }) {
                         </div>
 
                         {/* Payment Status */}
-                        <p className='font-semibold my-2'>This month status</p>
-                        {thisMonthPaid ? (
-                            <p className='text-sky-600 flex items-center border rounded-xl border-sky-600 gap-2 py-1 px-5 font-semibold text-sm lg:text-base'>
-                                <span className='text-green-700 font-bold'><FiCheckCircle /></span> Paid for {getMonth(month)}
-                            </p>
-                        ) : (
-                            <p className='text-red-600 border border-red-600 rounded-xl flex items-center gap-2 py-1 px-5 font-semibold text-sm lg:text-base'>
-                                <ImCross /> Not paid for {getMonth(month)}
-                            </p>
-                        )}
-
-                        {/* Last month status */}
+                        
                         {newStudent ? <div className='text-sky-600 text-sm lg:text-base p-1 px-5 text-start border border-sky-600 rounded-lg my-1 font-semibold'>
                             New Student
                         </div> :
