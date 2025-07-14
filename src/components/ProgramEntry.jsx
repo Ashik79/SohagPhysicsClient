@@ -8,7 +8,7 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 
 
 function ProgramEntry() {
-    const user = useLoaderData()
+    const [user, setUser] = useState(useLoaderData())
     const { month, date, year, loggedUser, notifySuccess, role, notifyFailed } = useContext(AuthContext)
 
     const [displayUser, setDisplayUser] = useState(user)
@@ -34,10 +34,10 @@ function ProgramEntry() {
         else if (program == 'Exam' || program == 'Others' || program == 'PBC') {
             setProgramStatus('admission')
         }
-        else if (program == 'ExamDue'  || program == 'HscPhyDue' || program == 'OthersDue' || program == 'HscPhyDue' || program == 'SscPhyDue' || program == 'MonthlyDue') {
+        else if (program == 'ExamDue' || program == 'HscPhyDue' || program == 'OthersDue' || program == 'HscPhyDue' || program == 'SscPhyDue' || program == 'MonthlyDue') {
             setProgramStatus('due')
         }
-        else if (program =='Chuti'){
+        else if (program == 'Chuti') {
             setProgramStatus('Chuti')
         }
     }
@@ -63,6 +63,7 @@ function ProgramEntry() {
             return;
         }
         const program = event.target.program.value;
+        const waver = event.target.waver.value || 0;
 
         //Agei joined ache kina 
         const alreadyPaid = user.programs.some(pro =>
@@ -110,6 +111,8 @@ function ProgramEntry() {
 
                 user.payments.push(notePayment)
                 user.payments.push(examPayment)
+                const temp = { ...user, waver: waver }
+                setUser(temp)
 
 
 
@@ -118,7 +121,7 @@ function ProgramEntry() {
                 const type = 'regular';
                 const Fee = noteFee + examFee
                 const programData = {
-                    program, monthlyAmount, type, payDate, Fee,entryBy:loggedUser
+                    program, monthlyAmount, type, payDate, Fee, entryBy: loggedUser
                 }
                 user.programs.push(programData)
 
@@ -127,7 +130,7 @@ function ProgramEntry() {
                     headers: {
                         'content-type': 'application/json'
                     },
-                    body: JSON.stringify(user)
+                    body: JSON.stringify(temp)
 
                 })
 
@@ -143,7 +146,7 @@ function ProgramEntry() {
                             api_key: 'CUOP72nJJHahM30djaQG',
                             senderid: '8809617642567',
                             number: user.phone,
-                            message: `Successfully enrolled program ${program}\nStudent ID: ${id}\nName: ${name}\nPaid Amount:${Fee}\nEnrolled by: ${loggedUser}\nSohag Physics`
+                            message: `Successfully enrolled program ${program}\nStudent ID: ${id}\nName: ${name}\nPaid Amount: ${Fee}${waver? `\nwaver: ${waver}`:''}\nEnrolled by: ${loggedUser}\nSohag Physics`
 
                         }),
                     })
@@ -153,7 +156,7 @@ function ProgramEntry() {
 
                         setLoading(false)
                         notifySuccess("Program Added successfully !")
-                        setDisplayUser(user)
+                        setDisplayUser(temp)
                     }
                 }
             }
@@ -172,17 +175,19 @@ function ProgramEntry() {
 
 
                 const programData = {
-                    program, Fee, payDate,entryBy:loggedUser
+                    program, Fee, payDate, entryBy: loggedUser
                 }
 
                 user.programs.push(programData)
+                const temp = { ...user, waver: waver }
+                setUser(temp)
 
                 const res = await fetch(`https://spoffice-server.vercel.app/addpayment/${id}`, {
                     method: 'PUT',
                     headers: {
                         'content-type': 'application/json'
                     },
-                    body: JSON.stringify(user)
+                    body: JSON.stringify(temp)
 
                 })
 
@@ -198,7 +203,7 @@ function ProgramEntry() {
                             api_key: 'CUOP72nJJHahM30djaQG',
                             senderid: '8809617642567',
                             number: user.phone,
-                            message: `Successfully enrolled program ${program}\nStudent ID: ${id}\nName: ${name}\nPaid Amount:${Fee}\nEnrolled by: ${loggedUser}\nSohag Physics`
+                            message: `Successfully enrolled program ${program}\nStudent ID: ${id}\nName: ${name}\nPaid Amount: ${Fee}${waver? `\nwaver: ${waver}`:''}\nEnrolled by: ${loggedUser}\nSohag Physics`
 
                         }),
                     })
@@ -208,7 +213,7 @@ function ProgramEntry() {
 
                         setLoading(false)
                         notifySuccess("Program Added successfully !")
-                        setDisplayUser(user)
+                        setDisplayUser(temp)
                     }
                 }
             }
@@ -227,17 +232,19 @@ function ProgramEntry() {
                     user.monthlyAmount = 800;
                 }
                 const programData = {
-                    program, Fee, payDate, due, note,entryBy:loggedUser
+                    program, Fee, payDate, due, note, entryBy: loggedUser
                 }
 
                 user.programs.push(programData)
+                const temp = { ...user, waver: waver }
+                setUser(temp)
 
                 const res = await fetch(`https://spoffice-server.vercel.app/addpayment/${id}`, {
                     method: 'PUT',
                     headers: {
                         'content-type': 'application/json'
                     },
-                    body: JSON.stringify(user)
+                    body: JSON.stringify(temp)
 
                 })
 
@@ -255,7 +262,7 @@ function ProgramEntry() {
                             api_key: 'CUOP72nJJHahM30djaQG',
                             senderid: '8809617642567',
                             number: user.phone,
-                            message: `Successfully enrolled program ${program}\nStudent ID: ${id}\nName: ${name}\nPaid Amount:${Fee}\nDue Amount:${due}\nEnrolled by: ${loggedUser}`
+                            message: `Successfully enrolled program ${program}\nStudent ID: ${id}\nName: ${name}\nPaid Amount:${Fee}\nDue Amount:${due}${waver? `\nwaver: ${waver}`:''}\nEnrolled by: ${loggedUser}`
 
                         }),
                     })
@@ -265,13 +272,13 @@ function ProgramEntry() {
 
                         setLoading(false)
                         notifySuccess("Program Added successfully !")
-                        setDisplayUser(user)
+                        setDisplayUser(temp)
                     }
                 }
             }
             else if (programStatus == 'Chuti') {
                 const type = 'Chuti'
-                const pamount =  0;
+                const pamount = 0;
                 const pdata = {
                     id, type, pamount, payDate, ptaken, date, month, year, program, name
                 }
@@ -279,10 +286,10 @@ function ProgramEntry() {
                 user.payments.push(pdata)
                 const Fee = pamount;
                 const note = event.target.dueNote.value;
-             
-              
+
+
                 const programData = {
-                    program, Fee, payDate, note,entryBy:loggedUser
+                    program, Fee, payDate, note, entryBy: loggedUser
                 }
 
                 user.programs.push(programData)
@@ -301,7 +308,7 @@ function ProgramEntry() {
                     setLoading(false)
                     notifySuccess("Program Added successfully !")
                     setDisplayUser(user)
-                  
+
                 }
             }
         }
@@ -318,183 +325,196 @@ function ProgramEntry() {
 
 
     return (
-        role =='CEO'?
-        <div>
-            <div className='mx-auto flex mt-2 flex-col gap-5 lg:flex-row w-full' >
+        role == 'CEO' ?
+            <div>
+                <div className='mx-auto flex mt-2 flex-col gap-5 lg:flex-row w-full' >
 
-                {/* students part */}
+                    {/* students part */}
 
-                <div className='lg:w-2/5'>
-                    <h1 className='font-bold text-2xl '>Program Entry :</h1>
+                    <div className='lg:w-2/5'>
+                        <h1 className='font-bold text-2xl '>Program Entry :</h1>
 
-                    <div className='flex py-3 px-2 items-center my-2 justify-between'>
-                        <p className='font-bold text-3xl'>{name} <span className='bg-sky-100 text-sky-500 font-semibold text-xl px-4 rounded-xl py-1'>{id}</span></p>
-                        <div className="dropdown dropdown-end">
-                            <div tabIndex={0} role="button" className="rounded-full p-1 bg-sky-200  font-semibold"><BsThreeDotsVertical /></div>
-                            <ul onClick={() => { handleSelect() }} tabIndex={0} className={`dropdown-content ${disabled ? 'hidden' : ''} menu bg-sky-100 text-sky-600 font-semibold rounded-box z-[1] w-52 p-2 shadow `}>
-                                <li className=''><Link to={`/payment/${user.id}`}> <FaMoneyBillTransfer /> Payment Entry</Link></li>
-                                <li><Link to={`/students/${user.id}`}><CgProfile /> Profile</Link></li>
+                        <div className='flex py-3 px-2 items-center my-2 justify-between'>
+                            <p className='font-bold text-3xl'>{name} <span className='bg-sky-100 text-sky-500 font-semibold text-xl px-4 rounded-xl py-1'>{id}</span></p>
+                            <div className="dropdown dropdown-end">
+                                <div tabIndex={0} role="button" className="rounded-full p-1 bg-sky-200  font-semibold"><BsThreeDotsVertical /></div>
+                                <ul onClick={() => { handleSelect() }} tabIndex={0} className={`dropdown-content ${disabled ? 'hidden' : ''} menu bg-sky-100 text-sky-600 font-semibold rounded-box z-[1] w-52 p-2 shadow `}>
+                                    <li className=''><Link to={`/payment/${user.id}`}> <FaMoneyBillTransfer /> Payment Entry</Link></li>
+                                    <li><Link to={`/students/${user.id}`}><CgProfile /> Profile</Link></li>
 
-                            </ul>
+                                </ul>
+                            </div>
                         </div>
+                        <ProgramList className='' student={displayUser}></ProgramList>
+
+
+
                     </div>
-                    <ProgramList className='' student={displayUser}></ProgramList>
+
+                    <form className='w-full  lg:w-full' onSubmit={handleProgramAdd}>
+                        <div className='grid grid-cols-1  lg:w-full  gap-3'>
 
 
 
-                </div>
+                            <div>
+                                <p className='font-semibold'>Program <span className='text-red-700'>*</span> </p>
+                                <select onChange={handleProgramChanged} required name='program' className="select text-lg font-semibold  select-info w-full ">
 
-                <form className='w-full  lg:w-full' onSubmit={handleProgramAdd}>
-                    <div className='grid grid-cols-1  lg:w-full  gap-3'>
+                                    <option value={'HscPhy'}>HSC Physics</option>
+                                    <option value={'HscPhyDue'}>HSC Physics Due</option>
+                                    <option value={'PBC'}>PBC</option>
+                                    <option value={'SscPhy'}>SSC Physics</option>
+                                    <option value={'MonthlyDue'}>Monthly Payment Due</option>
 
-
-
-                        <div>
-                            <p className='font-semibold'>Program <span className='text-red-700'>*</span> </p>
-                            <select onChange={handleProgramChanged} required name='program' className="select text-lg font-semibold  select-info w-full ">
-
-                                <option value={'HscPhy'}>HSC Physics</option>
-                                <option value={'HscPhyDue'}>HSC Physics Due</option>
-                                <option value={'PBC'}>PBC</option>
-                                <option value={'SscPhy'}>SSC Physics</option>
-                                <option value={'MonthlyDue'}>Monthly Payment Due</option>
-
-                                <option value={'SscPhyDue'}>SSC Physics Due</option>
-                                <option value={'Exam'}>Exam Batch </option>
-                                <option value={'ExamDue'}>Exam Batch Due </option>
-                                <option value={'Chuti'}>Chuti </option>
-                                <option value={'Others'}>Others </option>
-                                <option value={'OthersDue'}>Others Due </option>
-                            </select>
-                        </div>
-                        {
-                            programStatus == "regular" ?
-                                role == 'CEO' ? <div>
-                                    <p className='font-semibold'>Monthly Amount <span className='text-red-700'>*</span> </p>
-                                    <input
-                                        onWheel={(e) => e.target.blur()}
-                                        required
-                                        name='monthlyAmount'
-                                        type="number"
-                                        defaultValue={800}
-                                        className="input text-lg font-semibold  input-bordered input-info w-full " />
-                                </div>
-                                    :
-                                    <div>
+                                    <option value={'SscPhyDue'}>SSC Physics Due</option>
+                                    <option value={'Exam'}>Exam Batch </option>
+                                    <option value={'ExamDue'}>Exam Batch Due </option>
+                                    <option value={'Chuti'}>Chuti </option>
+                                    <option value={'Others'}>Others </option>
+                                    <option value={'OthersDue'}>Others Due </option>
+                                </select>
+                            </div>
+                            {
+                                programStatus == "regular" ?
+                                    role == 'CEO' ? <div>
                                         <p className='font-semibold'>Monthly Amount <span className='text-red-700'>*</span> </p>
                                         <input
                                             onWheel={(e) => e.target.blur()}
                                             required
                                             name='monthlyAmount'
-                                            type="text"
-                                            value={800}
+                                            type="number"
+                                            defaultValue={800}
                                             className="input text-lg font-semibold  input-bordered input-info w-full " />
                                     </div>
-                                :
-                                <></>
-                        }
-                        {
-                            programStatus == "admission" ? <div>
-                                <p className='font-semibold'>Program Fee <span className='text-red-700'>*</span> </p>
-                                <input
-                                    onWheel={(e) => e.target.blur()}
-                                    required
-                                    name='programFee'
-                                    type="number"
-                                    defaultValue={0}
+                                        :
+                                        <div>
+                                            <p className='font-semibold'>Monthly Amount <span className='text-red-700'>*</span> </p>
+                                            <input
+                                                onWheel={(e) => e.target.blur()}
+                                                required
+                                                name='monthlyAmount'
+                                                type="text"
+                                                value={800}
+                                                className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                        </div>
+                                    :
+                                    <></>
+                            }
+                            {
+                                programStatus == "admission" ? <div>
+                                    <p className='font-semibold'>Program Fee <span className='text-red-700'>*</span> </p>
+                                    <input
+                                        onWheel={(e) => e.target.blur()}
+                                        required
+                                        name='programFee'
+                                        type="number"
+                                        defaultValue={0}
 
-                                    className="input text-lg font-semibold  input-bordered input-info w-full " />
-                            </div> : <></>
-                        }
-                        {
-                            programStatus == "regular" ? <div>
-                                <p className='font-semibold'>Note Fee <span className='text-red-700'>*</span> </p>
-                                <input
-                                    onWheel={(e) => e.target.blur()}
-                                    required
-                                    name='noteFee'
-                                    type="number"
+                                        className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                </div> : <></>
+                            }
+                            {
+                                programStatus == "regular" ? <div>
+                                    <p className='font-semibold'>Note Fee <span className='text-red-700'>*</span> </p>
+                                    <input
+                                        onWheel={(e) => e.target.blur()}
+                                        required
+                                        name='noteFee'
+                                        type="number"
 
-                                    className="input text-lg font-semibold  input-bordered input-info w-full " />
-                            </div> : <></>
-                        }
-                        {
-                            programStatus == "regular" ? <div>
-                                <p className='font-semibold'>Exam Fee <span className='text-red-700'>*</span> </p>
-                                <input
-                                    onWheel={(e) => e.target.blur()}
-                                    required
-                                    name='examFee'
-                                    type="number"
+                                        className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                </div> : <></>
+                            }
+                            {
+                                programStatus == "regular" ? <div>
+                                    <p className='font-semibold'>Exam Fee <span className='text-red-700'>*</span> </p>
+                                    <input
+                                        onWheel={(e) => e.target.blur()}
+                                        required
+                                        name='examFee'
+                                        type="number"
 
-                                    className="input text-lg font-semibold  input-bordered input-info w-full " />
-                            </div> : <></>
-                        }
-                        {
-                            programStatus == "due" ? <div>
-                                <p className='font-semibold'>Paid Amount <span className='text-red-700'>*</span> </p>
-                                <input
-                                    onWheel={(e) => e.target.blur()}
-                                    required
-                                    name='duePaid'
-                                    type="number"
+                                        className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                </div> : <></>
+                            }
+                            {
+                                programStatus != 'Chuti' ?
+                                    <div>
+                                        <p className='font-semibold'>Waver <span className='text-red-700'>*</span> </p>
+                                        <input
+                                            onWheel={(e) => e.target.blur()}
+                                            defaultValue={user.waver||0}
+                                            name='waver'
+                                            type="number"
 
-                                    className="input text-lg font-semibold  input-bordered input-info w-full " />
-                            </div> : <></>
-                        }
-                        {
-                            programStatus == "due" ? <div>
-                                <p className='font-semibold'>Due Amount <span className='text-red-700'>*</span> </p>
-                                <input
-                                    onWheel={(e) => e.target.blur()}
-                                    required
-                                    name='due'
-                                    type="number"
+                                            className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                    </div> : <></>
+                            }
+                            {
+                                programStatus == "due" ? <div>
+                                    <p className='font-semibold'>Paid Amount <span className='text-red-700'>*</span> </p>
+                                    <input
+                                        onWheel={(e) => e.target.blur()}
+                                        required
+                                        name='duePaid'
+                                        type="number"
 
-                                    className="input text-lg font-semibold  input-bordered input-info w-full " />
-                            </div> : <></>
-                        }
-                        {
-                            programStatus == "due" ? <div>
-                                <p className='font-semibold'>Note  </p>
-                                <input
+                                        className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                </div> : <></>
+                            }
+                            {
+                                programStatus == "due" ? <div>
+                                    <p className='font-semibold'>Due Amount <span className='text-red-700'>*</span> </p>
+                                    <input
+                                        onWheel={(e) => e.target.blur()}
+                                        required
+                                        name='due'
+                                        type="number"
 
-                                    name='dueNote'
-                                    type="text"
+                                        className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                </div> : <></>
+                            }
+                            {
+                                programStatus == "due" ? <div>
+                                    <p className='font-semibold'>Note  </p>
+                                    <input
 
-                                    className="input text-lg font-semibold  input-bordered input-info w-full " />
-                            </div> : <></>
-                        }
-                        {
-                            programStatus == "Chuti" ? <div>
-                                <p className='font-semibold'>Note  </p>
-                                <input
+                                        name='dueNote'
+                                        type="text"
 
-                                    name='dueNote'
-                                    type="text"
+                                        className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                </div> : <></>
+                            }
+                            {
+                                programStatus == "Chuti" ? <div>
+                                    <p className='font-semibold'>Note  </p>
+                                    <input
 
-                                    className="input text-lg font-semibold  input-bordered input-info w-full " />
-                            </div> : <></>
-                        }
+                                        name='dueNote'
+                                        type="text"
+
+                                        className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                </div> : <></>
+                            }
 
 
-                        <div className='flex  mt-2 flex-col lg:flex-row'>
+                            <div className='flex  mt-2 flex-col lg:flex-row'>
 
-                            <div className=' text-center  w-full'>
-                                <input className="font-semibold w-full bg-blue-100  border-2 rounded-xl h-11  btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Confirm"}`} />
-                                <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
+                                <div className=' text-center  w-full'>
+                                    <input className="font-semibold w-full bg-blue-100  border-2 rounded-xl h-11  btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Confirm"}`} />
+                                    <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
+                                </div>
                             </div>
+
                         </div>
 
-                    </div>
+                    </form>
 
-                </form>
-
-            </div>
+                </div>
 
 
-            {navigate ? <Navigate to={`/payment`}></Navigate> : <></>}
-        </div> :<div>No Access</div>
+                {navigate ? <Navigate to={`/payment`}></Navigate> : <></>}
+            </div> : <div>No Access</div>
     )
 }
 

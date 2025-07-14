@@ -177,7 +177,7 @@ function PaymentReport() {
 
             // Table headers
             const headers = [
-                "Sl No", "Roll", "Name", "Phone", "Note Fee", "Exam Fee", "Program", "Session", ...Array.from({ length: 12 }, (_, i) => (getMonth(i + 1).slice(0, 3)))
+                "Sl No", "Roll", "Name", "Phone", "Note Fee", "Exam Fee","Waver", "Program", "Session", ...Array.from({ length: 12 }, (_, i) => (getMonth(i + 1).slice(0, 3)))
             ];
 
             // Table data rows for students
@@ -192,6 +192,7 @@ function PaymentReport() {
                     student.phone,
                     notePayment ? notePayment.pamount : "NaN",
                     examPayment ? examPayment.pamount : "NaN",
+                    student.waver ? student.waver : "",
                     (student.programs.length) ? student.programs[student.programs.length - 1].program : "Free Class",
                     student.session,
 
@@ -235,9 +236,10 @@ function PaymentReport() {
                     3: { cellWidth: 25 }, // Phone
                     4: { cellWidth: 12 }, // Note
                     5: { cellWidth: 12 }, // Exam
-                    6: { cellWidth: 18 }, // Program
-                    7: { cellWidth: 18 }, // Session
-                    ...Array.from({ length: 12 }, (_, i) => ({ [i + 8]: { cellWidth: 11 } })).reduce(
+                    6: { cellWidth: 14 }, // Waver
+                    7: { cellWidth: 18 }, // Program
+                    8: { cellWidth: 18 }, // Session
+                    ...Array.from({ length: 12 }, (_, i) => ({ [i + 9]: { cellWidth: 10 } })).reduce(
                         (acc, curr) => ({ ...acc, ...curr }),
                         {}
                     ), // Day columns
