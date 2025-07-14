@@ -129,8 +129,8 @@ function PaymentReport() {
         }
         const sortedStudents = sortArray(students)
         const data = sortedStudents.map((student, index) => {
-            const notePayment = student.payments.find(payment => payment.type == 'Note Fee')
-            const examPayment = student.payments.find(payment => payment.type == 'Exam Fee')
+            const notePayment = student.payments.reverse().find(payment => payment.type == 'Note Fee')
+            const examPayment = student.payments.reverse().find(payment => payment.type == 'Exam Fee')
 
             const row = {
                 // "Sl No": index + 1,
@@ -183,8 +183,8 @@ function PaymentReport() {
             // Table data rows for students
             const sortedStudents = sortArray(students)
             const tableData = sortedStudents.map((student, index) => {
-                const notePayment = student.payments.find(payment => payment.type == 'Note Fee')
-                const examPayment = student.payments.find(payment => payment.type == 'Exam Fee')
+                const notePayment = student.payments.reverse().find(payment => payment.type == 'Note Fee')
+                const examPayment = student.payments.reverse().find(payment => payment.type == 'Exam Fee')
                 return [
                     index + 1,
                     student.id,
