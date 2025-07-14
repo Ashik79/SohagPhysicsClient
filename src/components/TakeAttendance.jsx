@@ -154,6 +154,7 @@ function TakeAttendance({ student, today }) {
                                 )) : <></>}
                             </p>
                             <p className='font-semibold'> Last present in <span className='font-semibold text-sky-600'>{lastAttendanceDate}</span></p>
+                            <p className='text-sky-600 flex items-center border rounded-xl my-2 border-sky-600 gap-2 py-1 px-3 font-semibold text-base'><span className='text-green-700 font-bold'></span> Batch : {student.batch}</p>
                             <div className='flex justify-around my-1 mx-10 items-center '>
                                 <div className='w-24 lg:w-32  mb-4 '>
                                     <img className='rounded-lg' src={`${student.image ? student.image : '/profile.jpg'}`} alt="Image" />
@@ -192,7 +193,7 @@ function TakeAttendance({ student, today }) {
                                     }
                                 </div>
                             </div>}
-                        <p className='text-sky-600 flex items-center border rounded-xl my-2 border-sky-600 gap-2 py-1 px-3 font-semibold text-sm lg:text-base'><span className='text-green-700 font-bold'></span> Batch : {student.batch}</p>
+                        
 
                         {exam.title ?
                             <div className='border rounded-xl border-sky-600 py-1 px-5'>
