@@ -91,7 +91,7 @@ function AddPayment() {
 
 
                 }
-                if ((parseInt(lastMonthlyPayment.pmonth) == parseInt(month)) && ( parseInt(lastMonthlyPayment.pyear) == parseInt(year))) {
+                if ((parseInt(lastMonthlyPayment.pmonth) == parseInt(month)) && (parseInt(lastMonthlyPayment.pyear) == parseInt(year))) {
                     setUnpaidMonths([])
                 }
             }
@@ -248,8 +248,9 @@ function AddPayment() {
                             <div className='lg:w-2/5'>
                                 <h1 className='font-bold text-2xl '>Payment Entry :</h1>
                                 <p className='font-semibold'>Payment Information</p> <hr />
+
                                 <div className='flex py-3 px-2 items-center my-2 justify-between'>
-                                    <p className='font-bold text-3xl'>{name} <span className='bg-sky-100 text-sky-500 font-semibold text-xl px-4 rounded-xl py-1'>{id}</span></p>
+                                    <p className='font-bold text-lg lg:text-2xl'>{name} <span className='bg-sky-100 text-sky-500 font-semibold text-xl px-4 rounded-xl py-1'>{id}</span></p>
                                     <div className="dropdown dropdown-end">
                                         <div tabIndex={0} role="button" className="rounded-full p-1 bg-sky-200  font-semibold"><BsThreeDotsVertical /></div>
                                         <ul onClick={() => { handleSelect() }} tabIndex={0} className={`dropdown-content ${disabled ? 'hidden' : ''} menu bg-sky-100 text-sky-600 font-semibold rounded-box z-[1] w-52 p-2 shadow `}>
@@ -259,9 +260,15 @@ function AddPayment() {
                                         </ul>
                                     </div>
                                 </div>
-                                <div className='flex flex-col items-center my-2 justify-center rounded-lg py-3  border-sky-400 border'>
-                                    <p className='text-3xl text-sky-500 font-semibold flex gap-1 items-center '>{monthlyAmount} <span className='text-3xl'><TbCurrencyTaka /></span></p>
-                                    <p className='font-semibold'>Monthly</p>
+                                <div className='flex  border-sky-400 py-1 my-1 rounded-lg px-4 border items-center'>
+                                    <div className='w-1/2    mx-auto '>
+                                        <img className='rounded-lg w-2/3' src={`${user.image ? user.image : '/profile.jpg'}`} alt="Image" />
+                                    </div>
+                                    <div className='flex flex-col items-center my-2  rounded-lg py-3 w-1/2'>
+
+                                        <p className='text-2xl  text-sky-500 font-semibold flex gap-1 items-center '>{monthlyAmount} <span className=' text-lg lg:text-2xl'><TbCurrencyTaka /></span></p>
+                                        <p className='font-semibold'>Monthly</p>
+                                    </div>
                                 </div>
 
                                 {newStudent ? <div className='text-sky-600 text-sm lg:text-base p-1 px-5 text-start border border-sky-600 rounded-lg my-1 font-semibold'>
