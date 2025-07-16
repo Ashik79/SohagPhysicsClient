@@ -39,11 +39,6 @@ function AddPayment() {
     }
     //Basic data
     const [unpaidMonths, setUnpaidMonths] = useState([])
-    const [enrollment, setEnrollment] = useState({})
-    const [condition, setCondition] = useState(true)
-
-
-
 
 
     useEffect(() => {

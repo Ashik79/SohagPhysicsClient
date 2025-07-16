@@ -12,19 +12,16 @@ import AttendanceCalendar from './AttendanceComponent';
 function TakeAttendance({ student, today }) {
     const { month, loggedUser, getMonth, notifySuccess, notifyFailed, year } = useContext(AuthContext);
 
-    const [displayStudent, setDisplayStudent] = useState(student);
+    const [displayStudent, setDisplayStudent] = useState(null);
     const [present, setPresent] = useState(false);
-    const [lastMonthPaid, setLastMonthPaid] = useState(false);
-    const [thisMonthPaid, setThisMonthPaid] = useState(false);
     const [exam, setExam] = useState({})
     const [lastAttendanceDate, setLastAttendanceDate] = useState("Not Found")
     const [newStudent, setNewStudent] = useState(false)
     const [unpaidMonths, setUnpaidMonths] = useState([])
-    // Check payment statuses for last and this month
 
 
     useEffect(() => {
-
+        setDisplayStudent(null)
         if (student.payments.length == 0) {
             setNewStudent(true)
         }
@@ -79,13 +76,14 @@ function TakeAttendance({ student, today }) {
                     setUnpaidMonths([])
                 }
             }
-            
+
 
         }
 
         const length = student.attendances ? student.attendances.length : 0;
         if (length) setLastAttendanceDate(student.attendances[length - 1].date)
         else (setLastAttendanceDate("Not Found"))
+        setDisplayStudent(student)
     }, [student, month, student.attendances, today]);
 
     const handleAttendance = (e) => {
@@ -125,6 +123,7 @@ function TakeAttendance({ student, today }) {
     };
 
     return (
+        displayStudent? 
         <div>
             <form className='mx-auto w-full' onSubmit={handleAttendance}>
                 {/* Student Information */}
@@ -176,7 +175,7 @@ function TakeAttendance({ student, today }) {
                         </div>
 
                         {/* Payment Status */}
-                        
+
                         {newStudent ? <div className='text-sky-600 text-sm lg:text-base p-1 px-5 text-start border border-sky-600 rounded-lg my-1 font-semibold'>
                             New Student
                         </div> :
@@ -193,7 +192,7 @@ function TakeAttendance({ student, today }) {
                                     }
                                 </div>
                             </div>}
-                        
+
 
                         {exam.title ?
                             <div className='border rounded-xl border-sky-600 py-1 px-5'>
@@ -210,7 +209,7 @@ function TakeAttendance({ student, today }) {
                 </div>
             </form>
             <AttendanceCalendar student={displayStudent}></AttendanceCalendar>
-        </div>
+        </div> : <div>Loading...</div>
     );
 }
 
