@@ -8,6 +8,7 @@ import { FaMoneyBillTransfer } from "react-icons/fa6";
 import { CgProfile } from "react-icons/cg";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import AttendanceCalendar from './AttendanceComponent';
+import DueView from './DueView';
 
 function TakeAttendance({ student, today }) {
     const { month, loggedUser, getMonth, notifySuccess, notifyFailed, year } = useContext(AuthContext);
@@ -16,69 +17,20 @@ function TakeAttendance({ student, today }) {
     const [present, setPresent] = useState(false);
     const [exam, setExam] = useState({})
     const [lastAttendanceDate, setLastAttendanceDate] = useState("Not Found")
-    const [newStudent, setNewStudent] = useState(false)
-    const [unpaidMonths, setUnpaidMonths] = useState([])
+    
 
 
     useEffect(() => {
         setDisplayStudent(null)
-        if (student.payments.length == 0) {
-            setNewStudent(true)
-        }
+        
         // Check if the student is present today
         const isPresentToday = student.attendances.some(attendance => attendance.date === today);
         setPresent(isPresentToday);
-        setDisplayStudent(student)
-        const examPayment = student.payments.find(payment => payment.type == "Exam Fee")
+       
+        
         const examLength = student.exams ? student.exams.length : 0;
         if (examLength) setExam(student.exams[examLength - 1])
-        if (student.payments.length) {
-
-
-            const allMonthlyPayments = []
-            student.payments.forEach(payment => {
-                if (payment.type == "Monthly") {
-                    allMonthlyPayments.push(payment)
-                }
-            })
-            if (examPayment && allMonthlyPayments.length == 0) {
-                setNewStudent(true)
-            }
-            const lastMonthlyPayment = allMonthlyPayments[allMonthlyPayments.length - 1]
-
-            let bulb = false;
-            const unpaid = []
-            const yearArray = [2024, 2025, 2026, 2027, 2028, 2029, 2030]
-            if (lastMonthlyPayment) {
-                for (let i = 0; i < 7; i++) {
-
-                    for (let j = 1; j <= 12; j++) {
-
-
-                        if (bulb) {
-                            const obj = { month: j, monthName: getMonth(j), year: yearArray[i] }
-                            unpaid.push(obj)
-                            if (j == parseInt(month) && yearArray[i] == parseInt(year)) {
-                                bulb = false
-                                setUnpaidMonths(unpaid)
-                            }
-
-                        }
-
-                        if (j == parseInt(lastMonthlyPayment.pmonth) && yearArray[i] == parseInt(lastMonthlyPayment.pyear)) {
-                            bulb = true
-                        }
-                    }
-
-
-                }
-                if (parseInt(lastMonthlyPayment.pmonth == parseInt(month) && parseInt(lastMonthlyPayment.pyear == parseInt(year)))) {
-                    setUnpaidMonths([])
-                }
-            }
-
-
-        }
+       
 
         const length = student.attendances ? student.attendances.length : 0;
         if (length) setLastAttendanceDate(student.attendances[length - 1].date)
@@ -174,24 +126,7 @@ function TakeAttendance({ student, today }) {
                             </div>
                         </div>
 
-                        {/* Payment Status */}
-
-                        {newStudent ? <div className='text-sky-600 text-sm lg:text-base p-1 px-5 text-start border border-sky-600 rounded-lg my-1 font-semibold'>
-                            New Student
-                        </div> :
-                            <div className='p-2 border-sky-400 mt-2 border rounded-lg text-center'>
-                                {unpaidMonths.length ? <p className='font-semibold my-2'>Unpaid Months: <span className='text-red-600 font-bold'>{unpaidMonths.length}</span></p> : <p className=' font-semibold text-green-700'>All Payments Clear</p>}
-                                <div className={`p-1 text-sm lg:text-base ${unpaidMonths.length && 'h-28'} overflow-auto`}>
-                                    {
-                                        unpaidMonths.map((unpaid, index) => <div className='border border-red-600 rounded-md my-1 flex justify-center gap-3 items-center text-red-600 font-semibold' key={index}>
-                                            <div>{unpaid.monthName}</div>
-                                            <div>
-                                                {unpaid.year}
-                                            </div>
-                                        </div>)
-                                    }
-                                </div>
-                            </div>}
+                       {displayStudent && <DueView student={student}></DueView>}
 
 
                         {exam.title ?
