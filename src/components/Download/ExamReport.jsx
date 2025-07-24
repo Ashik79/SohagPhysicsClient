@@ -6,9 +6,10 @@ import * as XLSX from 'xlsx';
 import { jsPDF } from "jspdf";
 import "jspdf-autotable"; // Importing jsPDF autoTable plugin if necessary
 
-function PaymentReport() {
+function ExamReport() {
     const { notifyFailed, month, year, notifySuccess, role, date, getMonth } = useContext(AuthContext)
     const [students, setStudents] = useState([])
+    const [exams, setExams] = useState([])
 
     const [paymentMonth, setPaymentMonth] = useState(month)
     const [paymentYear, setPaymentYear] = useState(year)
@@ -52,19 +53,24 @@ function PaymentReport() {
         setLoading(true)
         e.preventDefault();
         const query = {};
+
         const batch = e.target.batch.value;
         setBatch(batch)
         const level = e.target.class.value;
         const program = e.target.program.value;
         const session = e.target.session.value;
+        const month = e.target.month.value;
+        const year = e.target.year.value;
         setSession(session)
 
         if (level) {
             query.level = level;
         }
         if (batch) query.batch = batch;
-
         if (session) query.session = session;
+        const examQuery = {...query}
+        if (month) examQuery.month = month;
+        if (year) examQuery.year = year;
 
 
         try {
@@ -79,6 +85,22 @@ function PaymentReport() {
             }
 
             const data = await res.json();
+          //exam find kore ana
+            const res2 = await fetch('https://spoffice-server.vercel.app/exams', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(examQuery),
+            });
+
+            if (!res.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data2 = await res2.json();
+            console.log(data2)
+            setExams(data2)
+
+
             let filteredStudents = data;
 
             // Filter by program
@@ -99,6 +121,7 @@ function PaymentReport() {
 
 
             setStudents(filteredStudents);
+            
 
             if (filteredStudents.length) {
                 notifySuccess(`Found ${filteredStudents.length} students`);
@@ -129,29 +152,31 @@ function PaymentReport() {
         }
         const sortedStudents = sortArray(students)
         const data = sortedStudents.map((student, index) => {
-            const notePayment = student.payments.reverse().find(payment => payment.type == 'Note Fee')
-            const examPayment = student.payments.reverse().find(payment => payment.type == 'Exam Fee')
-            const dueProgram = student.programs?.find(program => program.program == 'HscPhyDue')
+            const payment = student.payments.find(
+                payment =>
+                    payment.pmonth == paymentMonth && payment.pyear == paymentYear
+            )
+
 
             const row = {
                 // "Sl No": index + 1,
                 "Roll": student.id,
                 "Name": student.name,
                 "Phone": student.phone,
-                "Note Fee": notePayment ? notePayment.pamount : "",
-                "Exam Fee": examPayment ? examPayment.pamount : "",
-                "Due": dueProgram ? dueProgram.due : "",
-
-
+                "Program": student.programs.length
+                    ? student.programs[student.programs.length - 1].program
+                    : "Free Class",
+                "Payment": payment
+                    ? getFirstName(payment.ptaken)
+                    : "Unpaid"
             };
 
             // Add attendance per day
-            for (let i = 0; i <= 11; i++) {
-                const payment = student.payments.find((payment) => (payment.pmonth == (i + 1) && payment.pyear == paymentYear && payment.type == 'Monthly'))
-
-                row[`${getMonth(i + 1).slice(0, 3)}`] = payment ? payment.pamount : ""
-
-
+            for (let i = 1; i <= 31; i++) {
+                const date = `${i}-${paymentMonth}-${paymentYear}`;
+                row[`Day ${i}`] = student.attendances.some(att => att.date === date)
+                    ? "P"
+                    : "";
             }
 
             return row;
@@ -163,12 +188,12 @@ function PaymentReport() {
 
         XLSX.writeFile(
             workbook,
-            `Payment Sheet -Batch: ${batch} - Session:${session ? session : 'All'} ,Year: ${paymentYear}.xlsx`
+            `Attendance Sheet -Batch: ${batch} - Session:${session ? session : 'All'} ,Month: ${getMonth(paymentMonth)}, ${paymentYear}.xlsx`
         );
     };
 
 
-    //pdf download
+
 
     const handleDownload = async () => {
         try {
@@ -179,30 +204,28 @@ function PaymentReport() {
 
             // Table headers
             const headers = [
-                "Sl No", "Roll", "Name", "Phone", "Note Fee", "Exam Fee", "Waver", "Due","Program", "Session", ...Array.from({ length: 12 }, (_, i) => (getMonth(i + 1).slice(0, 3)))
+                "Sl No", "Roll", "Name", "Phone", "Program", "Payment", "session", ...Array.from({ length: exams.length }, (_, i) => (exams[i].title.slice(0,32))+'('+(exams[i].mcqTotal+exams[i].writenTotal).toString()+')')
             ];
 
             // Table data rows for students
             const sortedStudents = sortArray(students)
             const tableData = sortedStudents.map((student, index) => {
-                const notePayment = student.payments.reverse().find(payment => payment.type == 'Note Fee')
-                const examPayment = student.payments.reverse().find(payment => payment.type == 'Exam Fee')
-                const dueProgram = student.programs?.find(program => program.program == 'HscPhyDue')
+                const payment = student.payments.find(payment => payment.pmonth == paymentMonth && payment.pyear == paymentYear);
                 return [
                     index + 1,
                     student.id,
                     student.name,
                     student.phone,
-                    notePayment ? notePayment.pamount : "NaN",
-                    examPayment ? examPayment.pamount : "NaN",
-                    student.waver ? student.waver : "",
-                    dueProgram ? dueProgram.due : "",
                     (student.programs.length) ? student.programs[student.programs.length - 1].program : "Free Class",
+                    payment ?
+                        getFirstName(payment.ptaken) : "Unpaid",
                     student.session,
-
-                    ...Array.from({ length: 12 }, (_, i) => {
-                        const payment = student.payments.find((payment) => (payment.pmonth == (i + 1) && payment.pyear == paymentYear && payment.type == 'Monthly'))
-                        return payment ? payment.pamount : ""
+                    ...Array.from({ length: exams.length }, (_, i) => {
+                        const exam = exams[i];
+                        
+                        const found =student.exams.find(e=> e.title==exam.title)
+                       
+                        return found?  `              ${found.total} / ${found.mcqTotal +found.writenTotal}`:'                 A';
                     }),
                     // Empty comments column
 
@@ -234,17 +257,14 @@ function PaymentReport() {
                 body: tableData,
                 startY: 40,
                 columnStyles: {
-                    0: { cellWidth: 10 }, // Sl No
+                    0: { cellWidth: 7 }, // Sl No
                     1: { cellWidth: 15 }, // Roll
                     2: { cellWidth: 30 }, // Name
                     3: { cellWidth: 25 }, // Phone
-                    4: { cellWidth: 12 }, // Note
-                    5: { cellWidth: 12 }, // Exam
-                    6: { cellWidth: 14 }, // Waver
-                    7: { cellWidth: 12 }, // Due
-                    8: { cellWidth: 18 }, // Program
-                    9: { cellWidth: 18 }, // Session
-                    ...Array.from({ length: 12 }, (_, i) => ({ [i + 10]: { cellWidth: 10 } })).reduce(
+                    4: { cellWidth: 18 }, // Program
+                    5: { cellWidth: 18 }, // payment
+                    6: { cellWidth: 10 }, // session
+                    ...Array.from({ length: exams.length }, (_, i) => ({ [i + 7]: { cellWidth: 40 } })).reduce(
                         (acc, curr) => ({ ...acc, ...curr }),
                         {}
                     ), // Day columns
@@ -276,7 +296,7 @@ function PaymentReport() {
                         doc.text("Sohag Physics", pageWidth / 2, 20, { align: "center" });
                         doc.setFontSize(12);
                         doc.text(
-                            `Payment Sheet for Batch: ${batch} , Session: ${session ? session : 'All'} , Year: ${paymentYear}`,
+                            `Exam Sheet for Batch: ${batch} , Session: ${session ? session : 'All'} , Month: ${getMonth(paymentMonth)}, ${paymentYear}`,
                             pageWidth / 2,
                             30,
                             { align: "center" }
@@ -289,16 +309,30 @@ function PaymentReport() {
 
 
             // Save the generated PDF
-            doc.save(`Payment sheet of batch: ${students[0].batch}, Session: ${session ? session : 'All'}, Year: ${paymentYear}.pdf`);
+            doc.save(`Exam sheet of batch: ${students[0].batch}, Session: ${session ? session : 'All'}, Month: ${getMonth(paymentMonth)},${paymentYear}.pdf`);
         } catch (err) {
             console.log("Error generating PDF:", err);
         }
     };
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     return (
         (role == 'CEO' || role == 'Manager') ? <div className=''>
-            <h1 className=' text-center lg:text-left md:text-center font-semibold text-xl text-cyan-500 underline mt-10'>Payment Report</h1>
+            <h1 className=' text-center lg:text-left md:text-center font-semibold text-xl text-cyan-500 underline mt-10'>Exam Report</h1>
             <form className='mx-auto w-full' onSubmit={handleSearch} >
 
                 {/* students part */}
@@ -353,7 +387,7 @@ function PaymentReport() {
                             </select>
                         </div>
                         <div className='hidden'>
-                            <p className='font-semibold '>Class  </p>
+                            <p className='font-semibold'>Class  </p>
 
                             <select name='class' className="select text-base font-semibold  select-info w-full ">
 
@@ -412,8 +446,35 @@ function PaymentReport() {
                         </div>
 
 
+
                         <div>
-                            <p className='font-semibold'>Payment Year  </p>
+                            <p className='font-semibold'>Exam Month  </p>
+                            <select
+                                onChange={handleMonthChange}
+                                defaultValue={month}
+                                name='month'
+
+                                className="select text-base font-semibold  select-info w-full"
+                            >
+
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+
+
+                        <div>
+                            <p className='font-semibold'>Exam Year  </p>
                             <select onChange={handleYearChange} defaultValue={year} name='year' className="select text-base font-semibold  select-info w-full ">
 
                                 <option>2024</option>
@@ -450,8 +511,8 @@ function PaymentReport() {
                             <p className='text-base font-semibold'>Total Students Found <span className='font-bold text-red-600 text-2xl border-sky-600 border-2 rounded-full  px-2'>{students.length}</span></p>
 
                             <button onClick={handleDownload} className='flex items-center justify-center gap-1  border-2 font-bold text-sky-600 hover:bg-slate-400 py-1 mt-3 w-full hover:text-white  rounded-lg border-sky-600'><IoCloudDownloadOutline /> Download PDF</button>
-                            <div className="divider divider-primary">OR</div>
-                            <button onClick={handleExcel} className='flex items-center justify-center gap-1  border-2 font-bold text-sky-600 hover:bg-slate-400 py-1 mt-3 w-full hover:text-white  rounded-lg border-sky-600'><IoCloudDownloadOutline /> Download Excell</button>
+                            {/* <div className="divider divider-primary">OR</div>
+                            <button onClick={handleExcel} className='flex items-center justify-center gap-1  border-2 font-bold text-sky-600 hover:bg-slate-400 py-1 mt-3 w-full hover:text-white  rounded-lg border-sky-600'><IoCloudDownloadOutline /> Download Excell</button> */}
 
                         </div>
 
@@ -464,4 +525,4 @@ function PaymentReport() {
     )
 }
 
-export default PaymentReport
+export default ExamReport

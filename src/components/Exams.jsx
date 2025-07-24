@@ -59,7 +59,7 @@ function Exams() {
             })
         e.target.reset()
     }
-    console.log(displayExams)
+ 
 
     const handleFilter = e => {
         e.preventDefault()

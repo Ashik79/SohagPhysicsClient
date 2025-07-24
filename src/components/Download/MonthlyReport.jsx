@@ -306,7 +306,7 @@ function MonthlyReport() {
 
     return (
         (role == 'CEO' || role == 'Manager') ? <div className=''>
-            <h1 className=' text-center lg:text-left md:text-center font-semibold text-xl text-cyan-500 underline mt-10'>Monthly Report</h1>
+            <h1 className=' text-center lg:text-left md:text-center font-semibold text-xl text-cyan-500 underline mt-10'>Monthly Attendance Report</h1>
             <form className='mx-auto w-full' onSubmit={handleSearch} >
 
                 {/* students part */}
@@ -360,7 +360,7 @@ function MonthlyReport() {
 
                             </select>
                         </div>
-                        <div>
+                        <div className='hidden'>
                             <p className='font-semibold'>Class  </p>
 
                             <select name='class' className="select text-base font-semibold  select-info w-full ">
@@ -422,7 +422,7 @@ function MonthlyReport() {
 
 
                         <div>
-                            <p className='font-semibold'>Month  </p>
+                            <p className='font-semibold'>Attendance Month  </p>
                             <select
                                 onChange={handleMonthChange}
                                 defaultValue={month}
@@ -448,7 +448,7 @@ function MonthlyReport() {
 
 
                         <div>
-                            <p className='font-semibold'>Year  </p>
+                            <p className='font-semibold'>Attendance Year  </p>
                             <select onChange={handleYearChange} defaultValue={year} name='year' className="select text-base font-semibold  select-info w-full ">
 
                                 <option>2024</option>
