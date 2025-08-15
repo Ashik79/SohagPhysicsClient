@@ -24,6 +24,8 @@ function AddPayment() {
     const [paymentType, setPaymentType] = useState('Monthly')
     const [displayCoupon, setCoupon] = useState(null)
     const [newStudent, setNewStudent] = useState(false)
+    const [entryMonth, setEntryMonth] = useState(month)
+    const [entryYear, setEntryYear] = useState(year)
 
     const handleOptionChange = (event) => {
         setPaymentType(event.target.value);
@@ -90,15 +92,61 @@ function AddPayment() {
                     setUnpaidMonths([])
                 }
             }
-            setFirstLoading(false)
+
 
         }
         else if (user.id && !user.payments.length) {
 
             notifyFailed("Program entry needed for payment.")
             setNoProgram(true)
-            setFirstLoading(false)
+
         }
+
+        //entry month portion
+        if (unpaidMonths.length != 0) {
+
+            setEntryMonth(unpaidMonths[0].month)
+            setEntryYear(unpaidMonths[0].year)
+        }
+        else if (!unpaidMonths.length) {
+            const allMonthlyPayments = []
+            user.payments.forEach(payment => {
+                if (payment.type == "Monthly") {
+                    allMonthlyPayments.push(payment)
+                }
+            })
+
+            const lastMonthlyPayment = allMonthlyPayments[allMonthlyPayments.length - 1]
+            const lastPaidMonth = parseInt(lastMonthlyPayment.pmonth)
+            const lastPaidYear = parseInt(lastMonthlyPayment.pyear)
+
+
+
+
+
+            if (lastPaidMonth == month && lastPaidYear == year) {
+                if (month == 12) {
+                    setEntryMonth(1)
+                    setEntryYear(year + 1)
+                }
+                else {
+                    setEntryMonth(month + 1);
+                    setEntryYear(year)
+                }
+            }
+            else if ((lastPaidMonth > month) | (lastPaidYear > year)) {
+                if (lastPaidMonth == 12) {
+                    setEntryMonth(1)
+                    setEntryYear(lastPaidYear + 1);
+                }
+                else {
+                    setEntryMonth(lastPaidMonth + 1)
+                    setEntryYear(lastPaidYear)
+                }
+            }
+
+        }
+        setFirstLoading(false)
 
     }, [user]);
 
@@ -339,7 +387,7 @@ function AddPayment() {
                                 <div className='flex flex-col lg:flex-row gap-2 justify-between'>
                                     <div className='w-full lg:w-1/2'>
                                         <p className='font-semibold'>Month <span className='text-red-700'>*</span> </p>
-                                        <select name='pmonth' value={unpaidMonths[0]?.month ? unpaidMonths[0].month : month} className="select text-lg font-semibold   select-info w-full ">
+                                        <select name='pmonth' value={entryMonth} className="select text-lg font-semibold   select-info w-full ">
 
                                             <option value={1}>January</option>
                                             <option value={2}>February</option>
@@ -358,7 +406,7 @@ function AddPayment() {
                                     </div>
                                     <div className='w-full lg:w-1/2'>
                                         <p className='font-semibold'>Year <span className='text-red-700'>*</span> </p>
-                                        <select name='pyear' value={unpaidMonths[0]?.year ? unpaidMonths[0].year : year} className="select text-lg font-semibold  select-info w-full ">
+                                        <select name='pyear' value={entryYear} className="select text-lg font-semibold  select-info w-full ">
 
                                             <option value={2022}>2022</option>
                                             <option value={2023}>2023</option>

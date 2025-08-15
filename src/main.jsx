@@ -53,6 +53,7 @@ import VideoPlayer from './components/StudentSite/VideoPlayer';
 import DownloadCenter from './components/Download/DownloadCenter';
 import ManagementContainer from './components/UserManagement/ManagementContainer';
 import User from './components/UserManagement/User';
+import TakeAttendanceId from './components/TakeAttendanceId';
 
 
 
@@ -225,7 +226,7 @@ const router = createBrowserRouter([
       ,
       {
         path:'/attendance/:id',
-        element:<PrivateRoute><TakeAttendance></TakeAttendance></PrivateRoute>,
+        element:<PrivateRoute><TakeAttendanceId></TakeAttendanceId></PrivateRoute>,
         loader:fetchStudent,
       }
       ,
