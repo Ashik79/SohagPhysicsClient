@@ -102,13 +102,18 @@ function AddPayment() {
 
         }
 
-        //entry month portion
-        if (unpaidMonths.length != 0) {
+    }, [user]);
 
+        //entry month portion
+    useEffect(() => {
+
+        if (unpaidMonths.length != 0) {
+            console.log(unpaidMonths)
             setEntryMonth(unpaidMonths[0].month)
             setEntryYear(unpaidMonths[0].year)
         }
         else if (!unpaidMonths.length) {
+         
             const allMonthlyPayments = []
             user.payments.forEach(payment => {
                 if (payment.type == "Monthly") {
@@ -117,8 +122,8 @@ function AddPayment() {
             })
 
             const lastMonthlyPayment = allMonthlyPayments[allMonthlyPayments.length - 1]
-            const lastPaidMonth = parseInt(lastMonthlyPayment.pmonth)
-            const lastPaidYear = parseInt(lastMonthlyPayment.pyear)
+            const lastPaidMonth = parseInt(lastMonthlyPayment?.pmonth)
+            const lastPaidYear = parseInt(lastMonthlyPayment?.pyear)
 
 
 
@@ -134,7 +139,7 @@ function AddPayment() {
                     setEntryYear(year)
                 }
             }
-            else if ((lastPaidMonth > month) | (lastPaidYear > year)) {
+            else if ((lastPaidMonth > month) || (lastPaidYear > year)) {
                 if (lastPaidMonth == 12) {
                     setEntryMonth(1)
                     setEntryYear(lastPaidYear + 1);
@@ -146,9 +151,9 @@ function AddPayment() {
             }
 
         }
-        setFirstLoading(false)
 
-    }, [user]);
+        setFirstLoading(false)
+    }, [unpaidMonths])
 
 
     const { monthlyAmount, name, id, payments, phone } = user;
