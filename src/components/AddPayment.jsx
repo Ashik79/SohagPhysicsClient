@@ -286,7 +286,7 @@ function AddPayment() {
     };
 
     return (
-        role == 'CEO' ?
+        (role == 'CEO' || loggedUser == 'Sree Krishno') ?
             firstLoading ? <div>Loading user</div> :
                 <div>
                     <form className='mx-auto w-full' onSubmit={handlePayment} >
