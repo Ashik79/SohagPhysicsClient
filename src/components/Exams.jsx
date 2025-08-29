@@ -11,13 +11,14 @@ function Exams() {
     const { month, year, date, getMonth, notifySuccess } = useContext(AuthContext)
     const [loading, setLoading] = useState(false)
     const [firstLoading, setFirstLoading] = useState(true)
-
+    const [allExams, setAllExams] = useState([])
     const [displayExams, setDisplayExams] = useState([]);
 
     useEffect(() => {
         fetch('https://spoffice-server.vercel.app/getexams')
             .then(res => res.json())
             .then(data => {
+                setAllExams(data)
                 const sortedExams = data.sort((a, b) => new Date(b.date) - new Date(a.date));
                 setDisplayExams(sortedExams);
                 setFirstLoading(false)
@@ -78,19 +79,18 @@ function Exams() {
         const year = e.target.year.value
 
 
-        const filteredExams = allReversed.filter((exam) => {
-            const matchProgram = !program || exam.program === program;
-            const matchBatch = !batch || exam.batch === batch;
-            const matchSession = !session || exam.session === session;
-            const matchDay = !day || exam.day === day;
-            const matchMonth = !month || exam.month == month;
-            const matchYear = !year || exam.year == year;
+        let filtered = allExams.filter(exam => {
+            return (!program || exam.program === program) &&
+                (!batch || exam.batch === batch) &&
+                (!session || exam.session === session) &&
+                (!day || exam.day === day) &&
+                (!month || exam.month === month) &&
+                (!year || exam.year === year)
 
-            return matchProgram && matchBatch && matchSession && matchDay && matchMonth && matchYear;
         })
-        setDisplayExams(filteredExams)
 
-        console.log(displayExams)
+        console.log(filtered)
+        setDisplayExams(filtered.reverse())
 
 
     }
@@ -367,7 +367,7 @@ function Exams() {
                                 <div className="mb-4">
                                     <label className="block text-gray-700  font-bold mb-2 ">Day:</label>
                                     <select
-                                        defaultValue={date}
+                                        defaultValue={""}
                                         name='day'
                                         className="block w-full border-sky-600 bg-white border  rounded py-2 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                     >
@@ -382,7 +382,7 @@ function Exams() {
                                 <div className="mb-4 ">
                                     <label className="block text-gray-700  font-bold mb-2">Month:</label>
                                     <select
-                                        defaultValue={month}
+                                        defaultValue={""}
                                         name='month'
 
                                         className="block w-full bg-white border border-sky-600 rounded py-2 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
@@ -406,7 +406,7 @@ function Exams() {
                                     <label className="block text-gray-700  font-bold mb-2">Year:</label>
                                     <select
                                         name='year'
-                                        defaultValue={year}
+                                        defaultValue={""}
                                         className="p-2 border border-sky-600 rounded w-full"
                                     > <option value={""}>All</option>
                                         {[2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030].map(year => (
