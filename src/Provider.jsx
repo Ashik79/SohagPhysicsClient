@@ -95,7 +95,7 @@ function Provider({ children }) {
   const notifyFailed = (message) => {
     toast.error(message);
   }
-console.log(role)
+const today=`${date}-${month}-${year}`
   const providerInfo = {
     login,
     user,
@@ -113,7 +113,9 @@ console.log(role)
     getMonth,
     notifySuccess,
     notifyFailed,
-    loggedPhoto
+    loggedPhoto,
+    today
+    
   };
 
   return (

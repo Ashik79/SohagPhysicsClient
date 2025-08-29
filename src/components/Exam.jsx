@@ -9,10 +9,12 @@ import * as XLSX from 'xlsx';
 import { IoCloudDownloadOutline } from "react-icons/io5";
 
 function Exam() {
-    const { notifySuccess, notifyFailed, getMonth } = useContext(AuthContext);
+    const { notifySuccess, notifyFailed, getMonth, loggedUser, today } = useContext(AuthContext);
     const [exam, setExam] = useState(useLoaderData())
     console.log(exam);
     const { title, session, batch, program, date, results: examResults, mcqTotal, writenTotal, day, month, year } = exam;
+    const [published, setPublished] = useState(exam.published)
+
     const tarikh = `${day} ${getMonth(month)}, ${year}`
     const [displayResults, setDisplayResults] = useState(examResults)
     const [file, setFile] = useState(null)
@@ -369,7 +371,22 @@ function Exam() {
             console.log(result2);
 
             if (result2.response_code == 202) {
+                const response = await fetch(`https://spoffice-server.vercel.app/exam/update/${exam._id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ published: { status: true, date: today, publishedBy: loggedUser } })
+                });
 
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    notifyFailed(errorText);
+                    setLoading(false);
+                    return;
+                }
+
+                setPublished({ status: true, date: today, publishedBy: loggedUser })
                 notifySuccess("Result Published Successfully !")
                 setLoading(false)
             }
@@ -484,6 +501,14 @@ function Exam() {
                     <span className='font-semibold w-1/2'>
                         {displayResults?.length}
                     </span>
+                </div>
+                <div className='flex items-center text-sm lg:text-base  rounded-xl pl-4 bg-sky-200 px-2 py-1 mt-2'>
+                    <span className='w-1/2'>
+                        Result Published
+                    </span>
+                    {published ? <span className='font-semibold text-sm w-1/2'>
+                        in {published.date} by {published.publishedBy}
+                    </span> : <span>Not Published</span>}
                 </div>
 
 

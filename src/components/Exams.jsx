@@ -4,19 +4,25 @@ import { Link, Navigate, useLoaderData } from 'react-router-dom'
 import { IoMdClose } from "react-icons/io";
 import { MdDeleteForever } from "react-icons/md";
 import Swal from 'sweetalert2';
+import LoadingPage from './OtherPages.jsx/LoadingPage';
 
 function Exams() {
 
     const { month, year, date, getMonth, notifySuccess } = useContext(AuthContext)
     const [loading, setLoading] = useState(false)
-    const allExams = useLoaderData();
+    const [firstLoading, setFirstLoading] = useState(true)
+
     const [displayExams, setDisplayExams] = useState([]);
 
     useEffect(() => {
-
-        const sortedExams = [...allExams].sort((a, b) => new Date(b.date) - new Date(a.date));
-        setDisplayExams(sortedExams);
-    }, [allExams]);
+        fetch('https://spoffice-server.vercel.app/getexams')
+            .then(res => res.json())
+            .then(data => {
+                const sortedExams = data.sort((a, b) => new Date(b.date) - new Date(a.date));
+                setDisplayExams(sortedExams);
+                setFirstLoading(false)
+            })
+    }, []);
 
     const [navigate, setNavigate] = useState(false)
     const handleAddExam = e => {
@@ -59,7 +65,7 @@ function Exams() {
             })
         e.target.reset()
     }
- 
+
 
     const handleFilter = e => {
         e.preventDefault()
@@ -124,7 +130,7 @@ function Exams() {
     }
 
     return (
-        <div>
+        !firstLoading ? <div>
             {/* Open the modal using document.getElementById('ID').showModal() method */}
             <div className='flex justify-between items-center'>
                 <p className=' font-bold text-xl text-cyan-600 underline lg:text-2xl'>Exam Management</p>
@@ -245,14 +251,14 @@ function Exams() {
                                         <option value={'Sun 10'}>রবি ৬টা (নিউ নাইন SSC 27 - HSC 29) </option>
                                         <option value={'Sun 11'}>রবি ৭টা (নিউ টেন SSC 26 - HSC 28) </option>
                                         <option>HSC 26 Admission cancel</option>
-                                <option>HSC 27 Admission cancel</option>
-                                <option>SSC 26 class 10 Admission cancel</option>
-                                <option>SSC 27 class 9 Admission cancel</option>
+                                        <option>HSC 27 Admission cancel</option>
+                                        <option>SSC 26 class 10 Admission cancel</option>
+                                        <option>SSC 27 class 9 Admission cancel</option>
                                         <option>Exam Batch HSC 26</option>
                                         <option>Exam Batch (নিউ নাইন SSC 27 - HSC 29)</option>
                                         <option>Exam Batch (নিউ টেন SSC 26 - HSC 28)</option>
-                                        
-                                        
+
+
                                         <option>SSC 25 (Physics Olympiad)</option>
                                         <option>Class 9 (SSC 27) Phy Champ</option>
                                         <option>Class 10 (SSC 26) Phy Champ</option>
@@ -445,14 +451,14 @@ function Exams() {
                                         <option value={'Sun 10'}>রবি ৬টা (নিউ নাইন SSC 27 - HSC 29) </option>
                                         <option value={'Sun 11'}>রবি ৭টা (নিউ টেন SSC 26 - HSC 28) </option>
                                         <option>HSC 26 Admission cancel</option>
-                                <option>HSC 27 Admission cancel</option>
-                                <option>SSC 26 class 10 Admission cancel</option>
-                                <option>SSC 27 class 9 Admission cancel</option>
+                                        <option>HSC 27 Admission cancel</option>
+                                        <option>SSC 26 class 10 Admission cancel</option>
+                                        <option>SSC 27 class 9 Admission cancel</option>
                                         <option>Exam Batch HSC 26</option>
                                         <option>Exam Batch (নিউ নাইন SSC 27 - HSC 29)</option>
                                         <option>Exam Batch (নিউ টেন SSC 26 - HSC 28)</option>
-                                        
-                                        
+
+
                                         <option>SSC 25 (Physics Olympiad)</option>
                                         <option>Class 9 (SSC 27) Phy Champ</option>
                                         <option>Class 10 (SSC 26) Phy Champ</option>
@@ -554,7 +560,10 @@ function Exams() {
             {
                 navigate ? <Navigate to={'/exams'}></Navigate> : ''
             }
-        </div>
+        </div> :
+            <div>
+                <LoadingPage></LoadingPage>
+            </div>
     )
 }
 
