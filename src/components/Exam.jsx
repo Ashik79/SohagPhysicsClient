@@ -405,18 +405,17 @@ function Exam() {
 
     }
     const handleDelete = async (id) => {
-
+        const response = await fetch(`https://spoffice-server.vercel.app/student/${id}`)
+        let student=await response.json()
         let data = exam;
+     
         let filteredResults = data.results.filter(result => result.id != id)
         data.results = filteredResults
-        // fetch(`https://spoffice-server.vercel.app/deleteresult/${exam._id}`, {
-        //     method: 'PUT',
-        //     headers: {
-        //         'content-type': 'application/json'
-        //     },
-        //     body: JSON.stringify(data)
-
-        // })
+        student.exams=student.exams.filter(result => result.examId !=data._id)
+        console.log(data)
+        console.log(filteredResults)
+        
+      
 
         const res = await fetch(`https://spoffice-server.vercel.app/deleteresult/${exam._id}`, {
             method: 'PUT',
@@ -431,6 +430,14 @@ function Exam() {
             notifySuccess("Successfully Deleted")
             setDisplayResults(data.results)
         }
+        const studentResultDelete = await fetch(`https://spoffice-server.vercel.app/addresult/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify(student)
+
+            })
     }
 
     return (
