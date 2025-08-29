@@ -31,7 +31,7 @@ const ExamsList = ({ student }) => {
         headers: {
           'content-type': 'application/json'
         },
-        body: JSON.stringify(filteredExams)
+        body: JSON.stringify(filteredExams.reverse())
       });
 
       if (downloadResponse.ok) {
@@ -72,7 +72,7 @@ const ExamsList = ({ student }) => {
       <div>
         {filteredExams.length > 0 ? (
           <ul>
-            {filteredExams.map((exam, index) => (
+            {filteredExams.reverse().map((exam, index) => (
               <li key={index} className="p-2 border border-sky-600 rounded-xl px-5 py-2 mb-2">
                 <p><strong>Title:</strong> {exam.title}</p>
                 {exam.mcqTotal ? <p><strong>MCQ :</strong> {exam.mcqMarks}/{exam.mcqTotal}</p> : ''}

@@ -1,7 +1,7 @@
 import React from 'react'
 
 function StudentDetailsPart({ student }) {
-    const { address, admissionDate, lastEdit, admittedBy, note, batch, college, waver, gname, gphone, id, monthlyAmount, name, phone, program, reference, school, session, target } = student
+    const { address, admissionDate, lastEdit, admittedBy, note, batch, college, waver,waverReason, gname, gphone, id, monthlyAmount, name, phone, program, reference, school, session, target } = student
 
     return (
         <div>
@@ -119,6 +119,14 @@ function StudentDetailsPart({ student }) {
                 </span>
                 <span className='font-semibold w-3/5'>
                     {waver}
+                </span>
+            </div>
+            <div className='flex items-center text-sm lg:text-base  rounded-xl pl-4 bg-sky-200 px-2 py-1 mt-2'>
+                <span className='w-2/5'>
+                    Waver Reason
+                </span>
+                <span className='font-semibold w-3/5'>
+                    {waverReason}
                 </span>
             </div>
 

@@ -64,6 +64,7 @@ function ProgramEntry() {
         }
         const program = event.target.program.value;
         const waver = event.target.waver.value || 0;
+        const waverReason = event.target.waverReason.value 
 
         //Agei joined ache kina 
         const alreadyPaid = user.programs.some(pro =>
@@ -111,7 +112,7 @@ function ProgramEntry() {
 
                 user.payments.push(notePayment)
                 user.payments.push(examPayment)
-                const temp = { ...user, waver: waver }
+                const temp = { ...user, waver ,waverReason}
                 setUser(temp)
 
 
@@ -146,7 +147,7 @@ function ProgramEntry() {
                             api_key: 'CUOP72nJJHahM30djaQG',
                             senderid: '8809617642567',
                             number: user.phone,
-                            message: `Successfully enrolled program ${program}\nStudent ID: ${id}\nName: ${name}\nPaid Amount: ${Fee}${waver? `\nwaver: ${waver}`:''}\nEnrolled by: ${loggedUser}\nSohag Physics`
+                            message: `Successfully enrolled program ${program}\nStudent ID: ${id}\nName: ${name}\nPaid Amount: ${Fee}${waver ? `\nwaver: ${waver}` : ''}\nEnrolled by: ${loggedUser}\nSohag Physics`
 
                         }),
                     })
@@ -179,7 +180,7 @@ function ProgramEntry() {
                 }
 
                 user.programs.push(programData)
-                const temp = { ...user, waver: waver }
+                const temp = { ...user, waver,waverReason }
                 setUser(temp)
 
                 const res = await fetch(`https://spoffice-server.vercel.app/addpayment/${id}`, {
@@ -203,7 +204,7 @@ function ProgramEntry() {
                             api_key: 'CUOP72nJJHahM30djaQG',
                             senderid: '8809617642567',
                             number: user.phone,
-                            message: `Successfully enrolled program ${program}\nStudent ID: ${id}\nName: ${name}\nPaid Amount: ${Fee}${waver? `\nwaver: ${waver}`:''}\nEnrolled by: ${loggedUser}\nSohag Physics`
+                            message: `Successfully enrolled program ${program}\nStudent ID: ${id}\nName: ${name}\nPaid Amount: ${Fee}${waver ? `\nwaver: ${waver}` : ''}\nEnrolled by: ${loggedUser}\nSohag Physics`
 
                         }),
                     })
@@ -236,7 +237,7 @@ function ProgramEntry() {
                 }
 
                 user.programs.push(programData)
-                const temp = { ...user, waver: waver }
+                const temp = { ...user, waver,waverReason }
                 setUser(temp)
 
                 const res = await fetch(`https://spoffice-server.vercel.app/addpayment/${id}`, {
@@ -262,7 +263,7 @@ function ProgramEntry() {
                             api_key: 'CUOP72nJJHahM30djaQG',
                             senderid: '8809617642567',
                             number: user.phone,
-                            message: `Successfully enrolled program ${program}\nStudent ID: ${id}\nName: ${name}\nPaid Amount:${Fee}\nDue Amount:${due}${waver? `\nwaver: ${waver}`:''}\nEnrolled by: ${loggedUser}`
+                            message: `Successfully enrolled program ${program}\nStudent ID: ${id}\nName: ${name}\nPaid Amount:${Fee}\nDue Amount:${due}${waver ? `\nwaver: ${waver}` : ''}\nEnrolled by: ${loggedUser}`
 
                         }),
                     })
@@ -443,9 +444,22 @@ function ProgramEntry() {
                                         <p className='font-semibold'>Waver <span className='text-red-700'>*</span> </p>
                                         <input
                                             onWheel={(e) => e.target.blur()}
-                                            defaultValue={user.waver||0}
+                                            defaultValue={user.waver || 0}
                                             name='waver'
                                             type="number"
+
+                                            className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                    </div> : <></>
+                            }
+                            {
+                                programStatus != 'Chuti' ?
+                                    <div>
+                                        <p className='font-semibold'>Waver Reason<span className='text-red-700'>*</span> </p>
+                                        <input
+                                            onWheel={(e) => e.target.blur()}
+                                            defaultValue={user.waverReason}
+                                            name='waverReason'
+                                            type="text"
 
                                             className="input text-lg font-semibold  input-bordered input-info w-full " />
                                     </div> : <></>
