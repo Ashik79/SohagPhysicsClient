@@ -406,16 +406,12 @@ function Exam() {
     }
     const handleDelete = async (id) => {
         const response = await fetch(`https://spoffice-server.vercel.app/student/${id}`)
-        let student=await response.json()
-        let data = exam;
-     
-        let filteredResults = data.results.filter(result => result.id != id)
-        data.results = filteredResults
-        student.exams=student.exams.filter(result => result.examId !=data._id)
-        console.log(data)
-        console.log(filteredResults)
-        
-      
+        let student = await response.json()
+       
+
+        const filteredResults = exam.results.filter(result => parseInt(result.id) != parseInt(id))
+        const data ={...exam,results:filteredResults}
+        student.exams = student.exams.filter(result => result.examId != data._id)
 
         const res = await fetch(`https://spoffice-server.vercel.app/deleteresult/${exam._id}`, {
             method: 'PUT',
@@ -431,13 +427,13 @@ function Exam() {
             setDisplayResults(data.results)
         }
         const studentResultDelete = await fetch(`https://spoffice-server.vercel.app/addresult/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'content-type': 'application/json'
-                },
-                body: JSON.stringify(student)
+            method: 'PUT',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(student)
 
-            })
+        })
     }
 
     return (
@@ -676,7 +672,7 @@ function Exam() {
 
 
 
-                        <a onClick={() => handleDelete(result.id)} className='flex items-center text-lg gap-1 text-red-600'><MdDeleteForever /></a>
+                        <a onClick={() => handleDelete(parseInt(result.id))} className='flex items-center text-lg gap-1 text-red-600'><MdDeleteForever /></a>
 
 
                     </div>
