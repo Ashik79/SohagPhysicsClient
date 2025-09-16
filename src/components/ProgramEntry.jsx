@@ -112,12 +112,11 @@ function ProgramEntry() {
 
                 user.payments.push(notePayment)
                 user.payments.push(examPayment)
-                const temp = { ...user, waver ,waverReason}
-                setUser(temp)
-
-
-
+                
+                
+                
                 const monthlyAmount = parseInt(event.target.monthlyAmount.value)
+                console.log(monthlyAmount)
                 user.monthlyAmount = monthlyAmount
                 const type = 'regular';
                 const Fee = noteFee + examFee
@@ -125,6 +124,8 @@ function ProgramEntry() {
                     program, monthlyAmount, type, payDate, Fee, entryBy: loggedUser
                 }
                 user.programs.push(programData)
+                const temp = { ...user, waver ,waverReason,monthlyAmount}
+                setUser(temp)
 
                 const res = await fetch(`https://spoffice-server.vercel.app/addpayment/${id}`, {
                     method: 'PUT',
