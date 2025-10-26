@@ -126,7 +126,7 @@ function Videofiles() {
     const updatedChapter = { ...chapter, Videos: updatedfiles }
    
     fetch(`https://spoffice-server.vercel.app/updateVideofile/${editfiles.id}`, {
-    // fetch(`http://localhost:5000/updateVideofile/${editfiles.id}`, {
+    // fetch(`https://spoffice-server.vercel.app/updateVideofile/${editfiles.id}`, {
       method: 'PUT',
       headers: {
         'content-type': 'application/json'

@@ -126,7 +126,7 @@ function PdfNotes() {
     const updatedChapter = { ...chapter, Pdfs: updatedNotes }
    
     fetch(`https://spoffice-server.vercel.app/updatepdffile/${editNotes.id}`, {
-    // fetch(`http://localhost:5000/updatepdffile/${editNotes.id}`, {
+    // fetch(`https://spoffice-server.vercel.app/updatepdffile/${editNotes.id}`, {
       method: 'PUT',
       headers: {
         'content-type': 'application/json'
