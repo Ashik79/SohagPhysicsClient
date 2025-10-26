@@ -7,6 +7,7 @@ import { IoMdClose } from "react-icons/io";
 
 import Courses from './VideoCourses';
 import PdfCourses from './PdfCourses';
+import NoticeBoard from './NoticeBoard';
 
 const EditorDashboard = () => {
   const { role, notifySuccess } = useContext(AuthContext)
@@ -24,7 +25,7 @@ const EditorDashboard = () => {
       case 'pdf':
         return <div><PdfCourses></PdfCourses></div>;
       case 'notice':
-        return <div></div>;
+        return <div><NoticeBoard></NoticeBoard></div>;
       case 'results':
         return <div></div>;
       case 'attendance':
@@ -62,7 +63,7 @@ const EditorDashboard = () => {
         </button>
         <button
           onClick={() => setActiveTab('notice')}
-          className={`px-2 py-1 whitespace-nowrap ${activeTab === 'notes' ? 'bg-sky-600 text-white' : 'bg-gray-200'} rounded hover:bg-sky-700`}
+          className={`px-2 py-1 whitespace-nowrap ${activeTab === 'notice' ? 'bg-sky-600 text-white' : 'bg-gray-200'} rounded hover:bg-sky-700`}
         >
           Notice
         </button>
