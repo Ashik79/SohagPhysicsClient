@@ -5,12 +5,12 @@ const BatchCard = ({ batch }) => {
     const [showMenu, setShowMenu] = useState(false);
 
     
-    console.log(batch)
+    // //console.log(batch)
     const toggleMenu = () => {
         setShowMenu(!showMenu);
     };
     const handlePresentDownload = async () => {
-        console.log('d')
+        // //console.log('d')
         try {
 
             const downloadResponse = await fetch('https://spoffice-server.vercel.app/download/students', {
@@ -41,7 +41,7 @@ const BatchCard = ({ batch }) => {
         }
     }
     const handleAbsentDownload = async () => {
-        console.log('d')
+        // //console.log('d')
         try {
 
             const downloadResponse = await fetch('https://spoffice-server.vercel.app/download/students', {

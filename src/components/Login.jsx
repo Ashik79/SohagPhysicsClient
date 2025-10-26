@@ -13,16 +13,16 @@ function Login() {
     setLoading(true)
     e.preventDefault()
     const email = e.target.email.value;
-    console.log(email);
+  
     const pass = e.target.pass.value;
-    console.log(pass);
+  
 
     login(email, pass)
 
       .then((userCredential) => {
         // Signed up success hole
         const user = userCredential.user
-        console.log(user)
+        // //console.log(user)
         setLoading(false);
 
         setnevi(true);

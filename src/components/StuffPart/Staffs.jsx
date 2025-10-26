@@ -7,7 +7,7 @@ const Staffs = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const totalPages = Math.ceil(staffs.length / itemsPerPage);
-console.log(staffs)
+//console.log(staffs)
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };

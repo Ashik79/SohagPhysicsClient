@@ -41,7 +41,7 @@ const loaded =useLoaderData()
         })
             .then(res => res.json())
             .then(data => {
-                console.log(data)
+                // //console.log(data)
                 if (data.insertedId) {
                     notifySuccess("Coupon added Successfully")
                     const newDisplay = [...displayCoupons, details]
@@ -53,7 +53,7 @@ const loaded =useLoaderData()
             })
         e.target.reset()
     }
-    console.log(displayCoupons)
+    // //console.log(displayCoupons)
 
     
 
@@ -69,7 +69,7 @@ const loaded =useLoaderData()
             cancelButtonText: 'Cancel',
         }).then((result) => {
             if (result.isConfirmed) {
-                console.log(id)
+                //console.log(id)
                 fetch(`https://spoffice-server.vercel.app/coupon/delete/${id}`, {
                     method: "DELETE"
                 })

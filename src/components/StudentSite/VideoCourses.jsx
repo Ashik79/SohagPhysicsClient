@@ -37,7 +37,7 @@ const [firstLoading, setFirstLoading] = useState(true)
 
   const handleImageUpload = (url) => {
     setUploadedImageUrl(url);
-    console.log("Image URL received in parent:", url);
+    //console.log("Image URL received in parent:", url);
   };
 
   const [navigate, setNavigate] = useState(false)
@@ -54,7 +54,7 @@ const [firstLoading, setFirstLoading] = useState(true)
     const details = {
       title, chapters, priority, thumbnail,id
     }
-    console.log(details)
+    //console.log(details)
     fetch('https://spoffice-server.vercel.app/addVideocourse', {
       method: 'POST',
       headers: {
@@ -64,7 +64,7 @@ const [firstLoading, setFirstLoading] = useState(true)
     })
       .then(res => res.json())
       .then(data => {
-        console.log(data)
+        //console.log(data)
         if (data.insertedId) {
           notifySuccess("Course added Successfully")
           const newDisplay = [...displayCourses, details]
@@ -88,7 +88,7 @@ const [firstLoading, setFirstLoading] = useState(true)
 
 
   const handleEditCourse = e => {
-    console.log(editCourse)
+    //console.log(editCourse)
     setLoading(true)
     e.preventDefault()
     const title = e.target.title.value
@@ -98,7 +98,7 @@ const [firstLoading, setFirstLoading] = useState(true)
     const details = {
       title, priority, thumbnail,chapters,id:editCourse.id
     }
-    console.log(details)
+    //console.log(details)
     fetch( `https://spoffice-server.vercel.app/Videocourseupdate/${editCourse.id}`, {
       method: 'PUT',
       headers: {
@@ -108,7 +108,7 @@ const [firstLoading, setFirstLoading] = useState(true)
     })
       .then(res => res.json())
       .then(data => {
-        console.log(data)
+        //console.log(data)
         if (data.modifiedCount) {
           notifySuccess("Course Updated Successfully")
           const withoutEdited =allCourses.filter(course =>course._id !=editCourse._id)
@@ -147,7 +147,7 @@ const [firstLoading, setFirstLoading] = useState(true)
       cancelButtonText: 'Cancel',
     }).then((result) => {
       if (result.isConfirmed) {
-        console.log(id)
+        //console.log(id)
         fetch(`https://spoffice-server.vercel.app/Videocourse/delete/${id}`, {
           method: "DELETE"
         })

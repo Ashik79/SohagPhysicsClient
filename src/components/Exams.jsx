@@ -54,7 +54,7 @@ function Exams() {
         })
             .then(res => res.json())
             .then(data => {
-                console.log(data)
+                // //console.log(data)
                 if (data.insertedId) {
                     notifySuccess("Exam added Successfully")
                     const newDisplay = [...displayExams, details]
@@ -70,7 +70,7 @@ function Exams() {
 
     const handleFilter = e => {
         e.preventDefault()
-        console.log('status changed')
+        // //console.log('status changed')
         const program = e.target.program.value
         const batch = e.target.batch.value
         const session = e.target.session.value
@@ -89,7 +89,7 @@ function Exams() {
 
         })
 
-        console.log(filtered)
+        // //console.log(filtered)
         setDisplayExams(filtered.reverse())
 
 
@@ -107,7 +107,7 @@ function Exams() {
             cancelButtonText: 'Cancel',
         }).then((result) => {
             if (result.isConfirmed) {
-                console.log(id)
+               
                 fetch(`https://spoffice-server.vercel.app/exam/delete/${id}`, {
                     method: "DELETE"
                 })

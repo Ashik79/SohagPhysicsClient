@@ -57,7 +57,7 @@ const StaffDetails = () => {
     activeMin = totalMin % 60;
   }
 
-  console.log(staff)
+  //console.log(staff)
   const [activeTab, setActiveTab] = useState('workHours');
   const [messageText, setMessageText] = useState("")
   const [selectedOption, setSelectedOption] = useState('bangla');
@@ -82,7 +82,7 @@ const StaffDetails = () => {
   const handleEditSession = async e => {
     e.preventDefault()
     setLoading(true)
-    console.log(e.target)
+    //console.log(e.target)
     let newSession = editSession
     newSession.inHour = entryHour;
     newSession.inMin = entryMinute;
@@ -105,7 +105,7 @@ const StaffDetails = () => {
     tempStaff.sessions = newSessions
     setStaff(tempStaff)
 
-    console.log(staff)
+    //console.log(staff)
 
     try {
       const response = await fetch(`https://spoffice-server.vercel.app/updatestaff/${staff._id}`, {
@@ -116,7 +116,7 @@ const StaffDetails = () => {
         body: JSON.stringify(staff)
       });
       const data = await response.json();
-      console.log(data)
+      //console.log(data)
       if (data.modifiedCount) {
 
         setLoading(false)
@@ -175,7 +175,7 @@ const StaffDetails = () => {
           );
   
           const data = await response.json();
-          console.log(data);
+          //console.log(data);
   
           if (data.modifiedCount) {
             Swal.fire({

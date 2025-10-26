@@ -320,8 +320,8 @@ useEffect(()=>{
   const handleIdInput = async (event) => {
     event.preventDefault();
     const session = Number(event.target.session.value); // Ensure session is a number
-    console.log("Formatted Date:", formatDate(pickedDate));
-    console.log("Session Type:", typeof (session), "Session Value:", session);
+    // //console.log("Formatted Date:", formatDate(pickedDate));
+    // //console.log("Session Type:", typeof (session), "Session Value:", session);
     const tempBatchData = [
       {
         name: "Sat 1",
@@ -472,7 +472,7 @@ useEffect(()=>{
       });
     });
     setBatchData(tempBatchData)
-    console.log("Batch Data after Attendance Check:", batchData);
+    // //console.log("Batch Data after Attendance Check:", batchData);
   };
 
 

@@ -14,7 +14,7 @@ function UpdateStudent() {
     const [error, setError] = useState('')
     const handleImageUpload = (url) => {
         setUploadedImageUrl(url);
-        console.log("Image URL received in parent:", url);
+        //console.log("Image URL received in parent:", url);
     };
 
 
@@ -22,8 +22,8 @@ function UpdateStudent() {
     const handleAdmission = async (e) => {
 
         const admissionDate = `${date}-${month}-${year}`
-        console.log(admissionDate)
-        console.log("admission clicked")
+        //console.log(admissionDate)
+        //console.log("admission clicked")
         e.preventDefault();
         let image = student?.image
         if (uploadedImageUrl) {
@@ -56,7 +56,7 @@ function UpdateStudent() {
         const formData = {
             id, monthlyAmount, batch, name,note,image, school, college, session, target, phone, address, reference, gname, gphone, gender,lastEdit:loggedUser
         }
-        console.log(formData)
+        //console.log(formData)
 
         try {
             const response = await fetch(`https://spoffice-server.vercel.app/student/update/${id}`, {
@@ -75,7 +75,7 @@ function UpdateStudent() {
             } else {
                 // Handle successful response
                 const result = await response.json();
-                console.log('Updated:', result);
+                //console.log('Updated:', result);
                 if (result.modifiedCount) {
                     notifySuccess("Student info updated")
                     setNavigate(true)

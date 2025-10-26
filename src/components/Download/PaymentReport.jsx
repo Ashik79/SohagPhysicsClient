@@ -291,7 +291,7 @@ function PaymentReport() {
             // Save the generated PDF
             doc.save(`Payment sheet of batch: ${students[0].batch}, Session: ${session ? session : 'All'}, Year: ${paymentYear}.pdf`);
         } catch (err) {
-            console.log("Error generating PDF:", err);
+            //console.log("Error generating PDF:", err);
         }
     };
 

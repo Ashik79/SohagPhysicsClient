@@ -55,8 +55,8 @@ function Monitor() {
         setBrk(breakUsers);
         setDutyFinished(finishedUsers);
     }, [loadedUsers]);
-    console.log(brk)
-    console.log(inactiveAll)
+    //console.log(brk)
+    //console.log(inactiveAll)
     // Render boxes for users by location
     const renderLocationBox = (locationUsers, locationName, bgColor) => (
         <div className={`border p-3 rounded-lg mb-4 ${bgColor}`}>

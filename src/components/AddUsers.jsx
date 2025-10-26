@@ -19,7 +19,7 @@ function AddUsers() {
         const user = {
             email, name, photo, role
         }
-        console.log(user)
+        // //console.log(user)
 
         fetch('https://spoffice-server.vercel.app/adduser', {
             method: 'POST',
@@ -30,7 +30,7 @@ function AddUsers() {
         })
             .then(res => res.json())
             .then(data => {
-                console.log(data)
+                // //console.log(data)
                 notifySuccess("User Added Successfully")
                 setLoading(false)
             })

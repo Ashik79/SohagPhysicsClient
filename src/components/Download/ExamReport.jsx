@@ -97,7 +97,7 @@ function ExamReport() {
             }
 
             const data2 = await res2.json();
-            console.log(data2)
+            //console.log(data2)
             setExams(data2)
 
 
@@ -311,7 +311,7 @@ function ExamReport() {
             // Save the generated PDF
             doc.save(`Exam sheet of batch: ${students[0].batch}, Session: ${session ? session : 'All'}, Month: ${getMonth(paymentMonth)},${paymentYear}.pdf`);
         } catch (err) {
-            console.log("Error generating PDF:", err);
+            //console.log("Error generating PDF:", err);
         }
     };
 

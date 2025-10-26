@@ -16,7 +16,7 @@ function ProgramEntry() {
 
     const [disabled, setDisabled] = useState(false)
     const handleSelect = e => {
-        console.log('s')
+        //console.log('s')
         setDisabled(true)
         setTimeout(() => {
             setDisabled(false)
@@ -44,7 +44,7 @@ function ProgramEntry() {
 
 
 
-    console.log(user)
+    //console.log(user)
     const { name, id, } = user;
 
 
@@ -116,7 +116,7 @@ function ProgramEntry() {
                 
                 
                 const monthlyAmount = parseInt(event.target.monthlyAmount.value)
-                console.log(monthlyAmount)
+                //console.log(monthlyAmount)
                 user.monthlyAmount = monthlyAmount
                 const type = 'regular';
                 const Fee = noteFee + examFee
@@ -153,7 +153,7 @@ function ProgramEntry() {
                         }),
                     })
                     const result2 = await response2.json();
-                    console.log(result2);
+                    //console.log(result2);
                     if (result2.response_code == 202) {
 
                         setLoading(false)
@@ -210,7 +210,7 @@ function ProgramEntry() {
                         }),
                     })
                     const result2 = await response2.json();
-                    console.log(result2);
+                    //console.log(result2);
                     if (result2.response_code == 202) {
 
                         setLoading(false)
@@ -269,7 +269,7 @@ function ProgramEntry() {
                         }),
                     })
                     const result2 = await response2.json();
-                    console.log(result2);
+                    //console.log(result2);
                     if (result2.response_code == 202) {
 
                         setLoading(false)

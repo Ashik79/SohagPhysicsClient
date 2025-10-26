@@ -54,7 +54,7 @@ function Students() {
         if (gender) {
             query.gender = gender;
         }
-        console.log(query)
+        //console.log(query)
         if (role != 'CEO' && !query.phone && !query.id && !name) {
             notifyFailed("Input Can't be blank")
             setLoading(false)
@@ -102,13 +102,13 @@ function Students() {
                     }
                     else if (data.length) {
 
-                        console.log(data)
+                        //console.log(data)
                         notifySuccess(`Found ${data.length} students !`)
                         setLoading(false)
                         setStudents(data)
                     }
                 }
-                console.log(students)
+                //console.log(students)
             })
     }
     return (

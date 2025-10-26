@@ -11,7 +11,7 @@ import LoadingPage from '../OtherPages.jsx/LoadingPage';
 
 function PdfNotes() {
   const params = useParams()
-  console.log(params.id)
+  //console.log(params.id)
   const [firstLoading, setFirstLoading] = useState(true)
   const { month, year, date, getMonth, notifySuccess, notifyFailed } = useContext(AuthContext)
   const [loading, setLoading] = useState(false)
@@ -28,7 +28,7 @@ function PdfNotes() {
 
       .then(res => res.json())
       .then(data => {
-        console.log(data.chapters[0])
+        //console.log(data.chapters[0])
         setChapter(data.chapters[0])
         setAllNotes(data.chapters[0].Pdfs)
         setFirstLoading(false)
@@ -40,7 +40,7 @@ function PdfNotes() {
 
   useEffect(() => {
     if (allNotes.length) {
-      console.log("call hoise")
+      //console.log("call hoise")
       let temp = allNotes;
       temp.sort((a, b) => a.priority - b.priority)
       setDisplayNotes(temp)
@@ -54,7 +54,7 @@ function PdfNotes() {
 
   const handleImageUpload = (url) => {
     setUploadedImageUrl(url);
-    console.log("Image URL received in parent:", url);
+    //console.log("Image URL received in parent:", url);
   };
 
   const [navigate, setNavigate] = useState(false)
@@ -84,7 +84,7 @@ function PdfNotes() {
     })
       .then(res => res.json())
       .then(data => {
-        console.log(data)
+        //console.log(data)
         if (data.modifiedCount) {
           notifySuccess("Pdf added Successfully")
 
@@ -109,7 +109,7 @@ function PdfNotes() {
 
 
   const handleEditNotes = e => {
-    console.log(editNotes)
+    //console.log(editNotes)
     setLoading(true)
     e.preventDefault()
     const title = e.target.title.value
@@ -135,7 +135,7 @@ function PdfNotes() {
     })
       .then(res => res.json())
       .then(data => {
-        console.log(data)
+        //console.log(data)
         if (data.modifiedCount) {
           notifySuccess("Notes Updated Successfully")
 
@@ -177,7 +177,7 @@ function PdfNotes() {
 
         const updatedNotes = displayNotes.filter(Notes => Notes != deletable)
 
-        console.log('updatednotes',updatedNotes)
+        //console.log('updatednotes',updatedNotes)
         const updatedChapter = { ...chapter, Pdfs: updatedNotes }
 
         fetch(`https://spoffice-server.vercel.app/updatepdfchapter/${params.id}`, {

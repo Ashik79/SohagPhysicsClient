@@ -15,10 +15,10 @@ const ProgramList = ({ student }) => {
             setPrograms(student.programs);
         }
     }, [student]);
-    console.log(student)
+    //console.log(student)
 
     const handleDelete=async(programname)=>{
-        console.log('delete',programname)
+        //console.log('delete',programname)
         const remaining =student.programs.filter(program => program.program !=programname)
         student.programs =remaining
         const res = await fetch(`https://spoffice-server.vercel.app/addpayment/${student.id}`, {

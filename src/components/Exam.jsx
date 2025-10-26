@@ -11,7 +11,7 @@ import { IoCloudDownloadOutline } from "react-icons/io5";
 function Exam() {
     const { notifySuccess, notifyFailed, getMonth, loggedUser, today } = useContext(AuthContext);
     const [exam, setExam] = useState(useLoaderData())
-    console.log(exam);
+    // //console.log(exam);
     const { title, session, batch, program, date, results: examResults, mcqTotal, writenTotal, day, month, year } = exam;
     const [published, setPublished] = useState(exam.published)
 
@@ -23,8 +23,8 @@ function Exam() {
         const sortedResults = [...displayResults].sort((a, b) => (b.mcqMarks + b.writenMarks) - (a.mcqMarks + a.writenMarks));
         let rank = 1;
         let previousMarks = sortedResults[0]?.mcqMarks + sortedResults[0]?.writenMarks
-        console.log(sortedResults)
-        console.log(previousMarks)
+        // //console.log(sortedResults)
+        // //console.log(previousMarks)
 
         sortedResults.forEach((result, index) => {
             // If the current student's marks are the same as the previous student's, they share the same rank
@@ -36,7 +36,7 @@ function Exam() {
             previousMarks = result.mcqMarks + result.writenMarks; // Update previousMarks for the next iteration
         });
         setDisplayResults(sortedResults);
-        console.log(displayResults)
+        // //console.log(displayResults)
     }, [displayResults.length]);
 
 
@@ -77,7 +77,7 @@ function Exam() {
         try {
             const res = await fetch(`https://spoffice-server.vercel.app/student/${id}`);
             const data = await res.json();
-            console.log(data);
+            // //console.log(data);
 
             if (!data.id) {
                 notifyFailed("Student Not Found");
@@ -87,7 +87,7 @@ function Exam() {
 
             const name = data.name;
             const result = { id, mcqMarks, writenMarks, total, name, date, mcqTotal, writenTotal };
-            console.log(result);
+            // //console.log(result);
 
             const response = await fetch(`https://spoffice-server.vercel.app/exam/addresult/${exam._id}`, {
                 method: 'POST',
@@ -147,8 +147,8 @@ function Exam() {
             });
 
             const studentsData = await res.json();
-            console.log(studentsData)
-            console.log(ids)
+            // //console.log(studentsData)
+            // //console.log(ids)
 
             if (!studentsData || studentsData.length === 0) {
                 notifyFailed("No students found");
@@ -200,7 +200,7 @@ function Exam() {
             }
 
             const updateResult = await response.json();
-            console.log('Exam Updated:', updateResult);
+            // //console.log('Exam Updated:', updateResult);
 
             // Bulk update student profiles with the new exam results
             const response2 = await fetch(`https://spoffice-server.vercel.app/addbulkresults`, {
@@ -216,7 +216,7 @@ function Exam() {
                 notifyFailed(errorText);
             } else {
                 const result2 = await response2.json();
-                console.log('Students Updated:', result2);
+                // //console.log('Students Updated:', result2);
 
                 if (result2.modifiedCount) {
                     notifySuccess("Student info updated");
@@ -256,7 +256,7 @@ function Exam() {
             const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
             // Log the raw JSON data to debug
-            console.log('Raw JSON data:', jsonData);
+            // //console.log('Raw JSON data:', jsonData);
 
             // Assuming headers are present and the relevant data starts after the header row
             const header = jsonData[4];
@@ -294,7 +294,7 @@ function Exam() {
 
     //Download er Function
     const handleDownload = async () => {
-        console.log('d')
+        // //console.log('d')
         try {
 
             const downloadResponse = await fetch('https://spoffice-server.vercel.app/download/examresults', {
@@ -327,7 +327,7 @@ function Exam() {
     //Publish korar Function 
     const handlePublish = async () => {
         setLoading(true)
-        console.log("publish clicked")
+        // //console.log("publish clicked")
         const ids = []
         displayResults.map(result => {
             ids.push(result.id)
@@ -343,11 +343,11 @@ function Exam() {
             })
 
             const data = await res.json()
-            console.log(data)
+            // //console.log(data)
             const messages = []
             data.map(num => {
                 const result = displayResults.find(res => res.name == num.name)
-                console.log(result)
+                // //console.log(result)
                 const message = {
                     to: `${num.phone}`,
                     message: `Hey ${num.name},\nHere is your result! \nExam Name: ${title}\nExam Date: ${tarikh}\n${mcqTotal ? 'MCQ: ' : ''}${mcqTotal ? result.mcqMarks : ''}${mcqTotal ? `/${mcqTotal}\n` : ''}${writenTotal ? `Written: ${result.writenMarks}/${writenTotal}\n` : ''}Total: ${result.mcqMarks + result.writenMarks}/${mcqTotal + writenTotal}\nMerit:${result.merit}\nHighest Mark: ${displayResults[0].total} \nSohag Physics`
@@ -355,7 +355,7 @@ function Exam() {
                 messages.push(message)
 
             })
-            console.log(messages)
+            // //console.log(messages)
             const response2 = await fetch('https://bulksmsbd.net/api/smsapimany', {
                 method: 'POST',
                 headers: {
@@ -368,7 +368,7 @@ function Exam() {
                 }),
             })
             const result2 = await response2.json();
-            console.log(result2);
+            // //console.log(result2);
 
             if (result2.response_code == 202) {
                 const response = await fetch(`https://spoffice-server.vercel.app/exam/update/${exam._id}`, {

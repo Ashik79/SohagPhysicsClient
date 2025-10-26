@@ -108,7 +108,7 @@ function AddPayment() {
     useEffect(() => {
 
         if (unpaidMonths.length != 0) {
-            console.log(unpaidMonths)
+            // //console.log(unpaidMonths)
             setEntryMonth(unpaidMonths[0].month)
             setEntryYear(unpaidMonths[0].year)
         }
@@ -188,7 +188,7 @@ function AddPayment() {
         const coupon = event.target.coupon.value;
 
         if (coupon) {
-            console.log("Checking coupon...");
+            // //console.log("Checking coupon...");
             try {
                 const response = await fetch(`https://spoffice-server.vercel.app/getcoupon/${coupon}`);
                 const data = await response.json();
@@ -198,7 +198,7 @@ function AddPayment() {
                     return; // Stop the function here
                 } else {
                     pamount -= data.amount;
-                    console.log(pamount);
+                    // //console.log(pamount);
                     setCoupon(data);
                     if (data.month !== pmonth) {
                         notifyFailed("Coupon is not for this month");

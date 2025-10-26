@@ -11,7 +11,7 @@ import LoadingPage from '../OtherPages.jsx/LoadingPage';
 
 function Videofiles() {
   const params = useParams()
-  console.log(params.id)
+  //console.log(params.id)
   const [firstLoading, setFirstLoading] = useState(true)
   const { month, year, date, getMonth, notifySuccess, notifyFailed } = useContext(AuthContext)
   const [loading, setLoading] = useState(false)
@@ -28,7 +28,7 @@ function Videofiles() {
 
       .then(res => res.json())
       .then(data => {
-        console.log(data.chapters[0])
+        //console.log(data.chapters[0])
         setChapter(data.chapters[0])
         setAllfiles(data.chapters[0].Videos)
         setFirstLoading(false)
@@ -40,7 +40,7 @@ function Videofiles() {
 
   useEffect(() => {
     if (allfiles.length) {
-      console.log("call hoise")
+      //console.log("call hoise")
       let temp = allfiles;
       temp.sort((a, b) => a.priority - b.priority)
       setDisplayfiles(temp)
@@ -54,7 +54,7 @@ function Videofiles() {
 
   const handleImageUpload = (url) => {
     setUploadedImageUrl(url);
-    console.log("Image URL received in parent:", url);
+    //console.log("Image URL received in parent:", url);
   };
 
   const [navigate, setNavigate] = useState(false)
@@ -84,7 +84,7 @@ function Videofiles() {
     })
       .then(res => res.json())
       .then(data => {
-        console.log(data)
+        //console.log(data)
         if (data.modifiedCount) {
           notifySuccess("Video added Successfully")
 
@@ -109,7 +109,7 @@ function Videofiles() {
 
 
   const handleEditfiles = e => {
-    console.log(editfiles)
+    //console.log(editfiles)
     setLoading(true)
     e.preventDefault()
     const title = e.target.title.value
@@ -135,7 +135,7 @@ function Videofiles() {
     })
       .then(res => res.json())
       .then(data => {
-        console.log(data)
+        //console.log(data)
         if (data.modifiedCount) {
           notifySuccess("files Updated Successfully")
 
@@ -177,7 +177,7 @@ function Videofiles() {
 
         const updatedfiles = displayfiles.filter(files => files != deletable)
 
-        console.log('updatedfiles',updatedfiles)
+        //console.log('updatedfiles',updatedfiles)
         const updatedChapter = { ...chapter, Videos: updatedfiles }
 
         fetch(`https://spoffice-server.vercel.app/updateVideochapter/${params.id}`, {

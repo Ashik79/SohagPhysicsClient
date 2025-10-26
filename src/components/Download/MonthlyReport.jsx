@@ -285,7 +285,7 @@ function MonthlyReport() {
             // Save the generated PDF
             doc.save(`Attendance sheet of batch: ${students[0].batch}, Session: ${session?session:'All'}, Month: ${getMonth(paymentMonth)},${paymentYear}.pdf`);
         } catch (err) {
-            console.log("Error generating PDF:", err);
+            //console.log("Error generating PDF:", err);
         }
     };
 

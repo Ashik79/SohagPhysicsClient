@@ -15,15 +15,15 @@ function Admission() {
 
     const handleImageUpload = (url) => {
         setUploadedImageUrl(url);
-        console.log("Image URL received in parent:", url);
+        // //console.log("Image URL received in parent:", url);
     };
 
 
     const handleAdmission = async (e) => {
 
         const admissionDate = `${date}-${month}-${year}`
-        console.log(admissionDate)
-        console.log("admission clicked")
+        // //console.log(admissionDate)
+        // //console.log("admission clicked")
         e.preventDefault();
         const id = e.target.id.value;
         let image = '';
@@ -33,7 +33,7 @@ function Admission() {
         setLoading(true)
         setId(id)
         // const monthlyAmount = parseInt(e.target.monthlyAmount.value)
-        console.log(typeof (monthlyAmount))
+        // //console.log(typeof (monthlyAmount))
         // const noteFee = parseInt(e.target.noteFee.value)
         // const examFee = parseInt(e.target.examFee.value)
         const batch = e.target.batch.value;
@@ -68,7 +68,7 @@ function Admission() {
         const formData = {
             id, batch, name,image, school, note, college, programs, session, target, phone, address, reference, gname, gphone, gender, admissionDate, payments, admittedBy, admissionMonth, admissionYear, attendances, exams
         }
-        console.log(formData)
+        // //console.log(formData)
 
         try {
             const response = await fetch('https://spoffice-server.vercel.app/admit', {
@@ -89,7 +89,7 @@ function Admission() {
                 // Handle successful response
                 const result = await response.json();
 
-                console.log(result)
+                // //console.log(result)
                 const response2 = await fetch('https://bulksmsbd.net/api/smsapi', {
                     method: 'POST',
                     headers: {
@@ -104,7 +104,7 @@ function Admission() {
                     }),
                 })
                 const result2 = await response2.json();
-                console.log(result2);
+                // //console.log(result2);
                 if (result2.response_code == 202) {
 
                     notifySuccess("Registration Successful !")

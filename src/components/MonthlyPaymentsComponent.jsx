@@ -3,7 +3,7 @@ import { TbCurrencyTaka } from "react-icons/tb";
 
 const MonthlyPaymentsComponent = ({ payments, student }) => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  console.log(student);
+  // //console.log(student);
 
   const handleYearChange = (event) => {
     setSelectedYear(parseInt(event.target.value));

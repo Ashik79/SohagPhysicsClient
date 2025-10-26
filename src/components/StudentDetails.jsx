@@ -17,7 +17,7 @@ import { IoMdClose } from "react-icons/io";
 const StudentDetails = () => {
   const { role, notifySuccess } = useContext(AuthContext)
   const [navigate, setNavigate] = useState(false)
-  console.log(role)
+  //console.log(role)
   const student = useLoaderData();
   const [activeTab, setActiveTab] = useState('details');
   const [messageText, setMessageText] = useState("")
@@ -83,7 +83,7 @@ const StudentDetails = () => {
   const handleSend = async (e) => {
     e.preventDefault();  // Prevent the default form submission
     setLoading(true);
-    console.log('send', messageText);
+    //console.log('send', messageText);
   
     try {
       const response2 = await fetch('https://bulksmsbd.net/api/smsapi', {
@@ -100,7 +100,7 @@ const StudentDetails = () => {
       });
   
       const result2 = await response2.json();
-      console.log(result2);
+      //console.log(result2);
   
       if (result2.response_code === 202) {
         notifySuccess("SMS Sent Successfully !");

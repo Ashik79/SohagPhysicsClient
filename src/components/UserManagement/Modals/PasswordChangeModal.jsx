@@ -10,7 +10,7 @@ function PasswordChangeModal({ email }) {
 
     const handleCharChange = e => {
         setPassChar(e.target.value.length)
-        console.log(e.target.value.length)
+        //console.log(e.target.value.length)
     }
     const handlePasswordChange = async (e) => {
         setLoading(true)

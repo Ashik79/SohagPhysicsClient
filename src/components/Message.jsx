@@ -131,7 +131,7 @@ function Message() {
 
             if (filteredStudents.length) {
                 notifySuccess(`Found ${filteredStudents.length} students`);
-                console.log(filteredStudents)
+                // //console.log(filteredStudents)
                 setLoading(false)
             } else {
                 notifyFailed('Sorry, no student is found');
@@ -151,7 +151,7 @@ function Message() {
 
     const handleSend = async () => {
         setLoading(true)
-        console.log('send', messageText)
+        // //console.log('send', messageText)
 
         try {
             const ids = []
@@ -172,7 +172,7 @@ function Message() {
 
             const numbers = data.map(d => d.phone)
             const numbersString = numbers.join(',');
-            console.log(numbersString)
+            // //console.log(numbersString)
 
             const response2 = await fetch('https://bulksmsbd.net/api/smsapi', {
                 method: 'POST',
@@ -188,7 +188,7 @@ function Message() {
                 }),
             })
             const result2 = await response2.json();
-            console.log(result2);
+            // //console.log(result2);
             if (result2.response_code == 202) {
 
                 notifySuccess("SMS Sent Successfully !")

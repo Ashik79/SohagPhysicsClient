@@ -8,7 +8,7 @@ function User() {
     const [user, setUser] = useState(state.user)
     const { role: mainRole } = useContext(AuthContext)
     const { name, email, role, lastLogin, lastRefreshed, accountCreated, photo: image, disabled } = user
-    console.log(user)
+    //console.log(user)
     //function for formating the time
 
     function formatGMTtoLocal(dateString) {

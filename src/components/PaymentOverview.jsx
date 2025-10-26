@@ -25,7 +25,7 @@ const PaymentComponent = () => {
     const data = {
       month, day, year, taker
     }
-    console.log(data)
+    
     fetch('https://spoffice-server.vercel.app/api/payments', {
 
       method: 'POST',
@@ -36,7 +36,7 @@ const PaymentComponent = () => {
     })
       .then(res => res.json())
       .then(data => {
-        console.log(data)
+        // //console.log(data)
         setData(data)
 
         setLoading(false)
@@ -149,7 +149,7 @@ const PaymentComponent = () => {
       // Save the generated PDF
       doc.save(`Attendance sheet of batch ${students[0].batch} ${getMonth(paymentMonth)},${paymentYear}.pdf`);
     } catch (err) {
-      console.log("Error generating PDF:", err);
+      //console.log("Error generating PDF:", err);
     }
   };
   const handleDownload = async (type) => {
@@ -174,7 +174,7 @@ const PaymentComponent = () => {
         }
       })
     }
-    console.log(array)
+    //console.log(array)
     try {
 
       const downloadResponse = await fetch('https://spoffice-server.vercel.app/download/overview', {

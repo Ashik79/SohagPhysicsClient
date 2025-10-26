@@ -11,7 +11,7 @@ import LoadingPage from '../OtherPages.jsx/LoadingPage';
 
 function PdfChapters() {
   const params = useParams()
-  console.log(params.id)
+  //console.log(params.id)
   const [firstLoading, setFirstLoading] = useState(true)
   const [PdfCourse, setPdfCourse] = useState({})
   const { month, year, date, getMonth, notifySuccess, notifyFailed } = useContext(AuthContext)
@@ -28,7 +28,7 @@ function PdfChapters() {
     fetch(`https://spoffice-server.vercel.app/getpdfcourse/${params.id}`)
       .then(res => res.json())
       .then(data => {
-        console.log(data)
+        //console.log(data)
         setPdfCourse(data)
         setAllChapters(data.chapters)
         setFirstLoading(false)
@@ -41,7 +41,7 @@ function PdfChapters() {
 
   useEffect(() => {
     if (allChapters.length) {
-      console.log("call hoise")
+      //console.log("call hoise")
       let temp = allChapters;
       temp.sort((a, b) => a.priority - b.priority)
       setDisplayChapters(temp)
@@ -54,7 +54,7 @@ function PdfChapters() {
 
   const handleImageUpload = (url) => {
     setUploadedImageUrl(url);
-    console.log("Image URL received in parent:", url);
+    //console.log("Image URL received in parent:", url);
   };
 
   const [navigate, setNavigate] = useState(false)
@@ -82,7 +82,7 @@ function PdfChapters() {
     })
       .then(res => res.json())
       .then(data => {
-        console.log(data)
+        //console.log(data)
         if (data.modifiedCount) {
           notifySuccess("Chapter added Successfully")
 
@@ -107,7 +107,7 @@ function PdfChapters() {
 
 
   const handleEditChapter = e => {
-    console.log(editChapter)
+    //console.log(editChapter)
     setLoading(true)
     e.preventDefault()
     const title = e.target.title.value
@@ -130,7 +130,7 @@ function PdfChapters() {
     })
       .then(res => res.json())
       .then(data => {
-        console.log(data)
+        //console.log(data)
         if (data.modifiedCount) {
           notifySuccess("Chapter Updated Successfully")
 
