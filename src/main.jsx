@@ -44,11 +44,9 @@ import StaffDetails from './components/StuffPart/StaffDetails';
 import EditorDashboard from './components/StudentSite/EditorDashboard';
 
 import PdfUploader from './components/StudentSite/PdfUploader';
-import PdfChapters from './components/StudentSite/PdfChapters';
-import PdfNotes from './components/StudentSite/PdfNotes';
 import PDFViewer from './components/StudentSite/PdfViewer';
-import VideoChapters from './components/StudentSite/VideoChapters';
-import Videofiles from './components/StudentSite/VideoFiles';
+import VideoManager from './components/StudentSite/VideoManager';
+import VideoLibrary from './components/StudentSite/VideoLibrary';
 import VideoPlayer from './components/StudentSite/VideoPlayer';
 import DownloadCenter from './components/Download/DownloadCenter';
 import ManagementContainer from './components/UserManagement/ManagementContainer';
@@ -296,53 +294,16 @@ const router = createBrowserRouter([
         
       },
       {
-        path:'/course/chapters',
-        element:<PrivateRoute><VideoChapters></VideoChapters></PrivateRoute>,
-       
-        
+        path:'/videos',
+        element:<PrivateRoute><VideoManager></VideoManager></PrivateRoute>,
       },
       {
-        path:'/pdfcourse/:id',
-        element:<PrivateRoute><PdfChapters></PdfChapters></PrivateRoute>,
-       
-        
-      },
-      {
-        path:'/videocourse/:id',
-        element:<PrivateRoute><VideoChapters></VideoChapters></PrivateRoute>,
-       
-        
-      },
-      {
-        path:'/pdfchapter/:id',
-        element:<PrivateRoute><PdfNotes></PdfNotes></PrivateRoute>,
-       
-        
-      },
-      {
-        path:'/videochapter/:id',
-        element:<PrivateRoute><Videofiles></Videofiles></PrivateRoute>,
-       
-        
-      },
-      {
-        path:'/pdfcourse/chapters/notes',
-        element:<PrivateRoute><PdfNotes></PdfNotes></PrivateRoute>,
-      
-      },
-      {
-        path:'/videocourse/chapters/files',
-        element:<PrivateRoute><Videofiles></Videofiles></PrivateRoute>,
-      
+        path:'/video-library',
+        element:<VideoLibrary></VideoLibrary>,
       },
       {
         path:'/pdfcourse/chapters/notes/view',
         element:<PrivateRoute><PDFViewer></PDFViewer></PrivateRoute>,
-      
-      },
-      {
-        path:'/videocourse/chapters/file/view',
-        element:<PrivateRoute><VideoPlayer></VideoPlayer></PrivateRoute>,
       
       },
     ],

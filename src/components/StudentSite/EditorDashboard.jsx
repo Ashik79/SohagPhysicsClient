@@ -5,8 +5,8 @@ import { AuthContext } from '../../Provider';
 import Swal from 'sweetalert2';
 import { IoMdClose } from "react-icons/io";
 
-import Courses from './VideoCourses';
-import PdfCourses from './PdfCourses';
+import VideoManager from './VideoManager';
+import PdfManager from './PdfManager';
 import NoticeBoard from './NoticeBoard';
 import BannerPics from './BannerPics';
 
@@ -22,9 +22,9 @@ const EditorDashboard = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'videos':
-        return <div><Courses></Courses></div>;
+        return <div><VideoManager></VideoManager></div>;
       case 'pdf':
-        return <div><PdfCourses></PdfCourses></div>;
+        return <div><PdfManager></PdfManager></div>;
       case 'notice':
         return <div><NoticeBoard></NoticeBoard></div>;
       case 'banners':
