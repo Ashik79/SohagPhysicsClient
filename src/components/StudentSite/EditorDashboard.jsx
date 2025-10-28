@@ -94,30 +94,7 @@ const EditorDashboard = () => {
         >
           Banners
         </button>
-        <button
-          onClick={() => setActiveTab('attendance')}
-          className={`px-2 py-1 whitespace-nowrap ${activeTab === 'attendance' ? 'bg-sky-600 text-white' : 'bg-gray-200'} rounded hover:bg-sky-700`}
-        >
-          Attendance
-        </button>
-        <button
-          onClick={() => setActiveTab('results')}
-          className={`px-2 py-1 whitespace-nowrap ${activeTab === 'results' ? 'bg-sky-600 text-white' : 'bg-gray-200'} rounded hover:bg-sky-700`}
-        >
-          Results
-        </button>
-        <button
-          onClick={() => setActiveTab('monthlyPayments')}
-          className={`px-2 py-1 whitespace-nowrap ${activeTab === 'monthlyPayments' ? 'bg-sky-600 text-white' : 'bg-gray-200'} rounded hover:bg-sky-700`}
-        >
-          Monthly Payments
-        </button>
-        <button
-          onClick={() => setActiveTab('otherPayments')}
-          className={`px-2 py-1 whitespace-nowrap ${activeTab === 'otherPayments' ? 'bg-sky-600 text-white' : 'bg-gray-200'} rounded hover:bg-sky-700`}
-        >
-          Other Payments
-        </button>
+        
       </div>
       <div>
         {renderContent()}
