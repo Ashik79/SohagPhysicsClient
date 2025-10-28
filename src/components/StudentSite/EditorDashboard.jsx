@@ -9,6 +9,7 @@ import VideoManager from './VideoManager';
 import PdfManager from './PdfManager';
 import NoticeBoard from './NoticeBoard';
 import BannerPics from './BannerPics';
+import PromoVideo from './PromoVideo';
 
 const EditorDashboard = () => {
   const { role, notifySuccess } = useContext(AuthContext)
@@ -27,14 +28,16 @@ const EditorDashboard = () => {
         return <div><PdfManager></PdfManager></div>;
       case 'notice':
         return <div><NoticeBoard></NoticeBoard></div>;
+      case 'promo':
+        return <div><PromoVideo></PromoVideo></div>;
       case 'banners':
         return <div><BannerPics></BannerPics></div>;
-      case 'results':
-        return <div></div>;
-      case 'attendance':
-        return <div></div>;
-      case 'monthlyPayments':
-        return <div></div>;
+      // case 'results':
+      //   return <div></div>;
+      // case 'attendance':
+      //   return <div></div>;
+      // case 'monthlyPayments':
+      //   return <div></div>;
       
       default:
         return <div>Select a tab to view content</div>;
@@ -69,6 +72,12 @@ const EditorDashboard = () => {
           className={`px-2 py-1 whitespace-nowrap ${activeTab === 'notice' ? 'bg-sky-600 text-white' : 'bg-gray-200'} rounded hover:bg-sky-700`}
         >
           Notice
+        </button>
+        <button
+          onClick={() => setActiveTab('promo')}
+          className={`px-2 py-1 whitespace-nowrap ${activeTab === 'promo' ? 'bg-sky-600 text-white' : 'bg-gray-200'} rounded hover:bg-sky-700`}
+        >
+          Promo Video
         </button>
         <button
           onClick={() => setActiveTab('banners')}
