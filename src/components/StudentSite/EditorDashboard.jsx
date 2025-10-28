@@ -10,6 +10,7 @@ import PdfManager from './PdfManager';
 import NoticeBoard from './NoticeBoard';
 import BannerPics from './BannerPics';
 import PromoVideo from './PromoVideo';
+import BatchTime from './BatchTime';
 
 const EditorDashboard = () => {
   const { role, notifySuccess } = useContext(AuthContext)
@@ -30,6 +31,8 @@ const EditorDashboard = () => {
         return <div><NoticeBoard></NoticeBoard></div>;
       case 'promo':
         return <div><PromoVideo></PromoVideo></div>;
+      case 'batchtime':
+        return <div><BatchTime></BatchTime></div>;
       case 'banners':
         return <div><BannerPics></BannerPics></div>;
       // case 'results':
@@ -78,6 +81,12 @@ const EditorDashboard = () => {
           className={`px-2 py-1 whitespace-nowrap ${activeTab === 'promo' ? 'bg-sky-600 text-white' : 'bg-gray-200'} rounded hover:bg-sky-700`}
         >
           Promo Video
+        </button>
+        <button
+          onClick={() => setActiveTab('batchtime')}
+          className={`px-2 py-1 whitespace-nowrap ${activeTab === 'batchtime' ? 'bg-sky-600 text-white' : 'bg-gray-200'} rounded hover:bg-sky-700`}
+        >
+          Batch Time
         </button>
         <button
           onClick={() => setActiveTab('banners')}
