@@ -99,8 +99,6 @@ const EditorDashboard = () => {
       <div>
         {renderContent()}
       </div>
-      
-
      
     </div>
     :

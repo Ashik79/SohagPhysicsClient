@@ -28,6 +28,49 @@ function VideoManager() {
   const [chapterModal, setChapterModal] = useState({ type: '', data: {}, courseId: '' })
   const [videoModal, setVideoModal] = useState({ type: '', data: {}, chapterId: '', courseId: '' })
 
+  // Access control states for chapter
+  const [accessType, setAccessType] = useState('public')
+  const [selectedBatches, setSelectedBatches] = useState([])
+  const [customIds, setCustomIds] = useState([])
+  const [newIdInput, setNewIdInput] = useState('')
+
+  // All available batches from Admission page
+  const allBatches = [
+    { value: 'Hsc-27-Marketing', label: 'Hsc-27 (Marketing)' },
+    { value: 'Sat 1', label: 'শনি ৭টা (HSC 27)' },
+    { value: 'Sat 2', label: 'শনি ৮টা (HSC 27)' },
+    { value: 'Sat 3', label: 'শনি ৯টা (নিউ টেন SSC 26 - HSC 28)' },
+    { value: 'Sat 4', label: 'শনি ১০টা (নিউ নাইন SSC 27 - HSC 29)' },
+    { value: 'Sat 5', label: 'শনি ১১টা' },
+    { value: 'Sat 6', label: 'শনি ২টা (HSC 26)' },
+    { value: 'Sat 7', label: 'শনি ৩টা (HSC 26)' },
+    { value: 'Sat 8', label: 'শনি ৪টা (HSC 27)' },
+    { value: 'Sat 9', label: 'শনি ৫টা (HSC 26)' },
+    { value: 'Sat 10', label: 'শনি ৬.১৫টা (HSC 27)' },
+    { value: 'Sat 11', label: 'শনি ৭.১৫ টা (নিউ টেন SSC 26 - HSC 28)' },
+    { value: 'Sun 1', label: 'রবি ৭টা (HSC 27)' },
+    { value: 'Sun 2', label: 'রবি ৮টা (HSC 26)' },
+    { value: 'Sun 3', label: 'রবি ৯টা (HSC 27)' },
+    { value: 'Sun 4', label: 'রবি ১০টা (Nine & Ten combined)' },
+    { value: 'Sun 5', label: 'রবি ১১টা' },
+    { value: 'Sun 6', label: 'রবি ২টা (HSC 26)' },
+    { value: 'Sun 7', label: 'রবি ৩টা (HSC 27)' },
+    { value: 'Sun 8', label: 'রবি ৪টা (HSC 26)' },
+    { value: 'Sun 9', label: 'রবি ৫টা (HSC 26)' },
+    { value: 'Sun 10', label: 'রবি ৬টা (নিউ নাইন SSC 27 - HSC 29)' },
+    { value: 'Sun 11', label: 'রবি ৭টা (নিউ টেন SSC 26 - HSC 28)' },
+    { value: 'HSC 26 Admission cancel', label: 'HSC 26 Admission cancel' },
+    { value: 'HSC 27 Admission cancel', label: 'HSC 27 Admission cancel' },
+    { value: 'SSC 26 class 10 Admission cancel', label: 'SSC 26 class 10 Admission cancel' },
+    { value: 'SSC 27 class 9 Admission cancel', label: 'SSC 27 class 9 Admission cancel' },
+    { value: 'Exam Batch HSC 26', label: 'Exam Batch HSC 26' },
+    { value: 'Exam Batch (নিউ নাইন SSC 27 - HSC 29)', label: 'Exam Batch (নিউ নাইন SSC 27 - HSC 29)' },
+    { value: 'Exam Batch (নিউ টেন SSC 26 - HSC 28)', label: 'Exam Batch (নিউ টেন SSC 26 - HSC 28)' },
+    { value: 'SSC 25 (Physics Olympiad)', label: 'SSC 25 (Physics Olympiad)' },
+    { value: 'Class 9 (SSC 27) Phy Champ', label: 'Class 9 (SSC 27) Phy Champ' },
+    { value: 'Class 10 (SSC 26) Phy Champ', label: 'Class 10 (SSC 26) Phy Champ' }
+  ]
+
   useEffect(() => {
     fetchCourses()
   }, [])
@@ -56,6 +99,34 @@ function VideoManager() {
 
   const toggleChapter = (chapterId) => {
     setExpandedChapters(prev => ({ ...prev, [chapterId]: !prev[chapterId] }))
+  }
+
+  // Access control helper functions
+  const handleBatchToggle = (batchValue) => {
+    setSelectedBatches(prev => 
+      prev.includes(batchValue) 
+        ? prev.filter(b => b !== batchValue)
+        : [...prev, batchValue]
+    )
+  }
+
+  const handleAddCustomId = () => {
+    const trimmedId = newIdInput.trim()
+    if (trimmedId && !customIds.includes(trimmedId)) {
+      setCustomIds(prev => [...prev, trimmedId])
+      setNewIdInput('')
+    }
+  }
+
+  const handleRemoveCustomId = (idToRemove) => {
+    setCustomIds(prev => prev.filter(id => id !== idToRemove))
+  }
+
+  const resetAccessControl = () => {
+    setAccessType('public')
+    setSelectedBatches([])
+    setCustomIds([])
+    setNewIdInput('')
   }
 
   // ============== COURSE OPERATIONS ==============
@@ -160,7 +231,17 @@ function VideoManager() {
     const priority = e.target.priority.value
     const thumbnail = uploadedImageUrl || '';
     const id = crypto.randomUUID()
-    const details = { title, Videos: [], priority, thumbnail, id }
+    
+    // Build access object
+    const access = accessType === 'public' 
+      ? { type: 'public' }
+      : { 
+          type: 'private',
+          batches: selectedBatches,
+          ids: customIds
+        }
+    
+    const details = { title, Videos: [], priority, thumbnail, id, access }
 
     const course = allCourses.find(c => c.id === chapterModal.courseId)
     const updatedChapters = [...course.chapters, details]
@@ -197,10 +278,21 @@ function VideoManager() {
     const title = e.target.title.value
     const priority = e.target.priority.value
     const thumbnail = uploadedImageUrl || chapterModal.data.thumbnail;
+    
+    // Build access object
+    const access = accessType === 'public' 
+      ? { type: 'public' }
+      : { 
+          type: 'private',
+          batches: selectedBatches,
+          ids: customIds
+        }
+    
     const details = {
       title, priority, thumbnail,
       Videos: chapterModal.data.Videos,
-      id: chapterModal.data.id
+      id: chapterModal.data.id,
+      access
     }
 
     const course = allCourses.find(c => c.id === chapterModal.courseId)
@@ -402,6 +494,7 @@ function VideoManager() {
     setVideoModal({ type: '', data: {}, chapterId: '', courseId: '' })
     setUploadedImageUrl('')
     resetImageUpload()
+    resetAccessControl()
     setLoading(false)
     document.getElementById('modal_course')?.close()
     document.getElementById('modal_chapter')?.close()
@@ -508,13 +601,40 @@ function VideoManager() {
                           alt={chapter.title}
                         />
                         <div className='flex-grow min-w-0'>
-                          <h3 className='font-semibold text-sm sm:text-base text-cyan-700 truncate'>{chapter.title}</h3>
-                          <p className='text-xs text-gray-500'>{chapter.Videos?.length || 0} Videos</p>
+                          <div className='flex items-center gap-2'>
+                            <h3 className='font-semibold text-sm sm:text-base text-cyan-700 truncate'>{chapter.title}</h3>
+                            {chapter.access?.type === 'private' && (
+                              <span className='px-1.5 py-0.5 bg-orange-500 text-white text-xs font-semibold rounded whitespace-nowrap'>
+                                🔒 PRIVATE
+                              </span>
+                            )}
+                          </div>
+                          <p className='text-xs text-gray-500'>
+                            {chapter.Videos?.length || 0} Videos
+                            {chapter.access?.type === 'private' && (
+                              <span className='ml-2 text-orange-600'>
+                                • {(chapter.access.batches?.length || 0) + (chapter.access.ids?.length || 0)} access rules
+                              </span>
+                            )}
+                          </p>
                         </div>
                         <div className='flex flex-col sm:flex-row gap-0.5 sm:gap-1 flex-shrink-0'>
                           <button
                             onClick={() => {
-                              setChapterModal({ type: 'edit', data: chapter, courseId: course.id })
+                              const chapterData = chapter
+                              setChapterModal({ type: 'edit', data: chapterData, courseId: course.id })
+                              
+                              // Load existing access control data
+                              if (chapterData.access) {
+                                setAccessType(chapterData.access.type || 'public')
+                                setSelectedBatches(chapterData.access.batches || [])
+                                setCustomIds(chapterData.access.ids || [])
+                              } else {
+                                setAccessType('public')
+                                setSelectedBatches([])
+                                setCustomIds([])
+                              }
+                              
                               document.getElementById('modal_chapter').showModal()
                             }}
                             className='p-1 sm:p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors'
@@ -660,7 +780,7 @@ function VideoManager() {
 
       {/* Chapter Modal */}
       <dialog id="modal_chapter" className="modal">
-        <div className="modal-box max-w-lg">
+        <div className="modal-box max-w-2xl max-h-[90vh] overflow-y-auto">
           <div className="modal-action mt-0">
             <form method="dialog">
               <button className="text-red-600 text-xl sm:text-2xl" onClick={closeModal}><IoMdClose /></button>
@@ -699,6 +819,115 @@ function VideoManager() {
                   className="input input-bordered input-info w-full"
                 />
               </div>
+
+              {/* Access Control */}
+              <div className='border-t pt-3 mt-3'>
+                <p className='font-semibold mb-2'>Chapter Visibility <span className='text-red-700'>*</span></p>
+                <div className='flex gap-4'>
+                  <label className='flex items-center gap-2 cursor-pointer'>
+                    <input
+                      type='radio'
+                      name='access'
+                      value='public'
+                      checked={accessType === 'public'}
+                      onChange={(e) => setAccessType(e.target.value)}
+                      className='radio radio-primary radio-sm'
+                    />
+                    <span className='text-sm font-medium'>Public</span>
+                  </label>
+                  <label className='flex items-center gap-2 cursor-pointer'>
+                    <input
+                      type='radio'
+                      name='access'
+                      value='private'
+                      checked={accessType === 'private'}
+                      onChange={(e) => setAccessType(e.target.value)}
+                      className='radio radio-primary radio-sm'
+                    />
+                    <span className='text-sm font-medium'>Private</span>
+                  </label>
+                </div>
+                <p className='text-xs text-gray-500 mt-1'>
+                  Public: Available to everyone | Private: Only specific batches/students
+                </p>
+              </div>
+
+              {/* Private Access Controls */}
+              {accessType === 'private' && (
+                <div className='space-y-3 border border-orange-200 p-3 rounded-lg bg-orange-50'>
+                  {/* Batch Selection */}
+                  <div>
+                    <p className='font-semibold text-sm mb-2'>Select Batches:</p>
+                    <div className='max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-2 bg-white'>
+                      <div className='grid grid-cols-1 gap-1'>
+                        {allBatches.map((batch, index) => (
+                          <label key={index} className='flex items-center gap-2 p-1.5 hover:bg-gray-50 rounded cursor-pointer'>
+                            <input
+                              type='checkbox'
+                              checked={selectedBatches.includes(batch.value)}
+                              onChange={() => handleBatchToggle(batch.value)}
+                              className='checkbox checkbox-xs checkbox-primary'
+                            />
+                            <span className='text-xs'>{batch.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                    <p className='text-xs text-gray-500 mt-1'>
+                      Selected: {selectedBatches.length} batch(es)
+                    </p>
+                  </div>
+
+                  {/* Custom IDs */}
+                  <div>
+                    <p className='font-semibold text-sm mb-2'>Add Specific Student IDs:</p>
+                    <div className='flex gap-2'>
+                      <input
+                        type='text'
+                        value={newIdInput}
+                        onChange={(e) => setNewIdInput(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault()
+                            handleAddCustomId()
+                          }
+                        }}
+                        placeholder='Enter student ID'
+                        className='input input-bordered input-sm flex-1 text-sm'
+                      />
+                      <button
+                        type='button'
+                        onClick={handleAddCustomId}
+                        className='btn btn-sm btn-primary'
+                      >
+                        <FaPlus />
+                      </button>
+                    </div>
+                    {customIds.length > 0 && (
+                      <div className='mt-2 flex flex-wrap gap-1'>
+                        {customIds.map((id, index) => (
+                          <div
+                            key={index}
+                            className='flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs'
+                          >
+                            <span>{id}</span>
+                            <button
+                              type='button'
+                              onClick={() => handleRemoveCustomId(id)}
+                              className='text-red-600 hover:text-red-800'
+                            >
+                              <IoMdClose />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <p className='text-xs text-gray-500 mt-1'>
+                      {customIds.length} custom ID(s) added
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
             <div className='mt-6 text-center'>
               <button

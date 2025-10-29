@@ -42,12 +42,9 @@ import AttendanceBatch from './components/AttendanceBatch';
 import Staffs from './components/StuffPart/Staffs';
 import StaffDetails from './components/StuffPart/StaffDetails';
 import EditorDashboard from './components/StudentSite/EditorDashboard';
-
-import PdfUploader from './components/StudentSite/PdfUploader';
-import PDFViewer from './components/StudentSite/PdfViewer';
 import VideoManager from './components/StudentSite/VideoManager';
 import VideoLibrary from './components/StudentSite/VideoLibrary';
-import VideoPlayer from './components/StudentSite/VideoPlayer';
+
 import DownloadCenter from './components/Download/DownloadCenter';
 import ManagementContainer from './components/UserManagement/ManagementContainer';
 import User from './components/UserManagement/User';
@@ -272,11 +269,7 @@ const router = createBrowserRouter([
         element:<PrivateRoute><DownloadCenter></DownloadCenter></PrivateRoute>,
             
       },
-      {
-        path:'/pdfupload',
-        element:<PrivateRoute><PdfUploader></PdfUploader></PrivateRoute>,
-            
-      },
+      
       {
         path:'/user-management',
         element:<PrivateRoute><ManagementContainer></ManagementContainer></PrivateRoute>,
@@ -301,11 +294,7 @@ const router = createBrowserRouter([
         path:'/video-library',
         element:<VideoLibrary></VideoLibrary>,
       },
-      {
-        path:'/pdfcourse/chapters/notes/view',
-        element:<PrivateRoute><PDFViewer></PDFViewer></PrivateRoute>,
       
-      },
     ],
   },
 ]);
