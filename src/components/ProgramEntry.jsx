@@ -34,7 +34,7 @@ function ProgramEntry() {
         else if (program == 'Exam' || program == 'Others' || program == 'PBC') {
             setProgramStatus('admission')
         }
-        else if (program == 'ExamDue' || program == 'HscPhyDue' || program == 'OthersDue' || program == 'HscPhyDue' || program == 'SscPhyDue' || program == 'MonthlyDue') {
+        else if (program == 'ExamDue' || program == 'Note-Fee-Due' || program == 'OthersDue' || program == 'Exam-Fee-Due' || program == 'SscPhyDue' || program == 'MonthlyDue') {
             setProgramStatus('due')
         }
         else if (program == 'Chuti') {
@@ -363,7 +363,8 @@ function ProgramEntry() {
                                 <select onChange={handleProgramChanged} required name='program' className="select text-lg font-semibold  select-info w-full ">
 
                                     <option value={'HscPhy'}>HSC Physics</option>
-                                    <option value={'HscPhyDue'}>HSC Physics Due</option>
+                                    <option value={'Note-Fee-Due'}>Note Fee Due</option>
+                                    <option value={'Exam-Fee-Due'}>Exam Fee Due</option>
                                     <option value={'PBC'}>PBC</option>
                                     <option value={'SscPhy'}>SSC Physics</option>
                                     <option value={'MonthlyDue'}>Monthly Payment Due</option>

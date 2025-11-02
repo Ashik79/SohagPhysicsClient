@@ -348,12 +348,13 @@ function ExamReport() {
 
                                 <option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>
                                 <option value={'Sat 1'}>শনি ৭টা (HSC 27)</option>
-                                <option value={'Sat 2'}>শনি ৮টা (HSC 27)</option>
+                                <option value={'Sat 2'}>শনি ৮টা (নিউ নাইন SSC 27 - HSC 29)</option>
                                 <option value={'Sat 3'}>শনি ৯টা (নিউ টেন SSC 26 - HSC 28)</option>
                                 <option value={'Sat 4'}>শনি ১০টা (নিউ নাইন SSC 27 - HSC 29)</option>
                                 <option value={'Sat 5'}>শনি ১১টা </option>
+                                <option value={'Sat 12'}>শনি ১২টা (SSC 28 - HSC 30)</option>
 
-                                <option value={'Sat 6'}>শনি ২টা (HSC 26)</option>
+                                <option value={'Sat 6'}>শনি ২টা (HSC 27)</option>
                                 <option value={'Sat 7'}>শনি ৩টা (HSC 26)</option>
                                 <option value={'Sat 8'}>শনি ৪টা (HSC 27)</option>
                                 <option value={'Sat 9'}>শনি ৫টা (HSC 26)</option>
@@ -368,7 +369,7 @@ function ExamReport() {
                                 <option value={'Sun 6'}>রবি ২টা (HSC 26) </option>
                                 <option value={'Sun 7'}>রবি ৩টা (HSC 27) </option>
                                 <option value={'Sun 8'}>রবি ৪টা (HSC 26) </option>
-                                <option value={'Sun 9'}>রবি ৫টা (HSC 26) </option>
+                                <option value={'Sun 9'}>রবি ৫টা (HSC 27) </option>
                                 <option value={'Sun 10'}>রবি ৬টা (নিউ নাইন SSC 27 - HSC 29) </option>
                                 <option value={'Sun 11'}>রবি ৭টা (নিউ টেন SSC 26 - HSC 28) </option>
                                 <option>HSC 26 Admission cancel</option>
@@ -411,7 +412,8 @@ function ExamReport() {
                                 <option value={''}>All</option>
                                 <option value={'Free'}>Free Class</option>
                                 <option value={'HscPhy'}>HSC Physics</option>
-                                <option value={'HscPhyDue'}>HSC Physics Due</option>
+                                <option value={'Note-Fee-Due'}>Note Fee Due</option>
+                                    <option value={'Exam-Fee-Due'}>Exam Fee Due</option>
                                 <option value={'PBC'}>PBC</option>
                                 <option value={'SscPhy'}>SSC Physics</option>
                                 <option value={'MonthlyDue'}>Monthly Payment Due</option>
