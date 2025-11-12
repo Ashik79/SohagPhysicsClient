@@ -234,6 +234,8 @@ function Message() {
 
                             <select name='batch' className="select text-lg font-semibold  select-info w-full ">
                                 <option value={""}>All</option>
+                                <option value={'Olympiad-8'}>Olympiad 8</option>
+                                <option value={'Olympiad-9'}>Olympiad 9</option>
                                 <option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>
                                 <option value={'Sat 1'}>শনি ৭টা (HSC 27)</option>
                                 <option value={'Sat 2'}>শনি ৮টা (নিউ নাইন SSC 27 - HSC 29)</option>
