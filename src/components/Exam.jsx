@@ -291,7 +291,7 @@ function Exam() {
         reader.readAsBinaryString(file);
     };
 
-
+// console.log(displayResults)
     //Download er Function
     const handleDownload = async () => {
         // //console.log('d')
@@ -343,11 +343,14 @@ function Exam() {
             })
 
             const data = await res.json()
-            // //console.log(data)
+          
             const messages = []
             data.map(num => {
-                const result = displayResults.find(res => res.name == num.name)
-                // //console.log(result)
+                const result = displayResults.find(res => res.id == num.id)
+                if(!result){
+                    notifyFailed("result not found for ", num);
+                    return;
+                }
                 const message = {
                     to: `${num.phone}`,
                     message: `Hey ${num.name},\nHere is your result! \nExam Name: ${title}\nExam Date: ${tarikh}\n${mcqTotal ? 'MCQ: ' : ''}${mcqTotal ? result.mcqMarks : ''}${mcqTotal ? `/${mcqTotal}\n` : ''}${writenTotal ? `Written: ${result.writenMarks}/${writenTotal}\n` : ''}Total: ${result.mcqMarks + result.writenMarks}/${mcqTotal + writenTotal}\nMerit:${result.merit}\nHighest Mark: ${displayResults[0].total} \nSohag Physics`
@@ -355,7 +358,7 @@ function Exam() {
                 messages.push(message)
 
             })
-            // //console.log(messages)
+          
             const response2 = await fetch('https://bulksmsbd.net/api/smsapimany', {
                 method: 'POST',
                 headers: {
@@ -368,7 +371,7 @@ function Exam() {
                 }),
             })
             const result2 = await response2.json();
-            // //console.log(result2);
+            // console.log(result2);
 
             if (result2.response_code == 202) {
                 const response = await fetch(`https://spoffice-server.vercel.app/exam/update/${exam._id}`, {
