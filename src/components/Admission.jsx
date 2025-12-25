@@ -318,7 +318,7 @@ function Admission() {
                         <div>
                             <p className='font-semibold'>Guardian Name  </p>
                             <input
-
+                                required
                                 name='gname'
                                 type="text"
 
@@ -330,7 +330,7 @@ function Admission() {
                         <div>
                             <p className='font-semibold'>Guardian Phone </p>
                             <input
-
+                                required
                                 name='gphone'
                                 type="text"
 

@@ -13,7 +13,7 @@ import PromoVideo from './PromoVideo';
 import BatchTime from './BatchTime';
 
 const EditorDashboard = () => {
-  const { role, notifySuccess } = useContext(AuthContext)
+  const { role, notifySuccess,loggedUser } = useContext(AuthContext)
   const [navigate, setNavigate] = useState(false)
   
   
@@ -48,7 +48,7 @@ const EditorDashboard = () => {
   };
 
   return (
-    role == 'CEO' ?
+   ((role == 'CEO' )|| (loggedUser =="Badhon")) ?
     <div className="container mx-auto p-4">
       <div className='flex justify-between'>
         <div>
