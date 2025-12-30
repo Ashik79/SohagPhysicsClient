@@ -26,13 +26,13 @@ const Batch = () => {
     },
     {
       name: "Sat 2",
-      vakka: 'শনি ৮টা (নিউ নাইন SSC 27 - HSC 29)',
+      vakka: 'শনি ৮টা (নিউ নাইন SSC 28 - HSC 30)',
       total: [],
       present: [], absent: [],
     },
     {
       name: "Sat 3",
-      vakka: 'শনি ৯টা (নিউ টেন SSC 26 - HSC 28)',
+      vakka: 'শনি ৮টা (নিউ নাইন SSC 28 - HSC 30)',
       total: [],
       present: [], absent: [],
     },
@@ -44,13 +44,13 @@ const Batch = () => {
     },
     {
       name: "Sat 5",
-      vakka: 'শনি ১১টা',
+      vakka: 'শনি ১১টা - SSC 26 (All Batch)',
       total: [],
       present: [], absent: [],
     },
     {
       name: "Sat 12",
-      vakka: 'শনি ১২টা (SSC 28 - HSC 30)',
+      vakka: 'শনি ১২টা - New Nine (SSC 28 Special Batch) ',
       total: [],
       present: [], absent: [],
     },
@@ -62,7 +62,7 @@ const Batch = () => {
     },
     {
       name: "Sat 7",
-      vakka: 'শনি ৩টা (HSC 26)',
+      vakka: 'শনি ৩টা - HSC 27 (New Batch)',
       total: [],
       present: [], absent: [],
     },
@@ -74,7 +74,7 @@ const Batch = () => {
     },
     {
       name: "Sat 9",
-      vakka: 'শনি ৫টা (HSC 26)',
+      vakka: 'শনি ৫টা - SSC 28 (New Nine)',
       total: [],
       present: [], absent: [],
     },
@@ -86,7 +86,7 @@ const Batch = () => {
     },
     {
       name: "Sat 11",
-      vakka: 'শনি ৭.১৫ টা (নিউ টেন SSC 26 - HSC 28)',
+      vakka: 'শনি ৭ টা ( SSC 27 - HSC 29)',
       total: [],
       present: [], absent: [],
     },
@@ -111,7 +111,7 @@ const Batch = () => {
     },
     {
       name: "Sun 4",
-      vakka: 'রবি ১০টা (Nine & Ten combined)',
+      vakka: 'রবি ১০টা (HSC 28)',
       total: [],
       present: [], absent: [],
     },
@@ -147,13 +147,13 @@ const Batch = () => {
     },
     {
       name: "Sun 10",
-      vakka: 'রবি ৬টা (নিউ নাইন SSC 27 - HSC 29)',
+      vakka: 'রবি ৬টা (SSC 27 - HSC 29)',
       total: [],
       present: [], absent: [],
     },
     {
       name: "Sun 11",
-      vakka: 'রবি ৭টা (নিউ টেন SSC 26 - HSC 28)',
+      vakka: 'রবি ৭টা - SSC 28 (New Nine)',
       total: [],
       present: [], absent: [],
     },
@@ -180,13 +180,13 @@ const Batch = () => {
       },
       {
         name: "Sat 2",
-        vakka: 'শনি ৮টা (নিউ নাইন SSC 27 - HSC 29)',
+        vakka: 'শনি ৮টা (নিউ নাইন SSC 28 - HSC 30)',
         total: [],
         present: [], absent: [],
       },
       {
         name: "Sat 3",
-        vakka: 'শনি ৯টা (নিউ টেন SSC 26 - HSC 28)',
+        vakka: 'শনি ৯টা (নিউ নাইন SSC 28 - HSC 30)',
         total: [],
         present: [], absent: [],
       },
@@ -198,13 +198,13 @@ const Batch = () => {
       },
       {
         name: "Sat 5",
-        vakka: 'শনি ১১টা',
+        vakka: 'শনি ১১টা - SSC 26 (All Batch)',
         total: [],
         present: [], absent: [],
       },
       {
         name: "Sat 12",
-        vakka: 'শনি ১২টা (SSC 28 - HSC 30)',
+        vakka: 'শনি ১২টা - New Nine (SSC 28 Special Batch) ',
         total: [],
         present: [], absent: [],
       },
@@ -216,7 +216,7 @@ const Batch = () => {
       },
       {
         name: "Sat 7",
-        vakka: 'শনি ৩টা (HSC 26)',
+        vakka: 'শনি ৩টা - HSC 27 (New Batch)',
         total: [],
         present: [], absent: [],
       },
@@ -228,7 +228,7 @@ const Batch = () => {
       },
       {
         name: "Sat 9",
-        vakka: 'শনি ৫টা (HSC 26)',
+        vakka: 'শনি ৫টা - SSC 28 (New Nine)',
         total: [],
         present: [], absent: [],
       },
@@ -240,7 +240,7 @@ const Batch = () => {
       },
       {
         name: "Sat 11",
-        vakka: 'শনি ৭.১৫ টা (নিউ টেন SSC 26 - HSC 28)',
+        vakka: 'শনি ৭ টা ( SSC 27 - HSC 29)',
         total: [],
         present: [], absent: [],
       },
@@ -265,7 +265,7 @@ const Batch = () => {
       },
       {
         name: "Sun 4",
-        vakka: 'রবি ১০টা (Nine & Ten combined)',
+        vakka: 'রবি ১০টা (HSC 28)',
         total: [],
         present: [], absent: [],
       },
@@ -301,13 +301,13 @@ const Batch = () => {
       },
       {
         name: "Sun 10",
-        vakka: 'রবি ৬টা (নিউ নাইন SSC 27 - HSC 29)',
+        vakka: 'রবি ৬টা (SSC 27 - HSC 29)',
         total: [],
         present: [], absent: [],
       },
       {
         name: "Sun 11",
-        vakka: 'রবি ৭টা (নিউ টেন SSC 26 - HSC 28)',
+        vakka: 'রবি ৭টা - SSC 28 (New Nine)',
         total: [],
         present: [], absent: [],
       },
@@ -343,13 +343,13 @@ const Batch = () => {
       },
       {
         name: "Sat 2",
-        vakka: 'শনি ৮টা (নিউ নাইন SSC 27 - HSC 29)',
+        vakka: 'শনি ৯টা (নিউ নাইন SSC 28 - HSC 30)',
         total: [],
         present: [], absent: [],
       },
       {
         name: "Sat 3",
-        vakka: 'শনি ৯টা (নিউ টেন SSC 26 - HSC 28)',
+        vakka: 'শনি ৯টা (নিউ নাইন SSC 28 - HSC 30)',
         total: [],
         present: [], absent: [],
       },
@@ -361,13 +361,13 @@ const Batch = () => {
       },
       {
         name: "Sat 5",
-        vakka: 'শনি ১১টা',
+        vakka: 'শনি ১১টা - SSC 26 (All Batch)',
         total: [],
         present: [], absent: [],
       },
       {
         name: "Sat 12",
-        vakka: 'শনি ১২টা (SSC 28 - HSC 30)',
+        vakka: 'শনি ১২টা - New Nine (SSC 28 Special Batch) ',
         total: [],
         present: [], absent: [],
       },
@@ -379,7 +379,7 @@ const Batch = () => {
       },
       {
         name: "Sat 7",
-        vakka: 'শনি ৩টা (HSC 26)',
+        vakka: 'শনি ৩টা - HSC 27 (New Batch)',
         total: [],
         present: [], absent: [],
       },
@@ -391,7 +391,7 @@ const Batch = () => {
       },
       {
         name: "Sat 9",
-        vakka: 'শনি ৫টা (HSC 26)',
+        vakka: 'শনি ৫টা - SSC 28 (New Nine)',
         total: [],
         present: [], absent: [],
       },
@@ -403,7 +403,7 @@ const Batch = () => {
       },
       {
         name: "Sat 11",
-        vakka: 'শনি ৭.১৫ টা (নিউ টেন SSC 26 - HSC 28)',
+        vakka: 'শনি ৭ টা ( SSC 27 - HSC 29)',
         total: [],
         present: [], absent: [],
       },
@@ -428,7 +428,7 @@ const Batch = () => {
       },
       {
         name: "Sun 4",
-        vakka: 'রবি ১০টা (Nine & Ten combined)',
+        vakka: 'রবি ১০টা (HSC 28)',
         total: [],
         present: [], absent: [],
       },
@@ -464,13 +464,13 @@ const Batch = () => {
       },
       {
         name: "Sun 10",
-        vakka: 'রবি ৬টা (নিউ নাইন SSC 27 - HSC 29)',
+        vakka: 'রবি ৬টা (SSC 27 - HSC 29)',
         total: [],
         present: [], absent: [],
       },
       {
         name: "Sun 11",
-        vakka: 'রবি ৭টা (নিউ টেন SSC 26 - HSC 28)',
+        vakka: 'রবি ৭টা - SSC 28 (New Nine)',
         total: [],
         present: [], absent: [],
       },
