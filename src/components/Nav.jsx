@@ -74,7 +74,7 @@ function Nav() {
                                 (role == 'CEO' || loggedUser == 'Sree Krishno')? <NavLink to={'/payment'}><li className='pl-2 hover:bg-gray-200'>Payment Entry</li></NavLink> : ''
                             }
 
-
+ 
                             {
                                 ((role == 'CEO' )|| (loggedUser =="Badhon")) ? <NavLink to={'/editor'}><li className='pl-2 hover:bg-gray-200'>Student Website</li></NavLink> : ''
                             }

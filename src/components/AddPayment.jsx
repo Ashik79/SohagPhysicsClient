@@ -392,7 +392,7 @@ function AddPayment() {
                                 <div className='flex flex-col lg:flex-row gap-2 justify-between'>
                                     <div className='w-full lg:w-1/2'>
                                         <p className='font-semibold'>Month <span className='text-red-700'>*</span> </p>
-                                        <select name='pmonth' value={entryMonth} className="select text-lg font-semibold   select-info w-full ">
+                                        <select name='pmonth' defaultValue={entryMonth} className="select text-lg font-semibold   select-info w-full ">
 
                                             <option value={1}>January</option>
                                             <option value={2}>February</option>
