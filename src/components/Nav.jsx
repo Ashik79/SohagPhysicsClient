@@ -53,7 +53,7 @@ function Nav() {
                             tabIndex={0}
                             className={`menu menu-lg gap-2 text-base bg-gray-100 dropdown-content rounded-box z-[1] mt-3 w-52 p-2 shadow ${disabled ? 'hidden' : ''}`}>
                             {
-                                loggedUser != 'Sohag Prodhan' &&
+                            
 
                                 <NavLink to={'/overview'}><li className='pl-2 hover:bg-gray-200 '>Payment Overview</li></NavLink>
                             }

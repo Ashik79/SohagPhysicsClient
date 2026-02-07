@@ -8,8 +8,7 @@ function LargeNav() {
         <div className='w-full hidden lg:block'>
             <ul className="w-full flex flex-col pl-4 gap-3 font-semibold mt-10">
                 {
-                    loggedUser != 'Sohag Prodhan' &&
-
+                
                 <NavLink to={'/overview'}><li className='pl-2 hover:bg-gray-200 '>Payment Overview</li></NavLink>
                 }
                 {role === 'CEO' && <NavLink to={'/studentoverview'}><li className='pl-2 hover:bg-gray-200 '>Student Overview</li></NavLink>}
