@@ -411,7 +411,7 @@ function AddPayment() {
                                     </div>
                                     <div className='w-full lg:w-1/2'>
                                         <p className='font-semibold'>Year <span className='text-red-700'>*</span> </p>
-                                        <select name='pyear' value={entryYear} className="select text-lg font-semibold  select-info w-full ">
+                                        <select name='pyear' defaultValue={entryYear} className="select text-lg font-semibold  select-info w-full ">
 
                                             <option value={2022}>2022</option>
                                             <option value={2023}>2023</option>
