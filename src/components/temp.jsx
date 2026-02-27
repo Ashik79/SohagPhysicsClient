@@ -157,6 +157,7 @@ function Download() {
                                 <select name='program' className="select text-lg font-semibold select-info w-full">
                                     <option value="">All</option>
                                     <option value='HscPhy'>HSC Physics</option>
+                                    <option value='HscPhyDue'>HSC Physics Due</option>
                                     {/* Add other program options here */}
                                 </select>
                             </div>

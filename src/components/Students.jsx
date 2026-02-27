@@ -183,17 +183,17 @@ function Students() {
 
                             <select name='batch' className="select text-lg font-semibold  select-info w-full ">
                                 <option value={""}>All</option>
-                                
-                                
-                                
-                                <option value={'Olympiad-HSC27'}>Olympiad HSC 27</option>                                
+
+
+
+                                <option value={'Olympiad-HSC27'}>Olympiad HSC 27</option>
                                 <option value={'Sat 1'}>শনি ৭টা (HSC 27)</option>
                                 <option value={'Sat 2'}>শনি ৮টা (নিউ নাইন SSC 28 - HSC 30)</option>
                                 <option value={'Sat 3'}>শনি ৯টা (নিউ নাইন SSC 28 - HSC 30)</option>
                                 <option value={'Sat 4'}>শনি ১০টা (নিউ নাইন SSC 27 - HSC 29)</option>
                                 <option value={'Sat 5'}>শনি ১১টা - SSC 26 (All Batch) </option>
                                 <option value={'Sat 12'}>শনি ১২টা - New Nine (SSC 28 Special Batch) </option>
-                               
+
                                 <option value={'Sat 6'}>শনি ২টা (HSC 27)</option>
                                 <option value={'Sat 7'}>শনি ৩টা - HSC 27 (New Batch)</option>
                                 <option value={'Sat 8'}>শনি ৪টা (SSC 27)</option>
@@ -205,7 +205,7 @@ function Students() {
                                 <option value={'Sun 3'}>রবি ৯টা - HSC 27 (New Batch)</option>
                                 <option value={'Sun 4'}>রবি ১০টা (HSC 28)</option>
                                 <option value={'Sun 5'}>রবি ১১টা </option>
-                               
+
                                 <option value={'Sun 6'}>রবি ২টা (HSC 26) </option>
                                 <option value={'Sun 7'}>রবি ৩টা (HSC 27) </option>
                                 <option value={'Sun 8'}>রবি ৪টা (HSC 26) </option>
@@ -219,11 +219,11 @@ function Students() {
                                 <option>Exam Batch HSC 26</option>
                                 <option>Exam Batch (নিউ নাইন SSC 27 - HSC 29)</option>
                                 <option>Exam Batch (নিউ টেন SSC 26 - HSC 28)</option>
-<option value={'Olympiad-8'}>Olympiad 8 (ssc 28 - hsc 30)</option>
-<option value={'Olympiad-9'}>Olympiad 9 (ssc 27 - hsc 29)</option>
-<option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>
-                                
-                                
+                                <option value={'Olympiad-8'}>Olympiad 8 (ssc 28 - hsc 30)</option>
+                                <option value={'Olympiad-9'}>Olympiad 9 (ssc 27 - hsc 29)</option>
+                                <option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>
+
+
                                 <option>SSC 25 (Physics Olympiad)</option>
                                 <option>Class 9 (SSC 27) Phy Champ</option>
                                 <option>Class 10 (SSC 26) Phy Champ</option>
@@ -237,8 +237,9 @@ function Students() {
                                 <option value={''}>All</option>
                                 <option value={'Free'}>Free Class</option>
                                 <option value={'HscPhy'}>HSC Physics</option>
+                                <option value={'HscPhyDue'}>HSC Physics Due</option>
                                 <option value={'Note-Fee-Due'}>Note Fee Due</option>
-                                    <option value={'Exam-Fee-Due'}>Exam Fee Due</option>
+                                <option value={'Exam-Fee-Due'}>Exam Fee Due</option>
                                 <option value={'SscPhy'}>SSC Physics</option>
                                 <option value={'SscPhyDue'}>SSC Physics Due</option>
                                 <option value={'Exam'}>Exam Batch </option>

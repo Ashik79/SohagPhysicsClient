@@ -179,7 +179,7 @@ function PaymentReport() {
 
             // Table headers
             const headers = [
-                "Sl No", "Roll", "Name", "Phone", "Note Fee", "Exam Fee", "Waver", "Due","Program", "Session", ...Array.from({ length: 12 }, (_, i) => (getMonth(i + 1).slice(0, 3)))
+                "Sl No", "Roll", "Name", "Phone", "Note Fee", "Exam Fee", "Waver", "Due", "Program", "Session", ...Array.from({ length: 12 }, (_, i) => (getMonth(i + 1).slice(0, 3)))
             ];
 
             // Table data rows for students
@@ -312,10 +312,10 @@ function PaymentReport() {
 
                             <select name='batch' className="select text-base font-semibold  select-info w-full ">
 
-                                
-                                
-                                
-                                <option value={'Olympiad-HSC27'}>Olympiad HSC 27</option>                                
+
+
+
+                                <option value={'Olympiad-HSC27'}>Olympiad HSC 27</option>
                                 <option value={'Sat 1'}>শনি ৭টা (HSC 27)</option>
                                 <option value={'Sat 2'}>শনি ৮টা (নিউ নাইন SSC 28 - HSC 30)</option>
                                 <option value={'Sat 3'}>শনি ৯টা (নিউ নাইন SSC 28 - HSC 30)</option>
@@ -348,9 +348,9 @@ function PaymentReport() {
                                 <option>Exam Batch HSC 26</option>
                                 <option>Exam Batch (নিউ নাইন SSC 27 - HSC 29)</option>
                                 <option>Exam Batch (নিউ টেন SSC 26 - HSC 28)</option>
-<option value={'Olympiad-8'}>Olympiad 8 (ssc 28 - hsc 30)</option>
-<option value={'Olympiad-9'}>Olympiad 9 (ssc 27 - hsc 29)</option>
-<option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>
+                                <option value={'Olympiad-8'}>Olympiad 8 (ssc 28 - hsc 30)</option>
+                                <option value={'Olympiad-9'}>Olympiad 9 (ssc 27 - hsc 29)</option>
+                                <option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>
 
 
                                 <option>SSC 25 (Physics Olympiad)</option>
@@ -384,8 +384,9 @@ function PaymentReport() {
                                 <option value={''}>All</option>
                                 <option value={'Free'}>Free Class</option>
                                 <option value={'HscPhy'}>HSC Physics</option>
+                                <option value={'HscPhyDue'}>HSC Physics Due</option>
                                 <option value={'Note-Fee-Due'}>Note Fee Due</option>
-                                    <option value={'Exam-Fee-Due'}>Exam Fee Due</option>
+                                <option value={'Exam-Fee-Due'}>Exam Fee Due</option>
                                 <option value={'PBC'}>PBC</option>
                                 <option value={'SscPhy'}>SSC Physics</option>
                                 <option value={'MonthlyDue'}>Monthly Payment Due</option>

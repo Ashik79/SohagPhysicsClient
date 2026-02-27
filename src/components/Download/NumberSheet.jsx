@@ -41,7 +41,7 @@ function NumberSheet() {
     const handleAttendancedateChange = (event) => {
         setAttendancedate(event.target.value);
     };
- 
+
 
     const sortArray = arr => {
         let ar = arr;
@@ -64,7 +64,7 @@ function NumberSheet() {
 
         const program = e.target.program.value;
         const session = e.target.session.value;
-       
+
 
         if (batch) query.batch = batch;
 
@@ -82,7 +82,7 @@ function NumberSheet() {
             }
 
             const data = await res.json();
-           
+
             let filteredStudents = data;
 
             // Filter by program
@@ -195,10 +195,10 @@ function NumberSheet() {
 
                             <select name='batch' className="select text-base font-semibold  select-info w-full ">
                                 <option value={""}>All</option>
-                                
-                                
-                                
-                                <option value={'Olympiad-HSC27'}>Olympiad HSC 27</option>                                
+
+
+
+                                <option value={'Olympiad-HSC27'}>Olympiad HSC 27</option>
                                 <option value={'Sat 1'}>শনি ৭টা (HSC 27)</option>
                                 <option value={'Sat 2'}>শনি ৮টা (নিউ নাইন SSC 28 - HSC 30)</option>
                                 <option value={'Sat 3'}>শনি ৯টা (নিউ নাইন SSC 28 - HSC 30)</option>
@@ -231,9 +231,9 @@ function NumberSheet() {
                                 <option>Exam Batch HSC 26</option>
                                 <option>Exam Batch (নিউ নাইন SSC 27 - HSC 29)</option>
                                 <option>Exam Batch (নিউ টেন SSC 26 - HSC 28)</option>
-<option value={'Olympiad-8'}>Olympiad 8 (ssc 28 - hsc 30)</option>
-<option value={'Olympiad-9'}>Olympiad 9 (ssc 27 - hsc 29)</option>
-<option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>
+                                <option value={'Olympiad-8'}>Olympiad 8 (ssc 28 - hsc 30)</option>
+                                <option value={'Olympiad-9'}>Olympiad 9 (ssc 27 - hsc 29)</option>
+                                <option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>
 
 
                                 <option>SSC 25 (Physics Olympiad)</option>
@@ -249,8 +249,9 @@ function NumberSheet() {
                                 <option value={''}>All</option>
                                 <option value={'Free'}>Free Class</option>
                                 <option value={'HscPhy'}>HSC Physics</option>
+                                <option value={'HscPhyDue'}>HSC Physics Due</option>
                                 <option value={'Note-Fee-Due'}>Note Fee Due</option>
-                                    <option value={'Exam-Fee-Due'}>Exam Fee Due</option>
+                                <option value={'Exam-Fee-Due'}>Exam Fee Due</option>
                                 <option value={'SscPhy'}>SSC Physics</option>
                                 <option value={'SscPhyDue'}>SSC Physics Due</option>
                                 <option value={'Exam'}>Exam Batch </option>

@@ -19,7 +19,7 @@ function Message() {
         const value = e.target.value;
         setSelectedOption(value)
         if (value == 'bangla') {
-            
+
             setDivisor(65)
         }
         else if (value == 'english') {
@@ -210,7 +210,7 @@ function Message() {
     //just checking
 
     return (
-        (role == 'CEO'|| role =='Manager') ? <div className=''>
+        (role == 'CEO' || role == 'Manager') ? <div className=''>
             <h1 className=' text-center lg:text-left md:text-center font-semibold text-2xl text-cyan-500 underline mt-10'>Messaging</h1>
             <form className='mx-auto w-full' onSubmit={handleSearch} >
 
@@ -234,17 +234,17 @@ function Message() {
 
                             <select name='batch' className="select text-lg font-semibold  select-info w-full ">
                                 <option value={""}>All</option>
-                                
-                                
-                                
-                                <option value={'Olympiad-HSC27'}>Olympiad HSC 27</option>                                
+
+
+
+                                <option value={'Olympiad-HSC27'}>Olympiad HSC 27</option>
                                 <option value={'Sat 1'}>শনি ৭টা (HSC 27)</option>
                                 <option value={'Sat 2'}>শনি ৮টা (নিউ নাইন SSC 28 - HSC 30)</option>
                                 <option value={'Sat 3'}>শনি ৯টা (নিউ নাইন SSC 28 - HSC 30)</option>
                                 <option value={'Sat 4'}>শনি ১০টা (নিউ নাইন SSC 27 - HSC 29)</option>
                                 <option value={'Sat 5'}>শনি ১১টা - SSC 26 (All Batch) </option>
                                 <option value={'Sat 12'}>শনি ১২টা - New Nine (SSC 28 Special Batch) </option>
-                               
+
                                 <option value={'Sat 6'}>শনি ২টা (HSC 27)</option>
                                 <option value={'Sat 7'}>শনি ৩টা - HSC 27 (New Batch)</option>
                                 <option value={'Sat 8'}>শনি ৪টা (SSC 27)</option>
@@ -256,7 +256,7 @@ function Message() {
                                 <option value={'Sun 3'}>রবি ৯টা - HSC 27 (New Batch)</option>
                                 <option value={'Sun 4'}>রবি ১০টা (HSC 28)</option>
                                 <option value={'Sun 5'}>রবি ১১টা </option>
-                               
+
                                 <option value={'Sun 6'}>রবি ২টা (HSC 26) </option>
                                 <option value={'Sun 7'}>রবি ৩টা (HSC 27) </option>
                                 <option value={'Sun 8'}>রবি ৪টা (HSC 26) </option>
@@ -270,11 +270,11 @@ function Message() {
                                 <option>Exam Batch HSC 26</option>
                                 <option>Exam Batch (নিউ নাইন SSC 27 - HSC 29)</option>
                                 <option>Exam Batch (নিউ টেন SSC 26 - HSC 28)</option>
-<option value={'Olympiad-8'}>Olympiad 8 (ssc 28 - hsc 30)</option>
-<option value={'Olympiad-9'}>Olympiad 9 (ssc 27 - hsc 29)</option>
-<option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>
-                                
-                                
+                                <option value={'Olympiad-8'}>Olympiad 8 (ssc 28 - hsc 30)</option>
+                                <option value={'Olympiad-9'}>Olympiad 9 (ssc 27 - hsc 29)</option>
+                                <option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>
+
+
                                 <option>SSC 25 (Physics Olympiad)</option>
                                 <option>Class 9 (SSC 27) Phy Champ</option>
                                 <option>Class 10 (SSC 26) Phy Champ</option>
@@ -288,8 +288,9 @@ function Message() {
                                 <option value={''}>All</option>
                                 <option value={'Free'}>Free Class</option>
                                 <option value={'HscPhy'}>HSC Physics</option>
+                                <option value={'HscPhyDue'}>HSC Physics Due</option>
                                 <option value={'Note-Fee-Due'}>Note Fee Due</option>
-                                    <option value={'Exam-Fee-Due'}>Exam Fee Due</option>
+                                <option value={'Exam-Fee-Due'}>Exam Fee Due</option>
                                 <option value={'SscPhy'}>SSC Physics</option>
                                 <option value={'SscPhyDue'}>SSC Physics Due</option>
                                 <option value={'Exam'}>Exam Batch </option>
@@ -323,7 +324,7 @@ function Message() {
 
                         <div className='lg:col-span-2'>
                             <p className='font-semibold'>Payment  </p>
-                            <select onChange={handleStatusChange}  className="select text-lg font-semibold  select-info w-full ">
+                            <select onChange={handleStatusChange} className="select text-lg font-semibold  select-info w-full ">
 
 
                                 <option >All</option>
@@ -335,46 +336,46 @@ function Message() {
                             </select>
                         </div>
 
-    {
-        paymentStatus != 'All' && <div>
-            <p className='font-semibold'>Month  </p>
-            <select
-                onChange={handleMonthChange}
-                defaultValue={month}
-                name='month'
+                        {
+                            paymentStatus != 'All' && <div>
+                                <p className='font-semibold'>Month  </p>
+                                <select
+                                    onChange={handleMonthChange}
+                                    defaultValue={month}
+                                    name='month'
 
-                className="select text-lg font-semibold  select-info w-full"
-            >
-                <option value="">All</option>
-                <option value="1">January</option>
-                <option value="2">February</option>
-                <option value="3">March</option>
-                <option value="4">April</option>
-                <option value="5">May</option>
-                <option value="6">June</option>
-                <option value="7">July</option>
-                <option value="8">August</option>
-                <option value="9">September</option>
-                <option value="10">October</option>
-                <option value="11">November</option>
-                <option value="12">December</option>
-            </select>
-        </div>
-    }
-    {
-        paymentStatus != 'All' && <div>
-            <p className='font-semibold'>Year  </p>
-            <select onChange={handleYearChange} defaultValue={year} name='year' className="select text-lg font-semibold  select-info w-full ">
-                <option>2024</option>
-                <option>2025</option>
-                <option>2026</option>
-            </select>
-        </div>
-    }
+                                    className="select text-lg font-semibold  select-info w-full"
+                                >
+                                    <option value="">All</option>
+                                    <option value="1">January</option>
+                                    <option value="2">February</option>
+                                    <option value="3">March</option>
+                                    <option value="4">April</option>
+                                    <option value="5">May</option>
+                                    <option value="6">June</option>
+                                    <option value="7">July</option>
+                                    <option value="8">August</option>
+                                    <option value="9">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
+                                </select>
+                            </div>
+                        }
+                        {
+                            paymentStatus != 'All' && <div>
+                                <p className='font-semibold'>Year  </p>
+                                <select onChange={handleYearChange} defaultValue={year} name='year' className="select text-lg font-semibold  select-info w-full ">
+                                    <option>2024</option>
+                                    <option>2025</option>
+                                    <option>2026</option>
+                                </select>
+                            </div>
+                        }
 
                         <div className='lg:col-span-2'>
                             <p className='font-semibold'>Attendance  </p>
-                            <select onChange={handleAttendanceStatusChange}  className="select text-lg font-semibold  select-info w-full ">
+                            <select onChange={handleAttendanceStatusChange} className="select text-lg font-semibold  select-info w-full ">
 
 
                                 <option >All</option>
@@ -453,73 +454,73 @@ function Message() {
                     </div >
                 </div >
 
-        <div className='flex mt-10 flex-col w-full lg:flex-row'>
-            <h1 className='font-bold text-lg lg:w-1/4'></h1>
-            <div className='lg:w-2/3 text-center'>
-                <input className=" text-lg font-semibold h-11  w-full bg-blue-100  border-2 rounded-xl    btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Find Students"}`} />
-                <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
-            </div>
-        </div>
-
-
-
-            </form >
-    {
-        students.length ? <>
-            <div className='mt-10 flex flex-col lg:flex-row gap-5'>
-                <div className='w-full lg:w-2/3'>
-                    <textarea onKeyUp={handleKeyUp} className='w-full p-2 h-40 rounded-lg border-2 border-sky-600' name="text" ></textarea>
-                    <div className='relative -mt-9 text-end pr-4  '>
-                        char : <span className='font-semibold text-sky-600'>{messageText.length}</span> || word : <span className='font-semibold text-sky-600'>{getWordCount(messageText)}</span>
-                    </div>
-                </div>
-                <div className='w-full lg:w-1/3 flex justify-center flex-col items-start gap-2'>
-                    <div className='text-red-600 font-semibold border-2 border-red-600 rounded-lg w-full h-20 lg:h-28 flex flex-col items-center justify-center'>
-                        <div className='flex items-center gap-2'>
-                            <p className='text-2xl font-bold text-center border border-sky-600 rounded-full p-2 py-0'>{students.length}</p>
-                            <p>Students will get the SMS</p>
-                        </div>
-                        <p className='text-sky-600 flex gap-2 items-center text-sm'>Calculation for
-                            <div>
-                                <label>
-                                    <input
-                                        type="radio"
-                                        value="bangla"
-                                        checked={selectedOption === 'bangla'} // Bind the checked property to state
-                                        onChange={handleOptionChange}
-                                    />
-                                    বাংলা
-                                </label>
-                            </div>
-                            <div>
-                                <label>
-                                    <input
-                                        type="radio"
-                                        value="english"
-                                        checked={selectedOption === 'english'} // Bind the checked property to state
-                                        onChange={handleOptionChange}
-                                    />
-                                    English
-                                </label>
-                            </div>
-                        </p>
-                        <div className='flex items-center gap-3'>
-                            <p>Cost: {(Math.ceil(messageText.length / divisor) * 0.35 * students.length).toFixed(2)} TK</p>
-                            <p>Sms Part: {Math.ceil(messageText.length / divisor)} </p>
-                        </div>
-
-
-
-                    </div>
-                    <div className='h-10 border-2 font-bold text-sky-600 hover:bg-slate-400 hover:text-white w-full rounded-lg border-sky-600 text-center '>
-                        <button className='my-1 h-11' onClick={handleSend} >{loading ? "" : "Send SMS"}</button>
+                <div className='flex mt-10 flex-col w-full lg:flex-row'>
+                    <h1 className='font-bold text-lg lg:w-1/4'></h1>
+                    <div className='lg:w-2/3 text-center'>
+                        <input className=" text-lg font-semibold h-11  w-full bg-blue-100  border-2 rounded-xl    btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Find Students"}`} />
                         <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
                     </div>
                 </div>
 
-            </div>
-        </> : <></>
-    }
+
+
+            </form >
+            {
+                students.length ? <>
+                    <div className='mt-10 flex flex-col lg:flex-row gap-5'>
+                        <div className='w-full lg:w-2/3'>
+                            <textarea onKeyUp={handleKeyUp} className='w-full p-2 h-40 rounded-lg border-2 border-sky-600' name="text" ></textarea>
+                            <div className='relative -mt-9 text-end pr-4  '>
+                                char : <span className='font-semibold text-sky-600'>{messageText.length}</span> || word : <span className='font-semibold text-sky-600'>{getWordCount(messageText)}</span>
+                            </div>
+                        </div>
+                        <div className='w-full lg:w-1/3 flex justify-center flex-col items-start gap-2'>
+                            <div className='text-red-600 font-semibold border-2 border-red-600 rounded-lg w-full h-20 lg:h-28 flex flex-col items-center justify-center'>
+                                <div className='flex items-center gap-2'>
+                                    <p className='text-2xl font-bold text-center border border-sky-600 rounded-full p-2 py-0'>{students.length}</p>
+                                    <p>Students will get the SMS</p>
+                                </div>
+                                <p className='text-sky-600 flex gap-2 items-center text-sm'>Calculation for
+                                    <div>
+                                        <label>
+                                            <input
+                                                type="radio"
+                                                value="bangla"
+                                                checked={selectedOption === 'bangla'} // Bind the checked property to state
+                                                onChange={handleOptionChange}
+                                            />
+                                            বাংলা
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label>
+                                            <input
+                                                type="radio"
+                                                value="english"
+                                                checked={selectedOption === 'english'} // Bind the checked property to state
+                                                onChange={handleOptionChange}
+                                            />
+                                            English
+                                        </label>
+                                    </div>
+                                </p>
+                                <div className='flex items-center gap-3'>
+                                    <p>Cost: {(Math.ceil(messageText.length / divisor) * 0.35 * students.length).toFixed(2)} TK</p>
+                                    <p>Sms Part: {Math.ceil(messageText.length / divisor)} </p>
+                                </div>
+
+
+
+                            </div>
+                            <div className='h-10 border-2 font-bold text-sky-600 hover:bg-slate-400 hover:text-white w-full rounded-lg border-sky-600 text-center '>
+                                <button className='my-1 h-11' onClick={handleSend} >{loading ? "" : "Send SMS"}</button>
+                                <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </> : <></>
+            }
 
         </div > : <div className='text-red-600'> You Don't Have Permission</div>
     )

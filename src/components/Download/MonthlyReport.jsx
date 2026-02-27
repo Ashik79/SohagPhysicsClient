@@ -13,7 +13,7 @@ function MonthlyReport() {
     const [paymentMonth, setPaymentMonth] = useState(month)
     const [paymentYear, setPaymentYear] = useState(year)
     const [batch, setBatch] = useState('')
-    const [session,setSession] =useState('')
+    const [session, setSession] = useState('')
 
     const [loading, setLoading] = useState(false)
 
@@ -58,14 +58,14 @@ function MonthlyReport() {
         const program = e.target.program.value;
         const session = e.target.session.value;
         setSession(session)
-      
+
         if (level) {
             query.level = level;
         }
         if (batch) query.batch = batch;
 
         if (session) query.session = session;
-       
+
 
         try {
             const res = await fetch('https://spoffice-server.vercel.app/students', {
@@ -165,7 +165,7 @@ function MonthlyReport() {
 
         XLSX.writeFile(
             workbook,
-            `Attendance Sheet -Batch: ${batch} - Session:${session?session:'All'} ,Month: ${getMonth(paymentMonth)}, ${paymentYear}.xlsx`
+            `Attendance Sheet -Batch: ${batch} - Session:${session ? session : 'All'} ,Month: ${getMonth(paymentMonth)}, ${paymentYear}.xlsx`
         );
     };
 
@@ -181,7 +181,7 @@ function MonthlyReport() {
 
             // Table headers
             const headers = [
-                "Sl No", "Roll", "Name", "Phone", "Program", "Payment","session", ...Array.from({ length: 31 }, (_, i) => (i + 1).toString())
+                "Sl No", "Roll", "Name", "Phone", "Program", "Payment", "session", ...Array.from({ length: 31 }, (_, i) => (i + 1).toString())
             ];
 
             // Table data rows for students
@@ -196,7 +196,7 @@ function MonthlyReport() {
                     (student.programs.length) ? student.programs[student.programs.length - 1].program : "Free Class",
                     payment ?
                         getFirstName(payment.ptaken) : "Unpaid",
-                        student.session,
+                    student.session,
                     ...Array.from({ length: 31 }, (_, i) => {
                         const date = `${i + 1}-${paymentMonth}-${paymentYear}`;
                         return student.attendances.some((att) => att.date === date) ? "P" : "";
@@ -270,7 +270,7 @@ function MonthlyReport() {
                         doc.text("Sohag Physics", pageWidth / 2, 20, { align: "center" });
                         doc.setFontSize(12);
                         doc.text(
-                            `Attendance Sheet for Batch: ${batch} , Session: ${session?session:'All'} , Month: ${getMonth(paymentMonth)}, ${paymentYear}`,
+                            `Attendance Sheet for Batch: ${batch} , Session: ${session ? session : 'All'} , Month: ${getMonth(paymentMonth)}, ${paymentYear}`,
                             pageWidth / 2,
                             30,
                             { align: "center" }
@@ -283,7 +283,7 @@ function MonthlyReport() {
 
 
             // Save the generated PDF
-            doc.save(`Attendance sheet of batch: ${students[0].batch}, Session: ${session?session:'All'}, Month: ${getMonth(paymentMonth)},${paymentYear}.pdf`);
+            doc.save(`Attendance sheet of batch: ${students[0].batch}, Session: ${session ? session : 'All'}, Month: ${getMonth(paymentMonth)},${paymentYear}.pdf`);
         } catch (err) {
             //console.log("Error generating PDF:", err);
         }
@@ -320,10 +320,10 @@ function MonthlyReport() {
 
                             <select name='batch' className="select text-base font-semibold  select-info w-full ">
 
-                                
-                                
-                                
-                                <option value={'Olympiad-HSC27'}>Olympiad HSC 27</option>                                
+
+
+
+                                <option value={'Olympiad-HSC27'}>Olympiad HSC 27</option>
                                 <option value={'Sat 1'}>শনি ৭টা (HSC 27)</option>
                                 <option value={'Sat 2'}>শনি ৮টা (নিউ নাইন SSC 28 - HSC 30)</option>
                                 <option value={'Sat 3'}>শনি ৯টা (নিউ নাইন SSC 28 - HSC 30)</option>
@@ -356,9 +356,9 @@ function MonthlyReport() {
                                 <option>Exam Batch HSC 26</option>
                                 <option>Exam Batch (নিউ নাইন SSC 27 - HSC 29)</option>
                                 <option>Exam Batch (নিউ টেন SSC 26 - HSC 28)</option>
-<option value={'Olympiad-8'}>Olympiad 8 (ssc 28 - hsc 30)</option>
-<option value={'Olympiad-9'}>Olympiad 9 (ssc 27 - hsc 29)</option>
-<option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>
+                                <option value={'Olympiad-8'}>Olympiad 8 (ssc 28 - hsc 30)</option>
+                                <option value={'Olympiad-9'}>Olympiad 9 (ssc 27 - hsc 29)</option>
+                                <option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>
 
 
                                 <option>SSC 25 (Physics Olympiad)</option>
@@ -392,8 +392,9 @@ function MonthlyReport() {
                                 <option value={''}>All</option>
                                 <option value={'Free'}>Free Class</option>
                                 <option value={'HscPhy'}>HSC Physics</option>
+                                <option value={'HscPhyDue'}>HSC Physics Due</option>
                                 <option value={'Note-Fee-Due'}>Note Fee Due</option>
-                                    <option value={'Exam-Fee-Due'}>Exam Fee Due</option>
+                                <option value={'Exam-Fee-Due'}>Exam Fee Due</option>
                                 <option value={'PBC'}>PBC</option>
                                 <option value={'SscPhy'}>SSC Physics</option>
                                 <option value={'MonthlyDue'}>Monthly Payment Due</option>
@@ -409,7 +410,7 @@ function MonthlyReport() {
 
                             </select>
                         </div>
-                        
+
                         <div className=''>
                             <p className='font-semibold'>Session  </p>
                             <select name='session' className="select text-base font-semibold  select-info w-full ">
