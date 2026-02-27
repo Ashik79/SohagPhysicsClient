@@ -283,9 +283,9 @@ function Exams() {
 
                                         <option value={'SscPhy'}>SSC Physics</option>
 
-                                        <option value={'Exam'}>Exam Batch </option>
 
-                                        <option value={'Others'}>Others </option>
+
+                                        <option value={'suggestion'}>Suggestion Fee </option>
 
 
 
@@ -488,9 +488,9 @@ function Exams() {
 
                                         <option value={'SscPhy'}>SSC Physics</option>
 
-                                        <option value={'Exam'}>Exam Batch </option>
 
-                                        <option value={'Others'}>Others </option>
+
+                                        <option value={'suggestion'}>Suggestion Fee </option>
 
 
 

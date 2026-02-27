@@ -238,14 +238,14 @@ function Students() {
                                 <option value={'Free'}>Free Class</option>
                                 <option value={'HscPhy'}>HSC Physics</option>
                                 <option value={'HscPhyDue'}>HSC Physics Due</option>
-                                <option value={'Note-Fee-Due'}>Note Fee Due</option>
-                                <option value={'Exam-Fee-Due'}>Exam Fee Due</option>
+
+
                                 <option value={'SscPhy'}>SSC Physics</option>
                                 <option value={'SscPhyDue'}>SSC Physics Due</option>
-                                <option value={'Exam'}>Exam Batch </option>
-                                <option value={'ExamDue'}>Exam Batch Due </option>
-                                <option value={'Others'}>Others </option>
-                                <option value={'OthersDue'}>Others Due </option>
+
+
+                                <option value={'suggestion'}>Suggestion Fee </option>
+
 
 
 

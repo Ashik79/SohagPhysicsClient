@@ -64,18 +64,14 @@ function ProgramEntry() {
         }
         const program = event.target.program.value;
         const waver = event.target.waver.value || 0;
-        const waverReason = event.target.waverReason.value 
+        const waverReason = event.target.waverReason.value
 
         //Agei joined ache kina 
         const alreadyPaid = user.programs.some(pro =>
             pro.program == program
         );
 
-        if (alreadyPaid) {
-            notifyFailed("Already enrolled in this program !");
-            setLoading(false);
-            return;
-        }
+
 
 
         try {
@@ -112,9 +108,9 @@ function ProgramEntry() {
 
                 user.payments.push(notePayment)
                 user.payments.push(examPayment)
-                
-                
-                
+
+
+
                 const monthlyAmount = parseInt(event.target.monthlyAmount.value)
                 //console.log(monthlyAmount)
                 user.monthlyAmount = monthlyAmount
@@ -124,7 +120,7 @@ function ProgramEntry() {
                     program, monthlyAmount, type, payDate, Fee, entryBy: loggedUser
                 }
                 user.programs.push(programData)
-                const temp = { ...user, waver ,waverReason,monthlyAmount}
+                const temp = { ...user, waver, waverReason, monthlyAmount }
                 setUser(temp)
 
                 const res = await fetch(`https://spoffice-server.vercel.app/addpayment/${id}`, {
@@ -181,7 +177,7 @@ function ProgramEntry() {
                 }
 
                 user.programs.push(programData)
-                const temp = { ...user, waver,waverReason }
+                const temp = { ...user, waver, waverReason }
                 setUser(temp)
 
                 const res = await fetch(`https://spoffice-server.vercel.app/addpayment/${id}`, {
@@ -238,7 +234,7 @@ function ProgramEntry() {
                 }
 
                 user.programs.push(programData)
-                const temp = { ...user, waver,waverReason }
+                const temp = { ...user, waver, waverReason }
                 setUser(temp)
 
                 const res = await fetch(`https://spoffice-server.vercel.app/addpayment/${id}`, {
@@ -363,19 +359,19 @@ function ProgramEntry() {
                                 <select onChange={handleProgramChanged} required name='program' className="select text-lg font-semibold  select-info w-full ">
 
                                     <option value={'HscPhy'}>HSC Physics</option>
-                                    <option value={'Note-Fee-Due'}>Note Fee Due</option>
-                                    <option value={'Exam-Fee-Due'}>Exam Fee Due</option>
-                                    <option value={'PBC'}>PBC</option>
+
+
+
                                     <option value={'SscPhy'}>SSC Physics</option>
                                     <option value={'MonthlyDue'}>Monthly Payment Due</option>
 
                                     <option value={'SscPhyDue'}>SSC Physics Due</option>
                                     <option value={'HscPhyDue'}>HSC Physics Due</option>
-                                    <option value={'Exam'}>Exam Batch </option>
-                                    <option value={'ExamDue'}>Exam Batch Due </option>
+
+
                                     <option value={'Chuti'}>Chuti </option>
-                                    <option value={'Others'}>Others </option>
-                                    <option value={'OthersDue'}>Others Due </option>
+                                    <option value={'suggestion'}>Suggestion Fee </option>
+
                                 </select>
                             </div>
                             {
