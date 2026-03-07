@@ -349,7 +349,7 @@ const StudentDetails = () => {
                 <div className="flex gap-4">
                   <label className="flex items-center gap-2 cursor-pointer text-xs font-black text-slate-600 uppercase tracking-widest">
                     <input type="radio" value="bangla" checked={selectedOption === 'bangla'} onChange={handleOptionChange} className="radio radio-xs radio-primary" />
-                    à¦¬à¦¾à¦‚à¦²à¦¾
+                    à¦¬à¦¾à¦‚লা
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer text-xs font-black text-slate-600 uppercase tracking-widest">
                     <input type="radio" value="english" checked={selectedOption === 'english'} onChange={handleOptionChange} className="radio radio-xs radio-primary" />

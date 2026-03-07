@@ -198,38 +198,38 @@ function AbsentList() {
 
 
                                 <option value={'Olympiad-HSC27'}>Olympiad HSC 27</option>
-                                <option value={'Sat 1'}>à¦¶à¦¨à¦¿ à§­à¦Ÿà¦¾ (HSC 27)</option>
-                                <option value={'Sat 2'}>à¦¶à¦¨à¦¿ à§®à¦Ÿà¦¾ (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡à¦¨ SSC 28 - HSC 30)</option>
-                                <option value={'Sat 3'}>à¦¶à¦¨à¦¿ à§¯à¦Ÿà¦¾ (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡à¦¨ SSC 28 - HSC 30)</option>
-                                <option value={'Sat 4'}>à¦¶à¦¨à¦¿ à§§à§¦à¦Ÿà¦¾ (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡à¦¨ SSC 27 - HSC 29)</option>
-                                <option value={'Sat 5'}>à¦¶à¦¨à¦¿ à§§à§§à¦Ÿà¦¾ - SSC 26 (All Batch) </option>
-                                <option value={'Sat 12'}>à¦¶à¦¨à¦¿ à§§à§¨à¦Ÿà¦¾ - New Nine (SSC 28 Special Batch) </option>
+                                <option value={'Sat 1'}>শনি à§­à¦Ÿা (HSC 27)</option>
+                                <option value={'Sat 2'}>শনি à§®à¦Ÿা (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡ন SSC 28 - HSC 30)</option>
+                                <option value={'Sat 3'}>শনি à§¯à¦Ÿা (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡ন SSC 28 - HSC 30)</option>
+                                <option value={'Sat 4'}>শনি à§§à§¦à¦Ÿা (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡ন SSC 27 - HSC 29)</option>
+                                <option value={'Sat 5'}>শনি à§§à§§à¦Ÿা - SSC 26 (All Batch) </option>
+                                <option value={'Sat 12'}>শনি à§§à§¨à¦Ÿা - New Nine (SSC 28 Special Batch) </option>
 
-                                <option value={'Sat 6'}>à¦¶à¦¨à¦¿ à§¨à¦Ÿà¦¾ (HSC 27)</option>
-                                <option value={'Sat 7'}>à¦¶à¦¨à¦¿ à§©à¦Ÿà¦¾ - HSC 27 (New Batch)</option>
-                                <option value={'Sat 8'}>à¦¶à¦¨à¦¿ à§ªà¦Ÿà¦¾ (SSC 27)</option>
-                                <option value={'Sat 9'}>à¦¶à¦¨à¦¿ à§«à¦Ÿà¦¾ - SSC 28 (New Nine)</option>
-                                <option value={'Sat 10'}>à¦¶à¦¨à¦¿ à§¬à¦Ÿà¦¾ (SSC 28)</option>
-                                <option value={'Sat 11'}>à¦¶à¦¨à¦¿ à§­ à¦Ÿà¦¾ ( SSC 27 - HSC 29)</option>
-                                <option value={'Sun 1'}>à¦°à¦¬à¦¿ à§­à¦Ÿà¦¾ (HSC 27)</option>
-                                <option value={'Sun 2'}>à¦°à¦¬à¦¿ à§®à¦Ÿà¦¾ (HSC 26)</option>
-                                <option value={'Sun 3'}>à¦°à¦¬à¦¿ à§¯à¦Ÿà¦¾ - HSC 27 (New Batch)</option>
-                                <option value={'Sun 4'}>à¦°à¦¬à¦¿ à§§à§¦à¦Ÿà¦¾ (HSC 28)</option>
-                                <option value={'Sun 5'}>à¦°à¦¬à¦¿ à§§à§§à¦Ÿà¦¾ </option>
+                                <option value={'Sat 6'}>শনি à§¨à¦Ÿা (HSC 27)</option>
+                                <option value={'Sat 7'}>শনি à§©à¦Ÿা - HSC 27 (New Batch)</option>
+                                <option value={'Sat 8'}>শনি à§ªà¦Ÿা (SSC 27)</option>
+                                <option value={'Sat 9'}>শনি à§«à¦Ÿা - SSC 28 (New Nine)</option>
+                                <option value={'Sat 10'}>শনি à§¬à¦Ÿা (SSC 28)</option>
+                                <option value={'Sat 11'}>শনি ৭ à¦Ÿা ( SSC 27 - HSC 29)</option>
+                                <option value={'Sun 1'}>রবি à§­à¦Ÿা (HSC 27)</option>
+                                <option value={'Sun 2'}>রবি à§®à¦Ÿা (HSC 26)</option>
+                                <option value={'Sun 3'}>রবি à§¯à¦Ÿা - HSC 27 (New Batch)</option>
+                                <option value={'Sun 4'}>রবি à§§à§¦à¦Ÿা (HSC 28)</option>
+                                <option value={'Sun 5'}>রবি à§§à§§à¦Ÿা </option>
 
-                                <option value={'Sun 6'}>à¦°à¦¬à¦¿ à§¨à¦Ÿà¦¾ (HSC 26) </option>
-                                <option value={'Sun 7'}>à¦°à¦¬à¦¿ à§©à¦Ÿà¦¾ (HSC 27) </option>
-                                <option value={'Sun 8'}>à¦°à¦¬à¦¿ à§ªà¦Ÿà¦¾ (HSC 26) </option>
-                                <option value={'Sun 9'}>à¦°à¦¬à¦¿ à§«à¦Ÿà¦¾ (HSC 27) </option>
-                                <option value={'Sun 10'}>à¦°à¦¬à¦¿ à§¬à¦Ÿà¦¾ (SSC 27 - HSC 29) </option>
-                                <option value={'Sun 11'}>à¦°à¦¬à¦¿ à§­à¦Ÿà¦¾ - SSC 28 (New Nine) </option>
+                                <option value={'Sun 6'}>রবি à§¨à¦Ÿা (HSC 26) </option>
+                                <option value={'Sun 7'}>রবি à§©à¦Ÿা (HSC 27) </option>
+                                <option value={'Sun 8'}>রবি à§ªà¦Ÿা (HSC 26) </option>
+                                <option value={'Sun 9'}>রবি à§«à¦Ÿা (HSC 27) </option>
+                                <option value={'Sun 10'}>রবি à§¬à¦Ÿা (SSC 27 - HSC 29) </option>
+                                <option value={'Sun 11'}>রবি à§­à¦Ÿা - SSC 28 (New Nine) </option>
                                 <option>HSC 26 Admission cancel</option>
                                 <option>HSC 27 Admission cancel</option>
                                 <option>SSC 26 class 10 Admission cancel</option>
                                 <option>SSC 27 class 9 Admission cancel</option>
                                 <option>Exam Batch HSC 26</option>
-                                <option>Exam Batch (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡à¦¨ SSC 27 - HSC 29)</option>
-                                <option>Exam Batch (à¦¨à¦¿à¦‰ à¦Ÿà§‡à¦¨ SSC 26 - HSC 28)</option>
+                                <option>Exam Batch (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡ন SSC 27 - HSC 29)</option>
+                                <option>Exam Batch (à¦¨à¦¿à¦‰ à¦Ÿà§‡ন SSC 26 - HSC 28)</option>
                                 <option value={'Olympiad-8'}>Olympiad 8 (ssc 28 - hsc 30)</option>
                                 <option value={'Olympiad-9'}>Olympiad 9 (ssc 27 - hsc 29)</option>
                                 <option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>

@@ -196,8 +196,8 @@ function Exams() {
                         <select name='batch' className="input-premium w-full h-14 px-4 text-sm">
                             <option value="Universal">Universal</option>
                             <option value={'Olympiad-HSC27'}>Olympiad 27</option>
-                            <option value={'Sat 1'}>à¦¶à¦¨à¦¿ à§­à¦Ÿà¦¾ (27)</option>
-                            <option value={'Sat 2'}>à¦¶à¦¨à¦¿ à§®à¦Ÿà¦¾</option>
+                            <option value={'Sat 1'}>শনি à§­à¦Ÿা (27)</option>
+                            <option value={'Sat 2'}>শনি à§®à¦Ÿা</option>
                         </select>
                     </div>
                     <div className="space-y-2">
@@ -334,8 +334,8 @@ function Exams() {
                                 <select name='batch' className="input-premium w-full h-14">
                                     <option value={""}>Universal (All)</option>
                                     <option value={'Olympiad-HSC27'}>Olympiad HSC 27</option>
-                                    <option value={'Sat 1'}>à¦¶à¦¨à¦¿ à§­à¦Ÿà¦¾ (HSC 27)</option>
-                                    <option value={'Sat 2'}>à¦¶à¦¨à¦¿ à§®à¦Ÿà¦¾</option>
+                                    <option value={'Sat 1'}>শনি à§­à¦Ÿা (HSC 27)</option>
+                                    <option value={'Sat 2'}>শনি à§®à¦Ÿা</option>
                                 </select>
                             </div>
 

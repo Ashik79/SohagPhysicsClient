@@ -67,7 +67,7 @@ const MonthlyPaymentsComponent = ({ payments, student }) => {
                 <div className="space-y-1">
                   <div className="flex items-baseline gap-1">
                     <span className="text-xl font-black text-slate-800 tracking-tighter">{payment.pamount}</span>
-                    <span className="text-[10px] font-bold text-emerald-600 uppercase">à§³</span>
+                    <span className="text-[10px] font-bold text-emerald-600 uppercase">৳</span>
                   </div>
                   <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
                     <FiCalendar size={10} /> {payment.payDate}

@@ -79,7 +79,7 @@ function StudentDetailsPart({ student }) {
                     <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                         <FiFileText size={48} className="text-amber-800" />
                     </div>
-                    <p className="text-[10px] font-black text-amber-800/50 uppercase tracking-widest mb-2">Student Memo (à¦®à¦¨à§à¦¤à¦¬à§à¦¯)</p>
+                    <p className="text-[10px] font-black text-amber-800/50 uppercase tracking-widest mb-2">Student Memo (মন্তব্য)</p>
                     <p className="text-amber-900 font-bold leading-relaxed italic">{note}</p>
                 </div>
             )}
