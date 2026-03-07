@@ -25,6 +25,7 @@ const OmrHub = ({ exam, onClose, students }) => {
     const { notifySuccess, notifyFailed } = useContext(AuthContext);
     const [activeTab, setActiveTab] = useState('design');
     const [answerKey, setAnswerKey] = useState(() => {
+        if (exam?.answerKey && Object.keys(exam.answerKey).length > 0) return exam.answerKey;
         const saved = localStorage.getItem(`omr_key_${exam._id}`);
         return saved ? JSON.parse(saved) : {};
     });
@@ -37,9 +38,9 @@ const OmrHub = ({ exam, onClose, students }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [negativeMarking, setNegativeMarking] = useState(0);
-    // activeQuestions: how many of the 75 fixed bubbles to evaluate
-    // Valid options: 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75
-    const VALID_Q_OPTIONS = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75];
+    // activeQuestions: how many of the 60 fixed bubbles to evaluate
+    // Valid options: 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60
+    const VALID_Q_OPTIONS = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60];
     const snapToValidQ = (n) => VALID_Q_OPTIONS.reduce((prev, cur) => Math.abs(cur - n) < Math.abs(prev - n) ? cur : prev);
     const [activeQuestions, setActiveQuestions] = useState(snapToValidQ(exam?.mcqTotal || 25));
 
@@ -82,7 +83,9 @@ const OmrHub = ({ exam, onClose, students }) => {
 
     const handleScanComplete = (data) => {
         if (data.type === 'MASTER_KEY') {
-            setAnswerKey(prev => ({ ...prev, [data.set]: data.key }));
+            const newKey = data.key; // We use flat key for simplicity in current universal OMR
+            setAnswerKey(newKey);
+            saveAnswerKeyCloud(newKey);
             return;
         }
 
@@ -162,6 +165,26 @@ const OmrHub = ({ exam, onClose, students }) => {
         ));
     };
 
+    const saveAnswerKeyCloud = async (customKey) => {
+        const keyToSave = customKey || answerKey;
+        try {
+            const res = await fetch(`${API_URL}/exam/update/${exam._id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    answerKey: keyToSave,
+                    mcqTotal: activeQuestions // also sync the question count
+                })
+            });
+            if (res.ok) {
+                notifySuccess("Answer Key saved to Cloud!");
+                localStorage.setItem(`omr_key_${exam._id}`, JSON.stringify(keyToSave));
+            }
+        } catch (e) {
+            notifyFailed("Failed to save Key to Cloud");
+        }
+    };
+
     const handleSaveAll = async () => {
         if (scannedResults.length === 0) return;
         setIsSaving(true);
@@ -190,11 +213,15 @@ const OmrHub = ({ exam, onClose, students }) => {
 
             const finalResultsArray = Array.from(finalResultsMap.values());
 
-            // 1. Update Exam Collection
+            // 1. Update Exam Collection (Results + Answer Key)
             const examRes = await fetch(`${API_URL}/exam/update/${exam._id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ results: finalResultsArray })
+                body: JSON.stringify({
+                    results: finalResultsArray,
+                    answerKey: answerKey,
+                    mcqTotal: activeQuestions
+                })
             });
 
             if (!examRes.ok) throw new Error("Failed to update exam");
@@ -475,6 +502,7 @@ const OmrHub = ({ exam, onClose, students }) => {
                                     embedded={true}
                                     answerKey={answerKey}
                                     setAnswerKey={setAnswerKey}
+                                    onSaveKey={saveAnswerKeyCloud}
                                     activeQuestions={activeQuestions}
                                     setActiveQuestions={setActiveQuestions}
                                 />
@@ -492,7 +520,7 @@ const OmrHub = ({ exam, onClose, students }) => {
                                             <p className="text-[10px] font-black text-sky-400 uppercase tracking-wider mt-1">Active Questions</p>
                                         </div>
                                         <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-4 text-center">
-                                            <p className="text-3xl font-black text-emerald-600">{75 - activeQuestions}</p>
+                                            <p className="text-3xl font-black text-emerald-600">{60 - activeQuestions}</p>
                                             <p className="text-[10px] font-black text-emerald-400 uppercase tracking-wider mt-1">Ignored Bubbles</p>
                                         </div>
                                         <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4 text-center">

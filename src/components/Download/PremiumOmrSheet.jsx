@@ -4,17 +4,17 @@ import React, { forwardRef } from 'react';
 // ALL percentages match exactly with the WebWorker & Python Engine
 export const ENGINE = {
     qStartY: 36.5,
-    qRowSpace: 2.25,
-    gapHeight: 0.65,
+    qRowSpace: 3.05,
+    gapHeight: 0.85,
 
     colBaseX: [2, 35, 68],
     bubbleOffsetX: 8,
     bubbleSpacingX: 5.5,
 
-    rollStartX: 8,
+    rollStartX: 7.2,
     rollStartY: 16.5,
-    rollColSpace: 6,
-    rollRowSpace: 1.6,
+    rollColSpace: 7,
+    rollRowSpace: 1.65,
 
     setStartX: 56,
     setStartY: 16.5,
@@ -22,8 +22,8 @@ export const ENGINE = {
 };
 
 const OPTION_LABELS = ['A', 'B', 'C', 'D'];
-const TOTAL_Q = 75;
-const Q_PER_COL = 25;
+const TOTAL_Q = 60;
+const Q_PER_COL = 20;
 const NUM_COLS = 3;
 
 const PremiumOmrSheet = forwardRef(({ setLabel = 'A', answerKey, isAnswerKeyMode = false, copyNum = 1 }, ref) => {
@@ -54,9 +54,9 @@ const PremiumOmrSheet = forwardRef(({ setLabel = 'A', answerKey, isAnswerKeyMode
                 top: 32, left: 32, right: 32, bottom: 32,
                 zIndex: 10,
             }}>
-                {/* 1. HEADER (0% - 7.5%) */}
+                {/* 1. HEADER */}
                 <div style={{
-                    position: 'absolute', top: '0%', left: '0%', right: '0%', height: '7.5%',
+                    position: 'absolute', top: '0%', left: '2%', right: '2%', height: '5.5%',
                     border: '3px solid #000', borderRadius: 8,
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px',
                     background: '#f8fafc'
@@ -70,14 +70,14 @@ const PremiumOmrSheet = forwardRef(({ setLabel = 'A', answerKey, isAnswerKeyMode
                         </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: 14, fontWeight: 900, color: '#000' }}>{exam?.category || 'UNIVERSAL'}</div>
+                        <div style={{ fontSize: 14, fontWeight: 900, color: '#000' }}>UNIVERSAL</div>
                         <div style={{ fontSize: 9, fontWeight: 700, color: '#64748b', letterSpacing: '0.1em' }}>OMR ANSWER SHEET</div>
                     </div>
                 </div>
 
-                {/* 2. INSTRUCTIONS & GUIDELINES (8% - 10%) */}
+                {/* 2. INSTRUCTIONS & GUIDELINES */}
                 <div style={{
-                    position: 'absolute', top: '8.5%', left: '0%', right: '0%', height: '5%',
+                    position: 'absolute', top: '6.5%', left: '2%', right: '2%', height: '3.5%',
                     display: 'flex', border: '2px solid #e2e8f0', borderRadius: 8, overflow: 'hidden'
                 }}>
                     <div style={{ flex: 1, background: '#f1f5f9', display: 'flex', alignItems: 'center', px: 15, fontSize: 10, fontWeight: 800, paddingLeft: 15 }}>
@@ -85,46 +85,43 @@ const PremiumOmrSheet = forwardRef(({ setLabel = 'A', answerKey, isAnswerKeyMode
                     </div>
                     <div style={{ flex: 4, display: 'flex', alignItems: 'center', gap: 20, paddingLeft: 15 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <div style={{ width: 14, height: 14, borderRadius: '50%', background: '#000' }} />
-                            <span style={{ fontSize: 9, fontWeight: 700 }}>CORRECT</span>
+                            <div style={{ width: 17, height: 17, borderRadius: '50%', background: '#000' }} />
+                            <span style={{ fontSize: 10, fontWeight: 800 }}>CORRECT</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <div style={{ width: 14, height: 14, borderRadius: '50%', border: '1.5px solid #000', position: 'relative' }}>
-                                <div style={{ position: 'absolute', top: '50%', left: '50%', width: '100%', height: 1.5, background: '#000', transform: 'translate(-50%, -50%) rotate(45deg)' }} />
+                            <div style={{ width: 17, height: 17, borderRadius: '50%', border: '2px solid #000', position: 'relative' }}>
+                                <div style={{ position: 'absolute', top: '50%', left: '50%', width: '100%', height: 2, background: '#000', transform: 'translate(-50%, -50%) rotate(45deg)' }} />
                             </div>
-                            <span style={{ fontSize: 9, fontWeight: 700 }}>WRONG</span>
+                            <span style={{ fontSize: 10, fontWeight: 800 }}>WRONG</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <div style={{ width: 14, height: 14, borderRadius: '50%', border: '1.5px solid #000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#000' }} />
+                            <div style={{ width: 17, height: 17, borderRadius: '50%', border: '2px solid #000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#000' }} />
                             </div>
-                            <span style={{ fontSize: 9, fontWeight: 700 }}>WRONG</span>
+                            <span style={{ fontSize: 10, fontWeight: 800 }}>WRONG</span>
                         </div>
-                        <span style={{ fontSize: 8, fontWeight: 600, color: '#94a3b8', fontStyle: 'italic' }}>* Use black ballpoint pen only. Do not fold or smudge the sheet.</span>
+                        <span style={{ fontSize: 9, fontWeight: 600, color: '#94a3b8', fontStyle: 'italic' }}>* Use black ballpoint pen only. Do not fold or smudge the sheet.</span>
                     </div>
                 </div>
 
-                {/* 5. QUESTION GRID (35% - 98%) */}
+                {/* 5. QUESTION GRID (34.2% - 99.7%) */}
                 <div style={{
-                    position: 'absolute', top: '34%', left: '0%', right: '0%', height: '64%',
-                    border: '2px solid #e2e8f0', borderRadius: 12, background: '#fff'
+                    position: 'absolute', top: '34.2%', left: '1.8%', right: '1.8%', height: '65.5%',
+                    border: '2px solid #000', borderRadius: 12, background: '#fff'
                 }}>
-                    {/* Column Headers */}
-                    {Array.from({ length: NUM_COLS }).map((_, i) => (
-                        <div key={`col-head-${i}`} style={{
-                            position: 'absolute', top: 5,
-                            left: `${ENGINE.colBaseX[i] + 7.5}%`,
-                            fontSize: 9, fontWeight: 900, color: '#94a3b8', letterSpacing: '0.1em'
-                        }}>
-                            Q.NO | OPTIONS (A-D)
-                        </div>
-                    ))}
                 </div>
 
                 {/* 6. TIMING TRACKS (AI LINE ALIGNMENT) */}
-                <div style={{ position: 'absolute', top: '36.5%', right: '-3%', height: '61%', width: 8, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    {Array.from({ length: 25 }).map((_, i) => (
-                        <div key={`track-${i}`} style={{ width: 8, height: 8, background: '#000' }} />
+                {/* Right Side Tracks */}
+                <div style={{ position: 'absolute', top: '1.5%', right: '-3%', height: '97%', width: 8, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    {Array.from({ length: 45 }).map((_, i) => (
+                        <div key={`track-right-${i}`} style={{ width: 8, height: 8, background: '#000' }} />
+                    ))}
+                </div>
+                {/* Left Side Tracks */}
+                <div style={{ position: 'absolute', top: '1.5%', left: '-3%', height: '97%', width: 8, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    {Array.from({ length: 45 }).map((_, i) => (
+                        <div key={`track-left-${i}`} style={{ width: 8, height: 8, background: '#000' }} />
                     ))}
                 </div>
 
@@ -133,7 +130,7 @@ const PremiumOmrSheet = forwardRef(({ setLabel = 'A', answerKey, isAnswerKeyMode
                         {/* Section Divider Lines */}
                         {ci < NUM_COLS - 1 && (
                             <div style={{
-                                position: 'absolute', top: '35%', bottom: '2%',
+                                position: 'absolute', top: '35%', bottom: '0.3%',
                                 left: `${ENGINE.colBaseX[ci] + 32}%`,
                                 borderLeft: '1px dashed #cbd5e1'
                             }} />
@@ -141,9 +138,9 @@ const PremiumOmrSheet = forwardRef(({ setLabel = 'A', answerKey, isAnswerKeyMode
                     </React.Fragment>
                 ))}
 
-                {/* 3. ROLL BOX (15% - 32%) */}
+                {/* 3. ROLL BOX */}
                 <div style={{
-                    position: 'absolute', top: '15%', left: '2%', width: '44%', height: '17%',
+                    position: 'absolute', top: '10.5%', left: '2%', width: '45%', height: '22.5%',
                     border: '3px solid #000', borderRadius: 8, background: '#fff'
                 }}>
                     <div style={{ textAlign: 'center', fontSize: 10, fontWeight: 900, marginTop: 4, letterSpacing: '0.1em', color: '#000' }}>ROLL NUMBER</div>
@@ -156,8 +153,8 @@ const PremiumOmrSheet = forwardRef(({ setLabel = 'A', answerKey, isAnswerKeyMode
                         <div style={{
                             position: 'absolute',
                             left: `${ENGINE.rollStartX + c * ENGINE.rollColSpace}%`,
-                            top: `${ENGINE.rollStartY - 2.5}%`,
-                            width: 22, height: 22, border: '2px solid #000', borderRadius: 3,
+                            top: `${ENGINE.rollStartY - 1.4}%`,
+                            width: 28, height: 28, border: '2px solid #000', borderRadius: 3,
                             transform: 'translate(-50%, -100%)', background: '#fff'
                         }} />
                         {/* Bubbles 0-9 */}
@@ -166,9 +163,9 @@ const PremiumOmrSheet = forwardRef(({ setLabel = 'A', answerKey, isAnswerKeyMode
                                 position: 'absolute',
                                 left: `${ENGINE.rollStartX + c * ENGINE.rollColSpace}%`,
                                 top: `${ENGINE.rollStartY + r * ENGINE.rollRowSpace}%`,
-                                width: 15, height: 15, borderRadius: '50%', border: '1.5px solid #000',
+                                width: 20, height: 20, borderRadius: '50%', border: '2px solid #000',
                                 transform: 'translate(-50%, -50%)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontSize: 8, fontWeight: 800, background: '#fff'
+                                fontSize: 11, fontWeight: 900, background: '#fff'
                             }}>
                                 {r}
                             </div>
@@ -176,89 +173,27 @@ const PremiumOmrSheet = forwardRef(({ setLabel = 'A', answerKey, isAnswerKeyMode
                     </React.Fragment>
                 ))}
 
-                {/* 4. SET BOX (15% - 32%) */}
-                <div style={{
-                    position: 'absolute', top: '15%', left: '52%', width: '42%', height: '17%',
-                    border: '3px solid #000', borderRadius: 8, background: '#fff'
-                }}>
-                    <div style={{ textAlign: 'center', fontSize: 10, fontWeight: 900, marginTop: 4, letterSpacing: '0.1em', color: '#000' }}>QUESTION SET</div>
-                    <div style={{ position: 'absolute', top: '25%', left: '55%', transform: 'translateX(-50%)', border: '2px solid #000', width: 22, height: 22, borderRadius: 3, background: '#fff' }}></div>
-                </div>
-                {/* Write box */}
-                <div style={{
-                    position: 'absolute', left: `${ENGINE.setStartX}%`, top: `${ENGINE.setStartY - 3}%`,
-                    width: 26, height: 26, border: '2px solid #000', borderRadius: 3,
-                    transform: 'translate(-50%, -100%)', background: '#fff'
-                }}>
-                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 900 }}>{setLabel}</div>
-                </div>
-                {/* SET Bubbles A B C D */}
-                {['A', 'B', 'C', 'D'].map((lbl, r) => {
-                    const isSet = isAnswerKeyMode && setLabel === lbl;
-                    return (
-                        <div key={`set-${lbl}`} style={{
-                            position: 'absolute',
-                            left: `${ENGINE.setStartX}%`,
-                            top: `${ENGINE.setStartY + r * ENGINE.setRowSpace}%`,
-                            width: 18, height: 18, borderRadius: '50%', border: '2px solid #000',
-                            transform: 'translate(-50%, -50%)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 10, fontWeight: 900, background: isSet ? '#000' : '#fff', color: isSet ? '#fff' : '#000'
-                        }}>
-                            {isSet ? '✓' : lbl}
-                        </div>
-                    );
-                })}
 
                 {/* 4. NAME & INFO BOX */}
                 <div style={{
-                    position: 'absolute', top: '10%', left: '66%', right: '2%', height: '22%',
-                    border: '3px solid #000', borderRadius: 8, padding: '14px 14px',
-                    display: 'flex', flexDirection: 'column', justifyContent: 'space-around'
+                    position: 'absolute', top: '10.5%', left: '50%', right: '2%', height: '22.5%',
+                    border: '3px solid #000', borderRadius: 8, padding: '10px 14px',
+                    display: 'flex', flexDirection: 'column', justifyContent: 'space-around', background: '#fff'
                 }}>
-                    {['NAME', 'BATCH', 'DATE', 'SIGN'].map(lbl => (
+                    {['NAME', 'BATCH', 'DATE'].map(lbl => (
                         <div key={lbl} style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
-                            <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.1em' }}>{lbl}:</span>
+                            <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.1em', width: '45px' }}>{lbl}:</span>
                             <div style={{ flex: 1, borderBottom: '2px dashed #000' }} />
                         </div>
                     ))}
                 </div>
 
-                {/* 5. SET LABEL BADGE (top-right corner) */}
-                <div style={{
-                    position: 'absolute', top: '0%', right: '0%', width: 44, height: 44,
-                    background: '#000', color: '#fff', borderBottomLeftRadius: 16, borderTopRightRadius: 4,
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                    zIndex: 15
-                }}>
-                    <div style={{ fontSize: 20, lineHeight: 1, fontWeight: 900 }}>{setLabel}</div>
-                    <div style={{ fontSize: 7, lineHeight: 1.2, fontWeight: 800 }}>SET</div>
-                </div>
-
-                {/* 6. GRID HEADERS */}
-                <div style={{ position: 'absolute', top: '34.5%', left: 0, right: 0, height: 2.5, background: '#000' }} />
-
-                {Array.from({ length: NUM_COLS ?? 3 }).map((_, ci) => (
-                    <React.Fragment key={`head-${ci}`}>
-                        <div style={{
-                            position: 'absolute', top: '33.5%', left: `${ENGINE.colBaseX[ci] + 2}%`,
-                            transform: 'translateY(-50%)', fontSize: 8, fontWeight: 900, color: '#444'
-                        }}>Q.NO</div>
-                        {OPTION_LABELS.map((lbl, oi) => (
-                            <div key={lbl} style={{
-                                position: 'absolute', top: '33.5%',
-                                left: `${ENGINE.colBaseX[ci] + ENGINE.bubbleOffsetX + oi * ENGINE.bubbleSpacingX}%`,
-                                transform: 'translate(-50%, -50%)', fontSize: 9, fontWeight: 900, color: '#222'
-                            }}>
-                                {lbl}
-                            </div>
-                        ))}
-                    </React.Fragment>
-                ))}
+                {/* 6. GRID HEADERS REMOVED AS REQUESTED */}
 
                 {/* 7. COLUMNS & QUESTIONS DIVIDERS */}
                 {[1, 2].map(i => (
                     <div key={`col-${i}`} style={{
-                        position: 'absolute', top: '34.5%', bottom: '2%',
+                        position: 'absolute', top: '34.5%', bottom: '0.3%',
                         left: `${ENGINE.colBaseX[i] - 1.5}%`, width: 1.5, background: '#000'
                     }} />
                 ))}
@@ -276,7 +211,7 @@ const PremiumOmrSheet = forwardRef(({ setLabel = 'A', answerKey, isAnswerKeyMode
                             {/* Question Number */}
                             <div style={{
                                 position: 'absolute', left: `${ENGINE.colBaseX[ci] + 4}%`, top: `${y}%`,
-                                transform: 'translate(-100%, -50%)', fontSize: 10, fontWeight: 900, letterSpacing: '-0.05em'
+                                transform: 'translate(-100%, -50%)', fontSize: 13, fontWeight: 900, letterSpacing: '-0.05em'
                             }}>
                                 {qNum}.
                             </div>
@@ -288,12 +223,12 @@ const PremiumOmrSheet = forwardRef(({ setLabel = 'A', answerKey, isAnswerKeyMode
                                         position: 'absolute',
                                         left: `${ENGINE.colBaseX[ci] + ENGINE.bubbleOffsetX + oi * ENGINE.bubbleSpacingX}%`,
                                         top: `${y}%`,
-                                        width: 17, height: 17, borderRadius: '50%',
+                                        width: 22, height: 22, borderRadius: '50%',
                                         border: `2px solid ${isCorrect ? '#000' : dropOutColor}`,
                                         background: isCorrect ? '#000' : '#fff',
                                         color: isCorrect ? '#fff' : (isAnswerKeyMode ? 'transparent' : '#000'),
                                         transform: 'translate(-50%, -50%)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        fontSize: 8, fontWeight: 800
+                                        fontSize: 11, fontWeight: 900
                                     }}>
                                         {isCorrect ? '✓' : lbl}
                                     </div>
@@ -312,24 +247,8 @@ const PremiumOmrSheet = forwardRef(({ setLabel = 'A', answerKey, isAnswerKeyMode
                     );
                 })}
 
-                {/* 9. FOOTER */}
-                <div style={{
-                    position: 'absolute', bottom: '0%', left: '0%', right: '0%', height: '1.5%',
-                    borderTop: '3px solid #000',
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
-                    fontSize: 7.5, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#111',
-                }}>
-                    <span>P-{copyNum} • SET {setLabel}</span>
-                    <span>DO NOT WRITE BELOW THIS LINE • OPTICAL MARK RECOGNITION REGION</span>
-                    <span>75 QUESTIONS • 4 OPTIONS</span>
-                </div>
+                {/* 9. FOOTER REMOVED AS REQUESTED */}
 
-            </div>
-            <div style={{
-                position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)',
-                fontSize: 7, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.2em'
-            }}>
-                SOHAG PHYSICS UNIVERSAL OMR ENGINE v4.0 • SYSTEM-0012-75Q
             </div>
         </div>
     );

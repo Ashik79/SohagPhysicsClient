@@ -3,7 +3,7 @@
  *  SOHAG PHYSICS — UNIVERSAL OMR WEB WORKER  v4.0
  *  ─────────────────────────────────────────────
  *  Universal Sheet Edition — One SET per Exam
- *  • Always 75 bubble rows on sheet
+ *  • Always 60 bubble rows on sheet
  *  • Scanner evaluates only first N (activeQ) questions
  *  • SET bubble (A/B/C/D) auto-detected for identification
  * ╚══════════════════════════════════════════════════════════════════════╝
@@ -13,14 +13,14 @@
  *    setStartY   : 16.5%  →  setStartY = 0.165
  *    setRowSpace : 3.5%   →  setRowGap = 0.035
  *
- *    rollStartX  : 8%     →  rSX = 0.08
- *    rollColSpace: 6%     →  rCG = 0.06
+ *    rollStartX  : 7.2%   →  rSX = 0.072
+ *    rollColSpace: 7%     →  rCG = 0.07
  *    rollStartY  : 16.5%  →  rSY = 0.165
- *    rollRowSpace: 1.6%   →  rRG = 0.016
+ *    rollRowSpace: 1.65%  →  rRG = 0.0165
  *
  *    qStartY     : 36.5%  →  qStartY   = 0.365
- *    qRowSpace   : 2.25%  →  qRowSpace = 0.0225
- *    gapHeight   : 0.65%  →  gapHeight = 0.0065
+ *    qRowSpace   : 3.05%  →  qRowSpace = 0.0305
+ *    gapHeight   : 0.85%  →  gapHeight = 0.0085
  *    colBaseX    : [2,35,68]%
  *    bubbleOffsetX: 8%
  *    bubbleSpacingX: 5.5%
@@ -31,8 +31,8 @@ self.importScripts('https://docs.opencv.org/4.5.4/opencv.js');
 const OPTION_LABELS = ['A', 'B', 'C', 'D'];
 const WARPED_W = 800;
 const WARPED_H = 1000;
-const TOTAL_SHEET_Q = 75;
-const Q_PER_COL = 25;
+const TOTAL_SHEET_Q = 60;
+const Q_PER_COL = 20;
 
 cv['onRuntimeInitialized'] = () => {
     self.postMessage({ type: 'ready' });
@@ -44,10 +44,9 @@ function bubbleX(ci, oi) {
     return Math.round(WARPED_W * (colBaseX + 0.08 + oi * 0.055));
 }
 
-// ── Bubble row Y position (matches ENGINE.qStartY + ri * qRowSpace + floor(ri/5) * gapHeight)
 function bubbleY(i) {
     const ri = i % Q_PER_COL;
-    return Math.round(WARPED_H * (0.365 + ri * 0.0225 + Math.floor(ri / 5) * 0.0065));
+    return Math.round(WARPED_H * (0.365 + ri * 0.0305 + Math.floor(ri / 5) * 0.0085));
 }
 
 // ── Count filled pixels in a circle region
@@ -64,7 +63,7 @@ self.onmessage = function (e) {
     if (!cv || !cv.Mat) return;
 
     const { imageData, numQ, numOpts, isMasterKeyMode, selectedSet } = e.data;
-    // Clamp activeQ to [5, 75]
+    // Clamp activeQ to [5, 60]
     const activeQ = Math.min(TOTAL_SHEET_Q, Math.max(5, numQ || TOTAL_SHEET_Q));
 
     let src, gray, thresh, blurMat, warped, warpedGray, M, ordered, dstCoords;
@@ -135,36 +134,36 @@ self.onmessage = function (e) {
         cv.adaptiveThreshold(warpedGray, warpedGray, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 15, 5);
 
         // ── SET Detection (matches ENGINE: setStartX=56%, setStartY=16.5%, setRowSpace=3.5%)
-        //    SET bubbles are 18px circles → scan radius 9px
+        //    SET bubbles are 22px circles → scan radius 12px
         let detectedSet = null, maxSetPx = 0;
         const setColX = Math.round(WARPED_W * 0.56);   // 448px
         const setStartYpct = 0.165;                     // 16.5%
         const setRowGap = 0.035;                        // 3.5%
         for (let row = 0; row < 4; row++) {
             const cy = Math.round(WARPED_H * (setStartYpct + row * setRowGap));
-            const px = countPixels(warpedGray, setColX, cy, 9);
-            if (px > maxSetPx && px > 30) {
+            const px = countPixels(warpedGray, setColX, cy, 12);
+            if (px > maxSetPx && px > 50) {
                 maxSetPx = px;
                 detectedSet = OPTION_LABELS[row];
             }
         }
         const finalSet = detectedSet || selectedSet || 'A';
 
-        // ── Roll Number Detection (matches ENGINE: rollStartX=8%, rollColSpace=6%, rollStartY=16.5%, rollRowSpace=1.6%)
-        //    Roll bubbles are 15px circles → scan radius 7px
+        // ── Roll Number Detection (matches ENGINE: rollStartX=7.2%, rollColSpace=7%, rollStartY=16.5%, rollRowSpace=1.65%)
+        //    Roll bubbles are 20px circles → scan radius 10px
         let finalRoll = '';
-        const rSX = 0.08, rCG = 0.06, rSY = 0.165, rRG = 0.016;
+        const rSX = 0.072, rCG = 0.07, rSY = 0.165, rRG = 0.0165;
         for (let c = 0; c < 6; c++) {
             let best = null, mD = 0, sD = 0;
             for (let r = 0; r < 10; r++) {
-                const d = countPixels(warpedGray, Math.round(WARPED_W * (rSX + c * rCG)), Math.round(WARPED_H * (rSY + r * rRG)), 7);
+                const d = countPixels(warpedGray, Math.round(WARPED_W * (rSX + c * rCG)), Math.round(WARPED_H * (rSY + r * rRG)), 10);
                 if (d > mD) { sD = mD; mD = d; best = r; } else if (d > sD) sD = d;
             }
-            finalRoll += (mD < 40 || (mD > 40 && sD > 30 && mD / (sD || 1) < 1.3)) ? '?' : String(best);
+            finalRoll += (mD < 50 || (mD > 50 && sD > 30 && mD / (sD || 1) < 1.3)) ? '?' : String(best);
         }
 
-        // ── Answer Bubbles: scan all 75, but mark as SKIPPED_INACTIVE beyond activeQ
-        //    Question bubbles are 17px circles → scan radius 10px
+        // ── Answer Bubbles: scan all 60, but mark as SKIPPED_INACTIVE beyond activeQ
+        //    Question bubbles are 22px circles → scan radius 12px
         const detectedAnswers = [];
         for (let i = 0; i < TOTAL_SHEET_Q; i++) {
             const qNum = i + 1;
@@ -179,14 +178,14 @@ self.onmessage = function (e) {
             const by = bubbleY(i);
             const optData = [];
             for (let oi = 0; oi < 4; oi++) {
-                optData.push({ opt: OPTION_LABELS[oi], pixels: countPixels(warpedGray, bubbleX(ci, oi), by, 10) });
+                optData.push({ opt: OPTION_LABELS[oi], pixels: countPixels(warpedGray, bubbleX(ci, oi), by, 12) });
             }
             optData.sort((a, b) => b.pixels - a.pixels);
 
             const top1 = optData[0].pixels;
             const top2 = optData[1].pixels;
-            const isMultiple = top1 > 75 && top2 > 50 && (top1 / (top2 || 1)) < 1.4;
-            const isEmpty = top1 < 60;
+            const isMultiple = top1 > 100 && top2 > 60 && (top1 / (top2 || 1)) < 1.4;
+            const isEmpty = top1 < 80;
 
             detectedAnswers.push({
                 qNum,

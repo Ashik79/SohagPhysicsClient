@@ -300,10 +300,14 @@ const router = createBrowserRouter([
         path: '/video-library',
         element: <VideoLibrary></VideoLibrary>,
       },
-
     ],
   },
-]);
+], {
+  future: {
+    v7_startTransition: true,
+    v7_relativeSplatPath: true,
+  },
+});
 
 
 ReactDOM.createRoot(document.getElementById('root')).render(

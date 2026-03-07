@@ -39,7 +39,8 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
     const [sourceType, setSourceType] = useState('camera'); // 'camera' or 'scanner'
     const [devices, setDevices] = useState([]);
     const [selectedDeviceId, setSelectedDeviceId] = useState('');
-    const [usePythonServer, setUsePythonServer] = useState(false);
+    const [usePythonServer, setUsePythonServer] = useState(true); // Default to true for PRO scanner
+    const [pythonProcessing, setPythonProcessing] = useState(false);
 
     // AI Auto-Capture States
     const [autoCapture, setAutoCapture] = useState(true);
@@ -89,8 +90,8 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
         return { score: Math.max(0, score), correct, wrong, unattempted, skipped: skippedCount, breakdown };
     }, [answerKey, hasKey, marksPerCorrect, negativeMarking, negativeValue]);
 
-    const handleScanResult = useCallback((data, detectedSet) => {
-        const { detectedAnswers, finalRoll, imageData, isMasterKeyMode: _isMasterKey, selectedSet: _set } = data;
+    const handleScanResult = useCallback((data, detectedSet, isAutoCapture = false) => {
+        const { detectedAnswers, finalRoll, imageData, isMasterKeyMode: _isMasterKey, selectedSet: _set, roll_crop_base64 } = data;
         let finalSet = detectedSet || _set;
         const { score, correct, wrong, unattempted, breakdown } = calculateScore(detectedAnswers);
 
@@ -102,25 +103,40 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
             setIsMasterKeyMode(false);
             setStatus('ready');
         } else {
-            const canvas = canvasRef.current;
-            canvas.width = imageData.width;
-            canvas.height = imageData.height;
-            const ctx = canvas.getContext('2d');
-            ctx.putImageData(imageData, 0, 0);
-
             const rollUnreadable = finalRoll.includes('?');
             setEditRoll(rollUnreadable ? '' : finalRoll);
-            setScannedData({
-                roll: finalRoll,            // keep raw result including '?' markers
+
+            const newData = {
+                roll: finalRoll,
                 score, correct, wrong, unattempted, set: finalSet, breakdown,
-                capturedImg: canvas.toDataURL('image/jpeg', 0.5),
+                capturedImg: roll_crop_base64 || (imageData ? imageDataToDataURL(imageData) : null),
+                rollCrop: roll_crop_base64,
                 isEdgeAiProcessed: true,
                 icrVerified: !rollUnreadable,
                 scanTimestamp: new Date().toISOString()
-            });
-            setStatus('scanned');
+            };
+
+            if (isAutoCapture && !rollUnreadable) {
+                onSave(newData);
+                setBatchHistory(p => [newData, ...p]);
+                notifySuccess(`Auto-Saved: Roll ${finalRoll}`);
+                setStatus('ready');
+                setAlignmentScore(0);
+            } else {
+                setScannedData(newData);
+                setStatus('scanned');
+            }
         }
     }, [calculateScore, onSave, notifySuccess]);
+
+    const imageDataToDataURL = (imageData) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = imageData.width;
+        canvas.height = imageData.height;
+        const ctx = canvas.getContext('2d');
+        ctx.putImageData(imageData, 0, 0);
+        return canvas.toDataURL('image/jpeg', 0.5);
+    };
 
     const workerRef = useRef(null);
     useEffect(() => {
@@ -132,26 +148,27 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                 startCamera();
             } else if (e.data.type === 'detecting') {
                 setIsAligned(false);
-                setAlignmentScore(0);
+                // We let it continue so if it quickly loses tracking it doesn't hard-reset
+                // setAlignmentScore(0);
             } else if (e.data.type === 'scan_result') {
                 setIsAligned(true);
                 if (autoCapture && status === 'ready') {
                     setAlignmentScore(prev => {
                         const next = prev + 1;
                         if (next >= 5) {
-                            handleScanResult(e.data.data, e.data.detectedSet);
-                            notifySuccess('AI Auto-Captured Sheet!');
+                            handleScanResult(e.data.data, e.data.detectedSet, true);
                             return 0;
                         }
                         return next;
                     });
                 } else if (!autoCapture) {
-                    handleScanResult(e.data.data, e.data.detectedSet);
+                    handleScanResult(e.data.data, e.data.detectedSet, false);
                 }
             } else if (e.data.type === 'error') {
                 setIsAligned(false);
                 setAlignmentScore(0);
-                setStatus('ready');
+                // Do NOT set status to 'ready' if we were holding a scanned data. 
+                // We keep whatever status we are in (e.g., 'scanned' to review roll)
             }
         };
         return () => {
@@ -177,6 +194,34 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
 
     const stopCamera = () => { if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null; } };
 
+    const processFramePython = async (base64Image) => {
+        if (pythonProcessing) return;
+        setPythonProcessing(true);
+        try {
+            const resp = await fetch('http://localhost:5050/scan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: base64Image, active_q: totalQToEvaluate })
+            });
+            const data = await resp.json();
+            if (data.success) {
+                const result = data.result;
+                handleScanResult({
+                    detectedAnswers: result.questions,
+                    finalRoll: result.roll,
+                    roll_crop_base64: result.roll_crop_base64,
+                    selectedSet: result.set
+                }, result.set, autoCapture);
+            }
+        } catch (err) {
+            console.error("Python Server Error:", err);
+            notifyFailed("Python Server Error - Falling back to Edge AI");
+            setUsePythonServer(false);
+        } finally {
+            setPythonProcessing(false);
+        }
+    };
+
     const processFrame = useCallback((imageSource) => {
         if (!isCvLoaded || !imageSource || status !== 'ready' || !workerRef.current) return;
         const canvas = canvasRef.current;
@@ -185,18 +230,19 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
         if (!w || !h) return;
         canvas.width = w; canvas.height = h;
         ctx.drawImage(imageSource, 0, 0, w, h);
-        const imageData = ctx.getImageData(0, 0, w, h);
 
-        if (usePythonServer) {
-            // Python Server Logic...
+        if (usePythonServer && alignmentScore >= 5 && !pythonProcessing) {
+            const base64 = canvas.toDataURL('image/jpeg', 0.8);
+            processFramePython(base64);
             return;
         }
 
+        const imageData = ctx.getImageData(0, 0, w, h);
         workerRef.current.postMessage({
             imageData, width: w, height: h, numQ: totalQToEvaluate,
             numOpts: exam.optionsPerQuestion || 4, isMasterKeyMode, selectedSet
         }, [imageData.data.buffer]);
-    }, [isCvLoaded, status, totalQToEvaluate, exam, isMasterKeyMode, selectedSet, usePythonServer]);
+    }, [isCvLoaded, status, totalQToEvaluate, exam, isMasterKeyMode, selectedSet, usePythonServer, alignmentScore, pythonProcessing]);
 
     // Fast-Loop for camera
     useEffect(() => {
@@ -305,18 +351,24 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                                     <h3 className="text-xl font-black text-slate-900 mb-1">
                                         {scannedData.icrVerified ? 'Sheet Scanned ✓' : 'Roll Unreadable ⚠️'}
                                     </h3>
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">
+                                    {/* <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">
                                         SET: <span className="text-sky-600">{scannedData.set}</span>
-                                    </p>
+                                    </p> */}
 
                                     {/* Editable Roll — show when unreadable */}
                                     {!scannedData.icrVerified ? (
                                         <div className="mb-4">
+                                            {scannedData.rollCrop && (
+                                                <div className="mb-3 rounded-xl overflow-hidden border-2 border-slate-100 shadow-inner">
+                                                    <p className="text-[10px] font-black text-slate-400 bg-slate-50 py-1 uppercase">Sheet Roll Preview</p>
+                                                    <img src={scannedData.rollCrop} alt="Roll Crop" className="w-full h-16 object-contain bg-white" />
+                                                </div>
+                                            )}
                                             <p className="text-xs text-amber-600 font-bold mb-2">Roll বুঝা যায়নি। নিচে লিখুন:</p>
                                             <input
                                                 type="text"
                                                 value={editRoll}
-                                                onChange={e => setEditRoll(e.target.value)}
+                                                onChange={e => setEditRoll(e.target.value.replace(/\D/g, ''))}
                                                 placeholder="Roll Number লিখুন"
                                                 maxLength={10}
                                                 className="w-full px-4 py-3 border-2 border-amber-300 rounded-2xl text-center font-black text-slate-800 text-lg focus:outline-none focus:border-sky-500 bg-amber-50"
@@ -343,14 +395,29 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                                         </div>
                                     </div>
 
-                                    <div className="flex gap-3">
-                                        <button onClick={() => { setScannedData(null); setEditRoll(''); setStatus('ready'); }} className="flex-1 py-3.5 bg-slate-100 font-black rounded-2xl text-xs uppercase text-slate-500 hover:bg-slate-200 transition-colors">Reject</button>
+                                    <div className="flex gap-2">
+                                        <button onClick={() => { setScannedData(null); setEditRoll(''); setStatus('ready'); }} className="flex-1 py-3 bg-slate-100 font-black rounded-2xl text-xs uppercase text-slate-500 hover:bg-slate-200 transition-colors">Discard</button>
+
+                                        {!scannedData.icrVerified && !editRoll.trim() && (
+                                            <button
+                                                onClick={() => {
+                                                    const confirmedData = { ...scannedData, roll: "Unknown_" + Math.floor(1000 + Math.random() * 9000) };
+                                                    onSave(confirmedData);
+                                                    setBatchHistory(p => [confirmedData, ...p]);
+                                                    setEditRoll(''); setScannedData(null); setStatus('ready');
+                                                }}
+                                                className="flex-1 py-3 bg-amber-50 border border-amber-200 text-amber-600 font-black rounded-2xl text-xs uppercase hover:bg-amber-100 transition-colors"
+                                            >
+                                                Skip Roll
+                                            </button>
+                                        )}
+
                                         <button
                                             onClick={handleConfirm}
                                             disabled={!scannedData.icrVerified && !editRoll.trim()}
-                                            className="flex-[2] py-3.5 bg-slate-900 text-white font-black rounded-2xl text-xs uppercase shadow-xl hover:bg-black transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                            className="flex-[2] py-3 bg-slate-900 text-white font-black rounded-2xl text-[11px] uppercase shadow-xl hover:bg-black transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                                         >
-                                            ✓ Confirm & Save
+                                            ✓ Save
                                         </button>
                                     </div>
                                 </div>

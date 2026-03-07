@@ -18,10 +18,16 @@ function Exams() {
         fetch(`${API_URL}/getexams`)
             .then(res => res.json())
             .then(data => {
-                setAllExams(data)
-                const sortedExams = data.sort((a, b) => new Date(b.date) - new Date(a.date));
+                // Sort by _id descending (newest first) since MongoDB ObjectIds contain timestamps
+                const sortedExams = data.sort((a, b) => {
+                    const idA = a._id.toString();
+                    const idB = b._id.toString();
+                    return idB.localeCompare(idA);
+                });
+
+                setAllExams(sortedExams);
                 setDisplayExams(sortedExams);
-                setFirstLoading(false)
+                setFirstLoading(false);
             })
     }, []);
 

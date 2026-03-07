@@ -4,7 +4,7 @@ import { useReactToPrint } from 'react-to-print';
 import PremiumOmrSheet from './PremiumOmrSheet';
 
 // ── Universal OMR Sheet Designer ──────────────────────────────────────
-//  The OMR sheet is ALWAYS 75 questions (fixed and universal).
+//  The OMR sheet is ALWAYS 60 questions (fixed and universal).
 //  "Active Questions" tells the scanner how many bubbles to evaluate.
 //  One exam = one SET. The printed sheet never changes.
 // ─────────────────────────────────────────────────────────────────────
@@ -12,10 +12,10 @@ import PremiumOmrSheet from './PremiumOmrSheet';
 const OPTION_LABELS = ['A', 'B', 'C', 'D'];
 const OPTION_COLORS = { A: '#3b82f6', B: '#10b981', C: '#f59e0b', D: '#ef4444' };
 
-// Active question options: 10, 15, 20 ... 75 (step 5)
-const ACTIVE_Q_OPTIONS = Array.from({ length: 14 }, (_, i) => (i + 2) * 5);
+// Active question options: 10, 15, 20 ... 60 (step 5)
+const ACTIVE_Q_OPTIONS = Array.from({ length: 11 }, (_, i) => (i + 2) * 5);
 
-function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKey, setAnswerKey: setExternalAnswerKey, activeQuestions: externalActiveQ, setActiveQuestions: setExternalActiveQ }) {
+function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKey, setAnswerKey: setExternalAnswerKey, onSaveKey, activeQuestions: externalActiveQ, setActiveQuestions: setExternalActiveQ }) {
     const [activeTab, setActiveTab] = useState('design');
 
     // Answer key — shared with OmrHub if provided
@@ -53,8 +53,26 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
         pageStyle: `
             @page { size: A4 portrait; margin: 0; }
             @media print {
-                html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background: white !important; }
-                .print-page { margin: 0 !important; border: initial !important; box-shadow: initial !important; background: initial !important; page-break-after: always; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                html, body { 
+                    width: 210mm !important; 
+                    height: 297mm !important; 
+                    margin: 0 !important; 
+                    padding: 0 !important; 
+                    background: white !important; 
+                    overflow: hidden !important;
+                }
+                .print-page { 
+                    width: 210mm !important; 
+                    height: 297mm !important; 
+                    max-width: 210mm !important; 
+                    max-height: 297mm !important; 
+                    border: none !important; 
+                    box-shadow: none !important; 
+                    margin: 0 auto !important; 
+                    page-break-after: always; 
+                    box-sizing: border-box !important;
+                }
             }
         `
     });
@@ -78,7 +96,7 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
         <div className={(onClose || embedded) ? 'p-6 overflow-y-auto h-full' : ''}>
             {!embedded && (
                 <div className='flex items-center justify-between mb-4'>
-                    <h1 className='text-xl font-bold text-cyan-600 underline'>Universal OMR Sheet — Always 75 Questions</h1>
+                    <h1 className='text-xl font-bold text-cyan-600 underline'>Universal OMR Sheet — Always 60 Questions</h1>
                     {onClose && (
                         <button onClick={onClose} className='p-2 text-slate-400 hover:text-red-500 rounded-xl transition-colors'>
                             <MdClose size={22} />
@@ -114,8 +132,7 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
                                 </div>
                             </div>
                             <ul className='text-xs text-slate-600 space-y-1.5 font-medium'>
-                                <li>✅ <strong>Always 75 questions</strong> — sheet never changes</li>
-                                <li>✅ <strong>SET bubble</strong> (A/B/C/D) — scanner auto-detects active set</li>
+                                <li>✅ <strong>Always 60 questions</strong> — sheet never changes</li>
                                 <li>✅ <strong>Roll Number</strong> — 6-digit bubble grid</li>
                                 <li>✅ <strong>Scanner evaluates only "Active Questions"</strong> (Q1 → Q{activeQ})</li>
                                 <li>✅ No QR code, no conditions — pure bubble-based OMR</li>
@@ -129,7 +146,7 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
                             </label>
                             <p className='text-xs text-slate-400 mb-3'>
                                 Scanner will evaluate only the first <strong className='text-sky-600'>{activeQ}</strong> bubbles.
-                                Remaining {75 - activeQ} bubbles are ignored.
+                                Remaining {60 - activeQ} bubbles are ignored.
                             </p>
                             <div className='grid grid-cols-7 gap-1.5'>
                                 {ACTIVE_Q_OPTIONS.map(n => (
@@ -148,7 +165,7 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
                                 <div className='text-2xl font-black text-amber-600'>{activeQ}</div>
                                 <div>
                                     <p className='text-xs font-black text-amber-700'>Active Questions Selected</p>
-                                    <p className='text-[10px] text-amber-500'>Q1 → Q{activeQ} evaluated. Q{activeQ + 1} → Q75 ignored by scanner.</p>
+                                    <p className='text-[10px] text-amber-500'>Q1 → Q{activeQ} evaluated. Q{activeQ + 1} → Q60 ignored by scanner.</p>
                                 </div>
                             </div>
                         </div>
@@ -164,9 +181,9 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
                         </div>
                         <div className='grid grid-cols-3 gap-2 text-center text-xs mt-2'>
                             {[
-                                { label: 'Total Bubbles', val: 75, color: 'text-sky-600' },
+                                { label: 'Total Bubbles', val: 60, color: 'text-sky-600' },
                                 { label: 'Active Q', val: activeQ, color: 'text-amber-600' },
-                                { label: 'Ignored', val: 75 - activeQ, color: 'text-slate-400' },
+                                { label: 'Ignored', val: 60 - activeQ, color: 'text-slate-400' },
                             ].map(item => (
                                 <div key={item.label} className='bg-white border rounded-lg p-2'>
                                     <p className={`text-xl font-black ${item.color}`}>{item.val}</p>
@@ -190,7 +207,7 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
                             <p className='font-bold text-slate-700'>Enter Correct Answers</p>
                             <p className='text-sm text-slate-400'>
                                 Setting answers for <strong className='text-sky-600'>Q1 → Q{activeQ}</strong> only.
-                                Q{activeQ + 1}–Q75 are ignored by scanner.
+                                Q{activeQ + 1}–Q60 are ignored by scanner.
                             </p>
                         </div>
                         <div className='flex items-center gap-3'>
@@ -198,7 +215,15 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
                                 {answeredCount} / {activeQ} answered
                             </div>
                             {answeredCount > 0 && (
-                                <button onClick={() => setAnswerKey({})} className='btn btn-xs btn-outline btn-error'>Clear All</button>
+                                <div className="flex gap-2">
+                                    <button onClick={() => setAnswerKey({})} className='btn btn-xs btn-outline btn-error'>Clear All</button>
+                                    <button
+                                        onClick={() => onSaveKey && onSaveKey()}
+                                        className='btn btn-xs btn-primary gap-1 shadow-md shadow-sky-100'
+                                    >
+                                        <MdKey size={14} /> Save Key to Cloud
+                                    </button>
+                                </div>
                             )}
                         </div>
                     </div>
@@ -262,7 +287,7 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
                         <div className='w-8 h-8 bg-sky-600 rounded-xl flex items-center justify-center text-white text-sm font-black'>{activeQ}</div>
                         <div>
                             <p className='text-xs font-black text-sky-700'>Active Questions: {activeQ}</p>
-                            <p className='text-[10px] text-sky-400'>Scanner evaluates Q1–Q{activeQ}. Remaining {75 - activeQ} bubbles ignored. Sheet always has 75 bubbles.</p>
+                            <p className='text-[10px] text-sky-400'>Scanner evaluates Q1–Q{activeQ}. Remaining {60 - activeQ} bubbles ignored. Sheet always has 60 bubbles.</p>
                         </div>
                     </div>
 
@@ -275,7 +300,7 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
                             <div>
                                 <p className='font-black text-slate-800 text-base'>Print Universal OMR Sheet</p>
                                 <p className='text-slate-500 text-xs mt-1'>
-                                    75 questions • 4 options (A/B/C/D) • SET bubble • 6-digit Roll Number<br />
+                                    60 questions • 4 options (A/B/C/D) • SET bubble • 6-digit Roll Number<br />
                                     <span className='text-sky-600 font-bold'>One sheet for all exams — scanner evaluates only the first {activeQ} questions</span>
                                 </p>
                             </div>
@@ -297,10 +322,10 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
                         <div className='p-4 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col justify-center'>
                             <p className='font-bold text-xs text-slate-500 uppercase tracking-wider mb-2'>How it works</p>
                             <div className='space-y-1 text-xs text-slate-500'>
-                                <p>1️⃣ Print Universal Sheet (75 Q) — stock in bulk</p>
-                                <p>2️⃣ Student fills: SET bubble + roll number + answers</p>
-                                <p>3️⃣ Scanner reads SET, roll, and evaluates Q1–Q<strong className='text-sky-600'>{activeQ}</strong></p>
-                                <p>4️⃣ Remaining {75 - activeQ} bubbles automatically ignored</p>
+                                <p>1️⃣ Print Universal Sheet (60 Q) — stock in bulk</p>
+                                <p>2️⃣ Student fills: roll number + answers</p>
+                                <p>3️⃣ Scanner reads roll, and evaluates Q1–Q<strong className='text-sky-600'>{activeQ}</strong></p>
+                                <p>4️⃣ Remaining {60 - activeQ} bubbles automatically ignored</p>
                             </div>
                         </div>
                     </div>
