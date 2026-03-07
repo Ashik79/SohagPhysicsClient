@@ -122,9 +122,9 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
     // RENDER
     // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const tabs = [
-        { id: 'design', label: 'âš™ï¸ Sheet Design', icon: MdSettings },
-        { id: 'answerkey', label: 'ðŸ”‘ Answer Key', icon: MdKey },
-        { id: 'generate', label: 'ðŸš€ Generate PDF', icon: MdAutoAwesome },
+        { id: 'design', label: 'Sheet Design', icon: MdSettings },
+        { id: 'answerkey', label: 'Answer Key', icon: MdKey },
+        { id: 'generate', label: 'Generate PDF', icon: MdAutoAwesome },
     ];
 
     const inner = (
