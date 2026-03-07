@@ -198,7 +198,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
         if (pythonProcessing) return;
         setPythonProcessing(true);
         try {
-            const resp = await fetch('http://localhost:5050/scan', {
+            const resp = await fetch('https://omrenginepython.onrender.com/scan', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ image: base64Image, active_q: totalQToEvaluate })
