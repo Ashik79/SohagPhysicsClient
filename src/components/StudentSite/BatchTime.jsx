@@ -44,7 +44,7 @@ function BatchTime() {
   const fetchBatchTime = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://spoffice-server.vercel.app/getbatchtime');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/getbatchtime`);
       
       if (!response.ok) {
         initializeEmptyBatchTime();
@@ -371,7 +371,7 @@ function BatchTime() {
       
       if (batchTime && batchTime._id) {
         // Update existing
-        response = await fetch(`https://spoffice-server.vercel.app/updatebatchtime/${batchTime._id}`, {
+        response = await fetch(`${import.meta.env.VITE_API_URL}/updatebatchtime/${batchTime._id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -382,7 +382,7 @@ function BatchTime() {
         });
       } else {
         // Insert new
-        response = await fetch('https://spoffice-server.vercel.app/insertbatchtime', {
+        response = await fetch(`${import.meta.env.VITE_API_URL}/insertbatchtime`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -499,7 +499,7 @@ function BatchTime() {
                             )}
                           </div>
                           <p className="text-xs text-gray-500">Priority: {batch.priority}</p>
-                          <p className={`text-xs ${classObj.gradient.includes('blue') ? 'text-blue-600' : 'text-green-600'} font-medium`}>📍 {batch.location || 'Kalitola'}</p>
+                          <p className={`text-xs ${classObj.gradient.includes('blue') ? 'text-blue-600' : 'text-green-600'} font-medium`}>ðŸ“ {batch.location || 'Kalitola'}</p>
                         </div>
                         <div className="flex gap-2">
                           <button
@@ -551,7 +551,7 @@ function BatchTime() {
                             )}
                           </div>
                           <p className="text-xs text-gray-500">Priority: {batch.priority}</p>
-                          <p className={`text-xs ${classObj.gradient.includes('blue') ? 'text-blue-600' : 'text-green-600'} font-medium`}>📍 {batch.location || 'Kalitola'}</p>
+                          <p className={`text-xs ${classObj.gradient.includes('blue') ? 'text-blue-600' : 'text-green-600'} font-medium`}>ðŸ“ {batch.location || 'Kalitola'}</p>
                         </div>
                         <div className="flex gap-2">
                           <button

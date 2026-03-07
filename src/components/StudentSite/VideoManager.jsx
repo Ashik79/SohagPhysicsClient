@@ -37,36 +37,36 @@ function VideoManager() {
   // All available batches from Admission page
   const allBatches = [
     { value: 'Hsc-27-Marketing', label: 'Hsc-27 (Marketing)' },
-    { value: 'Sat 1', label: 'শনি ৭টা (HSC 27)' },
-    { value: 'Sat 2', label: 'শনি ৮টা (নিউ নাইন SSC 27- HSC 29)' },
-    { value: 'Sat 3', label: 'শনি ৮টা (নিউ নাইন SSC 28 - HSC 30)' },
-    { value: 'Sat 4', label: 'শনি ১০টা (নিউ নাইন SSC 27 - HSC 29)' },
-    { value: 'Sat 5', label: 'শনি ১১টা - SSC 26 (All Batch)' },
-    { value: 'Sat 12', label: 'শনি ১২টা - New Nine (SSC 28 Special Batch) ' },
-    { value: 'Sat 6', label: 'শনি ২টা (HSC 27)' },
-    { value: 'Sat 7', label: 'শনি ৩টা - HSC 27 (New Batch)' },
-    { value: 'Sat 8', label: 'শনি ৪টা (SSC 27)' },
-    { value: 'Sat 9', label: 'শনি ৫টা - SSC 28 (New Nine)' },
-    { value: 'Sat 10', label: 'শনি ৬টা (SSC 28)' },
-    { value: 'Sat 11', label: 'শনি ৭ টা ( SSC 27 - HSC 29)' },
-    { value: 'Sun 1', label: 'রবি ৭টা (HSC 27)' },
-    { value: 'Sun 2', label: 'রবি ৮টা (HSC 26)' },
-    { value: 'Sun 3', label: 'রবি ৯টা - HSC 27 (New Batch)' },
-    { value: 'Sun 4', label: 'রবি ১০টা (HSC 28)' },
-    { value: 'Sun 5', label: 'রবি ১১টা' },
-    { value: 'Sun 6', label: 'রবি ২টা (HSC 26)' },
-    { value: 'Sun 7', label: 'রবি ৩টা (HSC 27)' },
-    { value: 'Sun 8', label: 'রবি ৪টা (HSC 26)' },
-    { value: 'Sun 9', label: 'রবি ৫টা (HSC 27)' },
-    { value: 'Sun 10', label: 'রবি ৬টা (SSC 27 - HSC 29)' },
-    { value: 'Sun 11', label: 'রবি ৭টা - SSC 28 (New Nine)' },
+    { value: 'Sat 1', label: 'à¦¶à¦¨à¦¿ à§­à¦Ÿà¦¾ (HSC 27)' },
+    { value: 'Sat 2', label: 'à¦¶à¦¨à¦¿ à§®à¦Ÿà¦¾ (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡à¦¨ SSC 27- HSC 29)' },
+    { value: 'Sat 3', label: 'à¦¶à¦¨à¦¿ à§®à¦Ÿà¦¾ (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡à¦¨ SSC 28 - HSC 30)' },
+    { value: 'Sat 4', label: 'à¦¶à¦¨à¦¿ à§§à§¦à¦Ÿà¦¾ (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡à¦¨ SSC 27 - HSC 29)' },
+    { value: 'Sat 5', label: 'à¦¶à¦¨à¦¿ à§§à§§à¦Ÿà¦¾ - SSC 26 (All Batch)' },
+    { value: 'Sat 12', label: 'à¦¶à¦¨à¦¿ à§§à§¨à¦Ÿà¦¾ - New Nine (SSC 28 Special Batch) ' },
+    { value: 'Sat 6', label: 'à¦¶à¦¨à¦¿ à§¨à¦Ÿà¦¾ (HSC 27)' },
+    { value: 'Sat 7', label: 'à¦¶à¦¨à¦¿ à§©à¦Ÿà¦¾ - HSC 27 (New Batch)' },
+    { value: 'Sat 8', label: 'à¦¶à¦¨à¦¿ à§ªà¦Ÿà¦¾ (SSC 27)' },
+    { value: 'Sat 9', label: 'à¦¶à¦¨à¦¿ à§«à¦Ÿà¦¾ - SSC 28 (New Nine)' },
+    { value: 'Sat 10', label: 'à¦¶à¦¨à¦¿ à§¬à¦Ÿà¦¾ (SSC 28)' },
+    { value: 'Sat 11', label: 'à¦¶à¦¨à¦¿ à§­ à¦Ÿà¦¾ ( SSC 27 - HSC 29)' },
+    { value: 'Sun 1', label: 'à¦°à¦¬à¦¿ à§­à¦Ÿà¦¾ (HSC 27)' },
+    { value: 'Sun 2', label: 'à¦°à¦¬à¦¿ à§®à¦Ÿà¦¾ (HSC 26)' },
+    { value: 'Sun 3', label: 'à¦°à¦¬à¦¿ à§¯à¦Ÿà¦¾ - HSC 27 (New Batch)' },
+    { value: 'Sun 4', label: 'à¦°à¦¬à¦¿ à§§à§¦à¦Ÿà¦¾ (HSC 28)' },
+    { value: 'Sun 5', label: 'à¦°à¦¬à¦¿ à§§à§§à¦Ÿà¦¾' },
+    { value: 'Sun 6', label: 'à¦°à¦¬à¦¿ à§¨à¦Ÿà¦¾ (HSC 26)' },
+    { value: 'Sun 7', label: 'à¦°à¦¬à¦¿ à§©à¦Ÿà¦¾ (HSC 27)' },
+    { value: 'Sun 8', label: 'à¦°à¦¬à¦¿ à§ªà¦Ÿà¦¾ (HSC 26)' },
+    { value: 'Sun 9', label: 'à¦°à¦¬à¦¿ à§«à¦Ÿà¦¾ (HSC 27)' },
+    { value: 'Sun 10', label: 'à¦°à¦¬à¦¿ à§¬à¦Ÿà¦¾ (SSC 27 - HSC 29)' },
+    { value: 'Sun 11', label: 'à¦°à¦¬à¦¿ à§­à¦Ÿà¦¾ - SSC 28 (New Nine)' },
     { value: 'HSC 26 Admission cancel', label: 'HSC 26 Admission cancel' },
     { value: 'HSC 27 Admission cancel', label: 'HSC 27 Admission cancel' },
     { value: 'SSC 26 class 10 Admission cancel', label: 'SSC 26 class 10 Admission cancel' },
     { value: 'SSC 27 class 9 Admission cancel', label: 'SSC 27 class 9 Admission cancel' },
     { value: 'Exam Batch HSC 26', label: 'Exam Batch HSC 26' },
-    { value: 'Exam Batch (নিউ নাইন SSC 27 - HSC 29)', label: 'Exam Batch (নিউ নাইন SSC 27 - HSC 29)' },
-    { value: 'Exam Batch (নিউ টেন SSC 26 - HSC 28)', label: 'Exam Batch (নিউ টেন SSC 26 - HSC 28)' },
+    { value: 'Exam Batch (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡à¦¨ SSC 27 - HSC 29)', label: 'Exam Batch (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡à¦¨ SSC 27 - HSC 29)' },
+    { value: 'Exam Batch (à¦¨à¦¿à¦‰ à¦Ÿà§‡à¦¨ SSC 26 - HSC 28)', label: 'Exam Batch (à¦¨à¦¿à¦‰ à¦Ÿà§‡à¦¨ SSC 26 - HSC 28)' },
     { value: 'SSC 25 (Physics Olympiad)', label: 'SSC 25 (Physics Olympiad)' },
     { value: 'Class 9 (SSC 27) Phy Champ', label: 'Class 9 (SSC 27) Phy Champ' },
     { value: 'Class 10 (SSC 26) Phy Champ', label: 'Class 10 (SSC 26) Phy Champ' }
@@ -77,7 +77,7 @@ function VideoManager() {
   }, [])
 
   const fetchCourses = () => {
-    fetch('https://spoffice-server.vercel.app/getVideocourses')
+    fetch(`${import.meta.env.VITE_API_URL}/getVideocourses`)
       .then(res => res.json())
       .then(data => {
         const sorted = data.sort((a, b) => a.priority - b.priority)
@@ -140,7 +140,7 @@ function VideoManager() {
     const id = crypto.randomUUID()
     const details = { title, chapters: [], priority, thumbnail, id }
 
-    fetch('https://spoffice-server.vercel.app/addVideocourse', {
+    fetch(`${import.meta.env.VITE_API_URL}/addVideocourse`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(details)
@@ -175,7 +175,7 @@ function VideoManager() {
       id: courseModal.data.id
     }
 
-    fetch(`https://spoffice-server.vercel.app/Videocourseupdate/${courseModal.data.id}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/Videocourseupdate/${courseModal.data.id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(details)
@@ -210,7 +210,7 @@ function VideoManager() {
       cancelButtonText: 'Cancel',
     }).then((result) => {
       if (result.isConfirmed) {
-        fetch(`https://spoffice-server.vercel.app/Videocourse/delete/${course.id}`, {
+        fetch(`${import.meta.env.VITE_API_URL}/Videocourse/delete/${course.id}`, {
           method: "DELETE"
         })
           .then(res => res.json())
@@ -248,7 +248,7 @@ function VideoManager() {
     const updatedChapters = [...course.chapters, details]
     const updatedCourse = { ...course, chapters: updatedChapters }
 
-    fetch(`https://spoffice-server.vercel.app/Videocourseupdate/${course.id}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/Videocourseupdate/${course.id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(updatedCourse)
@@ -303,7 +303,7 @@ function VideoManager() {
     
     const updatedCourse = { ...course, chapters: updatedChapters }
 
-    fetch(`https://spoffice-server.vercel.app/updateVideochapter/${chapterModal.data.id}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/updateVideochapter/${chapterModal.data.id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(details)
@@ -341,7 +341,7 @@ function VideoManager() {
         const updatedChapters = course.chapters.filter(ch => ch.id !== chapter.id)
         const updatedCourse = { ...course, chapters: updatedChapters }
 
-        fetch(`https://spoffice-server.vercel.app/Videocourseupdate/${course.id}`, {
+        fetch(`${import.meta.env.VITE_API_URL}/Videocourseupdate/${course.id}`, {
           method: 'PUT',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(updatedCourse)
@@ -380,7 +380,7 @@ function VideoManager() {
     )
     const updatedCourse = { ...course, chapters: updatedChapters }
 
-    fetch(`https://spoffice-server.vercel.app/updateVideochapter/${chapter.id}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/updateVideochapter/${chapter.id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(updatedChapter)
@@ -426,7 +426,7 @@ function VideoManager() {
     )
     const updatedCourse = { ...course, chapters: updatedChapters }
 
-    fetch(`https://spoffice-server.vercel.app/updateVideofile/${videoModal.data.id}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/updateVideofile/${videoModal.data.id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(details)
@@ -468,7 +468,7 @@ function VideoManager() {
         )
         const updatedCourse = { ...course, chapters: updatedChapters }
 
-        fetch(`https://spoffice-server.vercel.app/updateVideochapter/${chapter.id}`, {
+        fetch(`${import.meta.env.VITE_API_URL}/updateVideochapter/${chapter.id}`, {
           method: 'PUT',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(updatedChapter)
@@ -606,7 +606,7 @@ function VideoManager() {
                             <h3 className='font-semibold text-sm sm:text-base text-cyan-700 truncate'>{chapter.title}</h3>
                             {chapter.access?.type === 'private' && (
                               <span className='px-1.5 py-0.5 bg-orange-500 text-white text-xs font-semibold rounded whitespace-nowrap'>
-                                🔒 PRIVATE
+                                ðŸ”’ PRIVATE
                               </span>
                             )}
                           </div>
@@ -675,7 +675,7 @@ function VideoManager() {
                             <div className='flex-grow cursor-pointer min-w-0' onClick={() => playVideo(video)}>
                               <p className='font-medium text-xs sm:text-sm text-gray-800 truncate'>{video.title}</p>
                               <p className='text-xs text-gray-500'>
-                                {video.type === 'reel' ? '🎬 Reel' : '🎥 Video'}
+                                {video.type === 'reel' ? 'ðŸŽ¬ Reel' : 'ðŸŽ¥ Video'}
                               </p>
                             </div>
                             <div className='flex flex-col sm:flex-row gap-0.5 sm:gap-1 flex-shrink-0'>
@@ -993,8 +993,8 @@ function VideoManager() {
                   defaultValue={videoModal.type === 'edit' ? (videoModal.data.type || 'video') : 'video'}
                   className="select select-bordered select-info w-full"
                 >
-                  <option value="video">🎥 Regular Video</option>
-                  <option value="reel">🎬 Short Reel</option>
+                  <option value="video">ðŸŽ¥ Regular Video</option>
+                  <option value="reel">ðŸŽ¬ Short Reel</option>
                 </select>
                 <p className='text-xs text-gray-500 mt-1'>
                   Use 'Reel' for YouTube Shorts or quick videos (&lt;60s)

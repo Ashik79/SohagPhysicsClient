@@ -53,7 +53,7 @@ function TakeAttendance({ student, today }) {
     };
 
     const updateStudent = (updatedStudent) => {
-        fetch(`https://spoffice-server.vercel.app/addpayment/${updatedStudent.id}`, {
+        fetch(`${import.meta.env.VITE_API_URL}/addpayment/${updatedStudent.id}`, {
             method: 'PUT',
             headers: {
                 'content-type': 'application/json'

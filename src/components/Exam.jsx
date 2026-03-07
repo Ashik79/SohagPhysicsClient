@@ -1,17 +1,19 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useLoaderData } from 'react-router-dom';
-import { IoMdClose } from "react-icons/io";
-
+import { useLoaderData, Link } from 'react-router-dom';
+import { FiX, FiPlus, FiCamera, FiDownload, FiFileText, FiTrash2, FiSend, FiUser, FiCalendar, FiBookOpen, FiActivity, FiAward, FiBarChart2, FiArrowLeft, FiChevronLeft, FiChevronRight, FiCheckCircle } from "react-icons/fi";
 import { AuthContext } from '../Provider';
-import { MdDeleteForever } from "react-icons/md";
-
 import * as XLSX from 'xlsx';
-import { IoCloudDownloadOutline } from "react-icons/io5";
+import OmrScanner from './OmrScanner';
+import ExamPDFExport from './ExamPDFExport';
+import OmrSheetDesigner from './Download/OmrSheetDesigner';
+import OmrHub from './OmrHub';
+import { saveAs } from 'file-saver';
+import Swal from 'sweetalert2';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function Exam() {
     const { notifySuccess, notifyFailed, getMonth, loggedUser, today } = useContext(AuthContext);
     const [exam, setExam] = useState(useLoaderData())
-    // //console.log(exam);
     const { title, session, batch, program, date, results: examResults, mcqTotal, writenTotal, day, month, year } = exam;
     const [published, setPublished] = useState(exam.published)
 
@@ -19,351 +21,151 @@ function Exam() {
     const [displayResults, setDisplayResults] = useState(examResults)
     const [file, setFile] = useState(null)
     const [loading, setLoading] = useState(false)
+    const [showPdf, setShowPdf] = useState(false)
+    const [showOmrHub, setShowOmrHub] = useState(false)
+    const [students, setStudents] = useState([])
+    const [rankedResults, setRankedResults] = useState([]);
+
     useEffect(() => {
-        const sortedResults = [...displayResults].sort((a, b) => (b.mcqMarks + b.writenMarks) - (a.mcqMarks + a.writenMarks));
-        let rank = 1;
-        let previousMarks = sortedResults[0]?.mcqMarks + sortedResults[0]?.writenMarks
-        // //console.log(sortedResults)
-        // //console.log(previousMarks)
+        if (!displayResults || displayResults.length === 0) {
+            setRankedResults([]);
+            return;
+        }
 
-        sortedResults.forEach((result, index) => {
-            // If the current student's marks are the same as the previous student's, they share the same rank
-            if ((result.mcqMarks + result.writenMarks) != previousMarks) {
-                rank++; // Update rank based on the index
-            }
-
-            result.merit = rank; // Assign the rank (merit) to the student
-            previousMarks = result.mcqMarks + result.writenMarks; // Update previousMarks for the next iteration
+        const sortedResults = [...displayResults].sort((a, b) => {
+            const totalA = (Number(a.mcqMarks) || 0) + (Number(a.writenMarks) || 0);
+            const totalB = (Number(b.mcqMarks) || 0) + (Number(b.writenMarks) || 0);
+            return totalB - totalA;
         });
-        setDisplayResults(sortedResults);
-        // //console.log(displayResults)
-    }, [displayResults.length]);
 
+        let rank = 1;
+        let previousTotal = (Number(sortedResults[0].mcqMarks) || 0) + (Number(sortedResults[0].writenMarks) || 0);
 
-    //pagination
+        const withMerit = sortedResults.map((result, index) => {
+            const currentTotal = (Number(result.mcqMarks) || 0) + (Number(result.writenMarks) || 0);
+            if (currentTotal < previousTotal) {
+                rank = index + 1;
+            }
+            previousTotal = currentTotal;
+            return { ...result, merit: rank, total: currentTotal };
+        });
+
+        setRankedResults(withMerit);
+    }, [displayResults]);
+
+    useEffect(() => {
+        fetch(`${import.meta.env.VITE_API_URL}/students`)
+            .then(res => res.json())
+            .then(data => setStudents(data))
+            .catch(err => console.error("Error fetching students:", err));
+    }, []);
+
+    // Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 20;
-    const totalPages = Math.ceil(displayResults.length / itemsPerPage);
+    const totalPages = Math.ceil(rankedResults.length / itemsPerPage);
+    const currentResults = rankedResults.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
-    };
-
-    const handlePrevious = () => {
-        const newPage = Math.max(currentPage - 1, 1);
-        setCurrentPage(newPage);
-    };
-
-    const handleNext = () => {
-        const newPage = Math.min(currentPage + 1, totalPages);
-        setCurrentPage(newPage);
-    };
-
-    const currentResults = displayResults.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
-
-    //Result add korar function
     const handleAddResult = async (e) => {
         setLoading(true)
         e.preventDefault();
-
         const id = e.target.id.value;
         const examId = exam._id
         const mcqMarks = e.target.mcqMarks.value ? parseFloat(e.target.mcqMarks.value) : 0;
         const writenMarks = e.target.writenMarks.value ? parseFloat(e.target.writenMarks.value) : 0;
         const total = mcqMarks + writenMarks;
 
-
         try {
-            const res = await fetch(`https://spoffice-server.vercel.app/student/${id}`);
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/student/${id}`);
             const data = await res.json();
-            // //console.log(data);
 
             if (!data.id) {
-                notifyFailed("Student Not Found");
+                notifyFailed("Student not found");
                 setLoading(false)
                 return;
             }
 
             const name = data.name;
             const result = { id, mcqMarks, writenMarks, total, name, date, mcqTotal, writenTotal };
-            // //console.log(result);
 
-            const response = await fetch(`https://spoffice-server.vercel.app/exam/addresult/${exam._id}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/exam/addresult/${exam._id}`, {
                 method: 'POST',
-                headers: {
-                    'content-type': 'application/json',
-                },
+                headers: { 'content-type': 'application/json' },
                 body: JSON.stringify(result),
             });
 
             if (response.status === 400) {
-                notifyFailed("Duplicate result for the same student");
+                notifyFailed("Duplicate result found");
                 setLoading(false)
             } else if (response.status === 200) {
-                notifySuccess("Result added Successfully");
+                notifySuccess("Result added successfully");
                 setLoading(false)
                 e.target.reset()
-                const temp = [...displayResults, result]
-                setDisplayResults(temp)
+                setDisplayResults([...displayResults, result])
             } else {
-                notifyFailed("Unknown error occurred");
+                notifyFailed("Failed to add result");
                 setLoading(false)
             }
-            const resultForStudent = {
-                title, examId, mcqMarks, writenMarks, total, date, mcqTotal, writenTotal, day, month, year
-            }
-            data.exams.push(resultForStudent)
-            const studentResultAdd = await fetch(`https://spoffice-server.vercel.app/addresult/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'content-type': 'application/json'
-                },
-                body: JSON.stringify(data)
 
+            const resultForStudent = { title, examId, mcqMarks, writenMarks, total, date, mcqTotal, writenTotal, day, month, year }
+            data.exams.push(resultForStudent)
+            await fetch(`${import.meta.env.VITE_API_URL}/addresult/${id}`, {
+                method: 'PUT',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify(data)
             })
         } catch (error) {
             console.error("Error adding result:", error);
-
+            setLoading(false)
         }
     };
 
-    //Batch result add
-    const handleProcessResults = async (resultsArray) => {
-        setLoading(true);
-
-
-        // Extract all IDs from the results array
-        const ids = resultsArray.map(resultObj => resultObj.id.toString());
-
-        try {
-            // Fetch all students in a single request
-            const res = await fetch(`https://spoffice-server.vercel.app/getstudents`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ ids }), // Send an array of IDs to the server
-            });
-
-            const studentsData = await res.json();
-            // //console.log(studentsData)
-            // //console.log(ids)
-
-            if (!studentsData || studentsData.length === 0) {
-                notifyFailed("No students found");
-                setLoading(false);
-                return;
-            }
-
-            const tempResults = [];
-            const studentTempResults = [];
-
-            for (const resultObj of resultsArray) {
-                const { id, mark: mcqMarks } = resultObj;
-                const student = studentsData.find(student => student.id == id);
-
-                if (!student) {
-                    notifyFailed(`Student with ID ${id} not found`);
-                    continue;
-                }
-
-                const examId = exam._id;
-                const writenMarks = 0; // Or any other logic for written marks
-                const total = mcqMarks + writenMarks;
-                const result = { id, mcqMarks, writenMarks, total, name: student.name, date, mcqTotal, writenTotal };
-
-                tempResults.push(result);
-
-                // Add result to the student's profile
-                const resultForStudent = { title, examId, mcqMarks, writenMarks, total, date, mcqTotal, writenTotal, day, month, year };
-                studentTempResults.push({
-                    id: id.toString(),
-                    exams: [resultForStudent]
-                });
-            }
-
-            // Update exam results in exam collection
-            const response = await fetch(`https://spoffice-server.vercel.app/exam/update/${exam._id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ results: [...examResults, ...tempResults] })
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                notifyFailed(errorText);
-                setLoading(false);
-                return;
-            }
-
-            const updateResult = await response.json();
-            // //console.log('Exam Updated:', updateResult);
-
-            // Bulk update student profiles with the new exam results
-            const response2 = await fetch(`https://spoffice-server.vercel.app/addbulkresults`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(studentTempResults)
-            });
-
-            if (!response2.ok) {
-                const errorText = await response2.text();
-                notifyFailed(errorText);
-            } else {
-                const result2 = await response2.json();
-                // //console.log('Students Updated:', result2);
-
-                if (result2.modifiedCount) {
-                    notifySuccess("Student info updated");
-
-                }
-            }
-        } catch (error) {
-            console.error("Error processing results:", error);
-        }
-
-        setLoading(false);
-    };
-
-
-    //excell file upload
-    const handleFileChange = e => {
-        setFile(e.target.files[0]);
-    }
-
-    const handleFileUpload = (e) => {
-        e.preventDefault()
-        if (!file) {
-            alert('Please select a file first.');
-            return;
-        }
-        const reader = new FileReader();
-
-        reader.onload = (event) => {
-            const binaryStr = event.target.result;
-            const workbook = XLSX.read(binaryStr, { type: 'binary' });
-
-            // Assuming the first sheet is the one you want
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[sheetName];
-
-            // Convert worksheet data to JSON
-            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-            // Log the raw JSON data to debug
-            // //console.log('Raw JSON data:', jsonData);
-
-            // Assuming headers are present and the relevant data starts after the header row
-            const header = jsonData[4];
-            const dataRows = jsonData.slice(1);
-
-            // Find the indices of the columns
-            const idIndex = header.indexOf('Roll No'); // Replace 'id' with the actual column name in the header
-            const markIndex = header.indexOf('Obtained Marks'); // Replace 'mark' with the actual column name in the header
-
-            if (idIndex === -1 || markIndex === -1) {
-                console.error('Column names not found in the header');
-                return;
-            }
-
-            // Process the data
-            const formattedData = dataRows.map(row => ({
-                id: row[idIndex],
-                mark: row[markIndex],
-            }));
-
-            // Update the state with the processed data
-            const resultArray = []
-            formattedData.map(data => {
-                if (typeof (data.mark) == 'number') {
-
-                    resultArray.push(data)
-                }
-            })
-            handleProcessResults(resultArray)
-        };
-
-        reader.readAsBinaryString(file);
-    };
-
-// console.log(displayResults)
-    //Download er Function
     const handleDownload = async () => {
-        // //console.log('d')
+        setLoading(true);
         try {
-
-            const downloadResponse = await fetch('https://spoffice-server.vercel.app/download/examresults', {
+            const downloadResponse = await fetch(`${import.meta.env.VITE_API_URL}/download/examresults`, {
                 method: 'POST',
-                headers: {
-                    'content-type': 'application/json'
-
-                },
-                body: JSON.stringify(displayResults)
-            })
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify(rankedResults)
+            });
 
             if (downloadResponse.ok) {
                 const blob = await downloadResponse.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${title}'s Results.xlsx`;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
+                saveAs(blob, `${title}_Results.xlsx`);
+                notifySuccess("Excel exported");
             } else {
-                console.error('Failed to download Info');
+                throw new Error('Export failed');
             }
-        }
-        catch (err) {
-            console.log(err)
+        } catch (err) {
+            console.error(err);
+            notifyFailed("Export failed");
+        } finally {
+            setLoading(false);
         }
     }
 
-    //Publish korar Function 
     const handlePublish = async () => {
         setLoading(true)
-        // //console.log("publish clicked")
-        const ids = []
-        displayResults.map(result => {
-            ids.push(result.id)
-
-        })
+        const ids = displayResults.map(result => result.id)
         try {
-            const res = await fetch('https://spoffice-server.vercel.app/getnumbers', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/getnumbers`, {
                 method: 'POST',
-                headers: {
-                    'content-type': 'application/json'
-                },
+                headers: { 'content-type': 'application/json' },
                 body: JSON.stringify(ids)
             })
 
             const data = await res.json()
-          
-            const messages = []
-            data.map(num => {
+            const messages = data.map(num => {
                 const result = displayResults.find(res => res.id == num.id)
-                if(!result){
-                    notifyFailed("result not found for ", num);
-                    return;
-                }
-                const message = {
+                return {
                     to: `${num.phone}`,
-                    message: `Hey ${num.name},\nHere is your result! \nExam Name: ${title}\nExam Date: ${tarikh}\n${mcqTotal ? 'MCQ: ' : ''}${mcqTotal ? result.mcqMarks : ''}${mcqTotal ? `/${mcqTotal}\n` : ''}${writenTotal ? `Written: ${result.writenMarks}/${writenTotal}\n` : ''}Total: ${result.mcqMarks + result.writenMarks}/${mcqTotal + writenTotal}\nMerit:${result.merit}\nHighest Mark: ${displayResults[0].total} \nSohag Physics`
+                    message: `Hey ${num.name},\nResult for: ${title}\nDate: ${tarikh}\nMCQ: ${result.mcqMarks}/${mcqTotal}\nWritten: ${result.writenMarks}/${writenTotal}\nTotal: ${result.total}/${mcqTotal + writenTotal}\nMerit: ${result.merit}\nSohag Physics`
                 }
-                messages.push(message)
-
             })
-          
+
             const response2 = await fetch('https://bulksmsbd.net/api/smsapimany', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     api_key: 'CUOP72nJJHahM30djaQG',
                     senderid: '8809617642567',
@@ -371,343 +173,243 @@ function Exam() {
                 }),
             })
             const result2 = await response2.json();
-            // console.log(result2);
 
             if (result2.response_code == 202) {
-                const response = await fetch(`https://spoffice-server.vercel.app/exam/update/${exam._id}`, {
+                const pubData = { published: { status: true, date: today, publishedBy: loggedUser } }
+                await fetch(`${import.meta.env.VITE_API_URL}/exam/update/${exam._id}`, {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ published: { status: true, date: today, publishedBy: loggedUser } })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(pubData)
                 });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    notifyFailed(errorText);
-                    setLoading(false);
-                    return;
-                }
-
-                setPublished({ status: true, date: today, publishedBy: loggedUser })
-                notifySuccess("Result Published Successfully !")
-                setLoading(false)
+                setPublished(pubData.published)
+                notifySuccess("Results published via SMS!")
+            } else {
+                notifyFailed("SMS service error");
             }
-            else if (result2.response_code != 202) {
-                notifyFailed("Error in SMS Server")
-                setLoading(false)
-            }
-
-
+        } catch (error) {
+            console.error(error)
+            notifyFailed("Publication failed");
+        } finally {
+            setLoading(false)
         }
-
-        catch (error) {
-            console.error("Error geting numbers", error)
-        }
-
-
     }
+
     const handleDelete = async (id) => {
-        const response = await fetch(`https://spoffice-server.vercel.app/student/${id}`)
-        let student = await response.json()
-       
+        Swal.fire({
+            title: 'Delete Result?',
+            text: "This will remove result from both exam and student records.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e11d48',
+            confirmButtonText: 'Yes, Delete'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/student/${id}`)
+                let student = await response.json()
 
-        const filteredResults = exam.results.filter(result => parseInt(result.id) != parseInt(id))
-        const data ={...exam,results:filteredResults}
-        student.exams = student.exams.filter(result => result.examId != data._id)
+                const filteredResults = exam.results.filter(result => parseInt(result.id) != parseInt(id))
+                const updateData = { ...exam, results: filteredResults }
+                student.exams = student.exams.filter(res => res.examId != exam._id)
 
-        const res = await fetch(`https://spoffice-server.vercel.app/deleteresult/${exam._id}`, {
-            method: 'PUT',
-            headers: {
-                'content-type': 'application/json'
-            },
-            body: JSON.stringify(data)
-
-        })
-        const dat = await res.json()
-        if (dat.modifiedCount) {
-            notifySuccess("Successfully Deleted")
-            setDisplayResults(data.results)
-        }
-        const studentResultDelete = await fetch(`https://spoffice-server.vercel.app/addresult/${id}`, {
-            method: 'PUT',
-            headers: {
-                'content-type': 'application/json'
-            },
-            body: JSON.stringify(student)
-
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/deleteresult/${exam._id}`, {
+                    method: 'PUT',
+                    headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                })
+                const dat = await res.json()
+                if (dat.modifiedCount) {
+                    setDisplayResults(filteredResults)
+                    notifySuccess("Result removed")
+                }
+                await fetch(`${import.meta.env.VITE_API_URL}/addresult/${id}`, {
+                    method: 'PUT',
+                    headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify(student)
+                })
+            }
         })
     }
 
     return (
-        <div>
-            {/* title part */}
-            <div className='flex justify-between items-center flex-col lg:flex-row md:flex-row gap-3'>
-                <div>
-                    <p className='font-semibold text-2xl text-black'>{title}</p>
-                    <p className='font-semibold text-gray-500 '>{date}</p>
-
-                </div>
-                <div className='flex gap-1 flex-col lg:flex-row items-center '>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-20">
+            {/* Header / Action Bar */}
+            <div className='flex flex-col lg:flex-row justify-between items-start lg:items-center bg-white/50 backdrop-blur-xl p-8 rounded-[2.5rem] shadow-sm border border-slate-100 mb-10 gap-8'>
+                <div className="flex items-center gap-5">
+                    <Link to="/exams" className="p-3 bg-white border border-slate-100 rounded-2xl text-slate-400 hover:text-indigo-600 transition-all shadow-sm">
+                        <FiArrowLeft size={20} />
+                    </Link>
                     <div>
-                        <button className='btn border-2 hover:border-sky-600 hover:text-sky-600 text-sm font-bold rounded-xl h-11 border-black text-black py-1 px-2' onClick={() => handlePublish()}>{loading ? "" : "Publish Result"}</button>
-                        <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
+                        <h1 className='font-black text-2xl text-slate-800 tracking-tight'>{title}</h1>
+                        <p className="text-indigo-600 text-xs font-black uppercase tracking-widest mt-1 flex items-center gap-2">
+                            <FiCalendar size={14} /> {tarikh}
+                        </p>
                     </div>
-                    <button className='btn border-2 hover:border-sky-600 hover:text-sky-600 text-sm font-bold rounded-xl border-black text-black py-1 px-5' onClick={() => document.getElementById('my_modal_1').showModal()} >Add Single Result</button>
-                    <button className='btn border-2 hover:border-sky-600 hover:text-sky-600 text-sm font-bold rounded-xl border-black text-black py-1 px-5' onClick={() => document.getElementById('my_modal_3').showModal()} >Add Multiple Results</button>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                    <button
+                        onClick={handlePublish}
+                        disabled={loading || published?.status}
+                        className={`h-12 px-6 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 transition-all ${published?.status
+                            ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                            : "bg-indigo-600 text-white shadow-lg shadow-indigo-100 hover:shadow-indigo-200 hover:-translate-y-0.5"
+                            }`}
+                    >
+                        <FiSend size={16} /> {published?.status ? "Published" : "Publish Results"}
+                    </button>
+                    <button
+                        onClick={() => setShowOmrHub(true)}
+                        className="h-12 px-6 bg-white text-cyan-600 border border-cyan-100 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-cyan-50 transition-all shadow-sm"
+                    >
+                        <FiCamera size={16} /> OMR Hub
+                    </button>
+                    <button
+                        onClick={() => document.getElementById('add_result_modal').showModal()}
+                        className="h-12 px-6 bg-slate-800 text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-black transition-all shadow-sm"
+                    >
+                        <FiPlus size={16} /> Add Result
+                    </button>
+                    <div className="dropdown dropdown-end">
+                        <button tabIndex={0} className="h-12 w-12 bg-white border border-slate-100 rounded-2xl text-slate-400 flex items-center justify-center hover:text-indigo-600 transition-all shadow-sm">
+                            <FiDownload size={20} />
+                        </button>
+                        <ul tabIndex={0} className="dropdown-content menu p-3 shadow-2xl bg-white rounded-2xl w-52 mt-2 border border-slate-100 border-white/20 z-20">
+                            <li><button onClick={handleDownload} className="rounded-xl flex items-center gap-3 py-3 font-bold text-slate-600 hover:bg-emerald-50 hover:text-emerald-600"><FiFileText size={18} /> Excel Report</button></li>
+                            <li><button onClick={() => setShowPdf(true)} className="rounded-xl flex items-center gap-3 py-3 font-bold text-slate-600 hover:bg-rose-50 hover:text-rose-600"><FiFileText size={18} /> PDF Export</button></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
-            {/* exam er details part */}
-            <div className='my-5'>
-                <div className='flex items-center text-sm lg:text-base  rounded-xl pl-4 bg-sky-200 px-2 py-1 mt-2'>
-                    <span className='w-1/2'>
-                        Batch
-                    </span>
-                    <span className='font-semibold w-1/2'>
-                        {batch}
-                    </span>
-                </div>
-                <div className='flex items-center text-sm lg:text-base  rounded-xl pl-4 bg-gray-200 px-2 py-1 mt-2'>
-                    <span className='w-1/2'>
-                        Program
-                    </span>
-                    <span className='font-semibold w-1/2'>
-                        {program}
-                    </span>
-                </div>
-                <div className='flex items-center text-sm lg:text-base  rounded-xl pl-4 bg-sky-200 px-2 py-1 mt-2'>
-                    <span className='w-1/2'>
-                        Session
-                    </span>
-                    <span className='font-semibold w-1/2'>
-                        {session}
-                    </span>
-                </div>
-                <div className='flex items-center text-sm lg:text-base  rounded-xl pl-4 bg-gray-200 px-2 py-1 mt-2'>
-                    <span className='w-1/2'>
-                        Total MCQ Marks
-                    </span>
-                    <span className='font-semibold w-1/2'>
-                        {mcqTotal}
-                    </span>
-                </div>
-                <div className='flex items-center text-sm lg:text-base  rounded-xl pl-4 bg-sky-200 px-2 py-1 mt-2'>
-                    <span className='w-1/2'>
-                        Total Written Marks
-                    </span>
-                    <span className='font-semibold w-1/2'>
-                        {writenTotal}
-                    </span>
-                </div>
-                <div className='flex items-center text-sm lg:text-base  rounded-xl pl-4 bg-gray-200 px-2 py-1 mt-2'>
-                    <span className='w-1/2'>
-                        Total Results
-                    </span>
-                    <span className='font-semibold w-1/2'>
-                        {displayResults?.length}
-                    </span>
-                </div>
-                <div className='flex items-center text-sm lg:text-base  rounded-xl pl-4 bg-sky-200 px-2 py-1 mt-2'>
-                    <span className='w-1/2'>
-                        Result Published
-                    </span>
-                    {published ? <span className='font-semibold text-sm w-1/2'>
-                        in {published.date} by {published.publishedBy}
-                    </span> : <span>Not Published</span>}
-                </div>
-
-
+            {/* Stats Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-12">
+                {[
+                    { label: "Batch", val: batch, icon: FiUser, color: "indigo" },
+                    { label: "Program", val: program, icon: FiActivity, color: "cyan" },
+                    { label: "MCQ Marks", val: mcqTotal, icon: FiAward, color: "amber" },
+                    { label: "Writ. Marks", val: writenTotal, icon: FiBarChart2, color: "rose" },
+                    { label: "Total Entries", val: displayResults?.length, icon: FiCheckCircle, color: "emerald" },
+                    { label: "Session", val: session, icon: FiBookOpen, color: "slate" }
+                ].map((stat, i) => (
+                    <div key={i} className="bg-white border border-slate-100 p-6 rounded-[2rem] shadow-sm">
+                        <div className={`p-2 bg-${stat.color}-50 text-${stat.color}-600 rounded-xl w-fit mb-4`}>
+                            <stat.icon size={18} />
+                        </div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
+                        <p className="text-lg font-black text-slate-800 truncate">{stat.val || '-'}</p>
+                    </div>
+                ))}
             </div>
 
-
-            {/* Result add korar modal edit */}
-
-            <dialog id="my_modal_1" className="modal ">
-                <div className="modal-box ">
-                    <div className="modal-action">
-                        <form method="dialog">
-                            {/* if there is a button in form, it will close the modal */}
-                            <button className="text-red-600 px-1 lg:text-lg"><IoMdClose /></button>
-                        </form>
+            {/* Results Table */}
+            <div className="bg-white/50 backdrop-blur-xl border border-white/20 p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50">
+                <div className="flex items-center justify-between mb-8">
+                    <h2 className="font-black text-xl text-slate-800 tracking-tight">Merit List</h2>
+                    <div className="flex items-center gap-2">
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mr-2">Page {currentPage} / {totalPages}</p>
+                        <button
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                            className="p-3 bg-white border border-slate-100 rounded-xl text-slate-400 hover:text-indigo-600 disabled:opacity-30 shadow-sm transition-all"
+                        >
+                            <FiChevronLeft size={20} />
+                        </button>
+                        <button
+                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                            disabled={currentPage === totalPages}
+                            className="p-3 bg-white border border-slate-100 rounded-xl text-slate-400 hover:text-indigo-600 disabled:opacity-30 shadow-sm transition-all"
+                        >
+                            <FiChevronRight size={20} />
+                        </button>
                     </div>
-                    <form className='mx-auto  w-full' onSubmit={handleAddResult} >
+                </div>
 
+                <div className="overflow-x-auto">
+                    <table className="w-full">
+                        <thead>
+                            <tr className="text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100">
+                                <th className="pb-4 pl-4 w-16">Rank</th>
+                                <th className="pb-4 pl-4">Student</th>
+                                <th className="pb-4 text-center">MCQ</th>
+                                <th className="pb-4 text-center">Written</th>
+                                <th className="pb-4 text-center">Total</th>
+                                <th className="pb-4 text-right pr-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                            {currentResults.map((result, idx) => (
+                                <motion.tr
+                                    key={result.id}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="group hover:bg-slate-50/50 transition-colors"
+                                >
+                                    <td className="py-5 pl-4">
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm ${result.merit === 1 ? "bg-amber-100 text-amber-600" :
+                                            result.merit === 2 ? "bg-slate-200 text-slate-600" :
+                                                result.merit === 3 ? "bg-orange-100 text-orange-600" : "text-slate-400"
+                                            }`}>
+                                            {result.merit}
+                                        </div>
+                                    </td>
+                                    <td className="py-5 pl-4">
+                                        <p className="font-bold text-slate-800">{result.name}</p>
+                                        <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{result.id}</p>
+                                    </td>
+                                    <td className="py-5 text-center font-bold text-slate-600">{result.mcqMarks} <span className="text-[10px] text-slate-300">/ {mcqTotal}</span></td>
+                                    <td className="py-5 text-center font-bold text-slate-600">{result.writenMarks} <span className="text-[10px] text-slate-300">/ {writenTotal}</span></td>
+                                    <td className="py-5 text-center font-black text-indigo-600 text-lg">{(result.mcqMarks || 0) + (result.writenMarks || 0)}</td>
+                                    <td className="py-5 text-right pr-4">
+                                        <button
+                                            onClick={() => handleDelete(result.id)}
+                                            className="p-3 bg-white border border-slate-100 rounded-xl text-slate-400 hover:text-rose-600 hover:border-rose-100 transition-all opacity-0 group-hover:opacity-100 shadow-sm"
+                                        >
+                                            <FiTrash2 size={18} />
+                                        </button>
+                                    </td>
+                                </motion.tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-                        {/* students part */}
-                        <div className='flex  flex-col '>
-                            <h1 className='font-bold text-center underline mb-2 text-xl '>Add Result </h1>
-                            <div className='grid grid-cols-1   gap-3'>
-
-
-                                <div>
-                                    <p className='font-semibold'>Student ID <span className='text-red-700'>*</span> </p>
-                                    <input
-                                        required
-                                        name='id'
-                                        type="text"
-
-                                        className="input text-lg font-semibold  input-bordered input-info w-full " />
-                                </div>
-
-
-
-
-
-                                <div>
-                                    <p className='font-semibold'>MCQ Marks ( <span className='text-gray-500'>out of {mcqTotal}</span> ) </p>
-                                    <input
-
-                                        name='mcqMarks'
-                                        type="text"
-
-                                        className="input text-lg font-semibold  input-bordered input-info w-full " />
-                                </div>
-                                <div>
-                                    <p className='font-semibold'>Written Marks ( <span className='text-gray-500'>out of {writenTotal}</span> )</p>
-                                    <input
-
-                                        name='writenMarks'
-                                        type="text"
-
-                                        className="input text-lg font-semibold  input-bordered input-info w-full " />
-                                </div>
-
-
+            {/* Modals & Components */}
+            <dialog id="add_result_modal" className="modal backdrop-blur-md">
+                <div className="modal-box bg-white/90 p-0 rounded-[2.5rem] shadow-2xl border border-white/20 overflow-hidden">
+                    <div className="bg-indigo-600 p-8 text-white relative">
+                        <button onClick={() => document.getElementById('add_result_modal').close()} className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all">
+                            <FiX size={20} />
+                        </button>
+                        <h2 className="text-2xl font-black tracking-tight">Manual Result Entry</h2>
+                        <p className="text-indigo-100 text-sm mt-1">Directly record a student's score.</p>
+                    </div>
+                    <form onSubmit={handleAddResult} className="p-8 space-y-6">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Student ID</label>
+                            <input required name='id' type="text" className="input-premium h-14 w-full pt-4" placeholder="Enter Roll/ID" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">MCQ Score (Max {mcqTotal})</label>
+                                <input name='mcqMarks' type="number" step="any" className="input-premium h-14 w-full pt-4" placeholder="0.0" />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Written Score (Max {writenTotal})</label>
+                                <input name='writenMarks' type="number" step="any" className="input-premium h-14 w-full pt-4" placeholder="0.0" />
                             </div>
                         </div>
-
-
-                        <div className='flex mt-10 flex-col lg:flex-row'>
-                            <h1 className='font-bold text-lg lg:w-1/4'></h1>
-                            <div className='lg:w-2/3 text-center'>
-                                <input className=" text-lg font-semibold  w-full bg-blue-100  border-2 rounded-xl h-11   btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? "" : "Add Result"}`} />
-                                <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
-                            </div>
-                        </div>
-
+                        <button type="submit" disabled={loading} className="btn-premium w-full h-16 text-lg font-bold">
+                            {loading ? <span className="loading loading-spinner"></span> : "Confirm Result Entry"}
+                        </button>
                     </form>
-
-
-
-
-
-
-
-
-
-
                 </div>
             </dialog>
 
-            {/* Multiple upload er modal */}
-
-            <dialog id="my_modal_3" className="modal ">
-                <div className="modal-box ">
-                    <div className="modal-action">
-                        <form method="dialog">
-                            {/* if there is a button in form, it will close the modal */}
-                            <button className="text-red-600 px-1 lg:text-lg"><IoMdClose /></button>
-                        </form>
-                    </div>
-                    <form className='mx-auto  w-full'  >
-
-
-
-                        <div className='mb-10'>
-                            <h1 className='text-2xl font-semibold my-1 text-sky-600'>Upload Excel File</h1>
-                            <input className='  text-black font-semibold' type="file" accept=".xlsx, .xls" onChange={handleFileChange} />
-                            <button className='border-sky-600 border-2 font-semibold text-sky-600 hover:bg-slate-300 py-1 px-3 rounded-lg' onClick={handleFileUpload}>Submit</button>
-
-                        </div>
-
-
-
-                    </form>
-
-
-
-
-
-
-
-
-
-
-                </div>
-            </dialog>
-
-            <h1 className='text-2xl font-semibold text-sky-900 flex items-center justify-center gap-1'>
-                Results : <button onClick={handleDownload} className=' flex items-center justify-center gap-1 px-1 text-base border-2 font-bold text-sky-600 hover:bg-slate-400 py-1  hover:text-white  rounded-lg border-sky-600'><IoCloudDownloadOutline /> Download</button> <br />
-            </h1>
-
-            <div className='flex text-gray-500 text-sm lg:text-base font-semibold mt-8 mb-2 w-full'>
-                <div className='w-1/3'>
-                    <p>NAME</p>
-                </div>
-
-                <div className='w-2/3 flex text-sm lg:text-base'>
-                    <p className='w-1/2 flex flex-col lg:flex-row md:flex-row'>MCQ <span>({mcqTotal})</span></p>
-                    <p className='w-1/2 flex flex-col lg:flex-row md:flex-row'>WRITTEN <span>({writenTotal})</span></p>
-                    <p className='w-1/2 flex flex-col lg:flex-row md:flex-row'>TOTAL <span>({mcqTotal + writenTotal})</span></p>
-                    <p className='w-1/2 flex flex-col lg:flex-row md:flex-row'>MERIT <span>({examResults.length})</span></p>
-                </div>
-            </div>
-
-
-            {
-                currentResults.map((result, index) => <>
-                    <div key={index} className='flex w-full text-sm lg:text-base cursor-pointer items-center border-b  p-1 border-sky-600 '>
-
-                        <div className='w-1/3' >
-                            <p className='font-semibold'>{result.name}</p>
-                            <p className='text-sm text-gray-500'>{result.id}</p>
-                        </div>
-
-
-
-                        <div className=' w-2/3 flex text-gray-500 font-semibold'>
-                            <p className='w-1/3 ml-6'>{result.mcqMarks}</p>
-                            <p className='w-1/3 ml-10'>{result.writenMarks}</p>
-                            <p className='w-1/3 ml-10'>{result.mcqMarks + result.writenMarks}</p>
-                            <p className='w-1/3 ml-10'>{result.merit}</p>
-                        </div>
-
-
-
-                        <a onClick={() => handleDelete(parseInt(result.id))} className='flex items-center text-lg gap-1 text-red-600'><MdDeleteForever /></a>
-
-
-                    </div>
-                </>)
-            }
-            <div className="flex justify-center items-center mt-4">
-                <button
-                    onClick={handlePrevious}
-                    disabled={currentPage === 1}
-                    className="px-4 py-2 bg-sky-600 text-white rounded-l hover:bg-sky-700 disabled:bg-gray-400"
-                >
-                    Previous
-                </button>
-                <span className="px-4 py-2 border-t border-b border-sky-600">
-                    Page {currentPage} of {totalPages}
-                </span>
-                <button
-                    onClick={handleNext}
-                    disabled={currentPage === totalPages}
-                    className="px-4 py-2 bg-sky-600 text-white rounded-r hover:bg-sky-700 disabled:bg-gray-400"
-                >
-                    Next
-                </button>
-            </div>
-
-
-
-
-
-
-        </div>
-    )
+            {showPdf && <ExamPDFExport exam={exam} results={rankedResults} onClose={() => setShowPdf(false)} />}
+            {showOmrHub && <OmrHub exam={exam} students={students} onClose={() => setShowOmrHub(false)} />}
+        </motion.div>
+    );
 }
 
-export default Exam
+export default Exam;

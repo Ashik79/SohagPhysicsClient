@@ -123,7 +123,7 @@ function ProgramEntry() {
                 const temp = { ...user, waver, waverReason, monthlyAmount }
                 setUser(temp)
 
-                const res = await fetch(`https://spoffice-server.vercel.app/addpayment/${id}`, {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/addpayment/${id}`, {
                     method: 'PUT',
                     headers: {
                         'content-type': 'application/json'
@@ -180,7 +180,7 @@ function ProgramEntry() {
                 const temp = { ...user, waver, waverReason }
                 setUser(temp)
 
-                const res = await fetch(`https://spoffice-server.vercel.app/addpayment/${id}`, {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/addpayment/${id}`, {
                     method: 'PUT',
                     headers: {
                         'content-type': 'application/json'
@@ -237,7 +237,7 @@ function ProgramEntry() {
                 const temp = { ...user, waver, waverReason }
                 setUser(temp)
 
-                const res = await fetch(`https://spoffice-server.vercel.app/addpayment/${id}`, {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/addpayment/${id}`, {
                     method: 'PUT',
                     headers: {
                         'content-type': 'application/json'
@@ -292,7 +292,7 @@ function ProgramEntry() {
 
                 user.programs.push(programData)
 
-                const res = await fetch(`https://spoffice-server.vercel.app/addpayment/${id}`, {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/addpayment/${id}`, {
                     method: 'PUT',
                     headers: {
                         'content-type': 'application/json'

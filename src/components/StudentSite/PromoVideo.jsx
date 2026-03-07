@@ -26,7 +26,7 @@ function PromoVideo() {
   const fetchPromoVideo = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://spoffice-server.vercel.app/getpromovideo');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/getpromovideo`);
       
       if (!response.ok) {
         setPromoVideo(null);
@@ -116,7 +116,7 @@ function PromoVideo() {
       
       if (promoVideo && promoVideo._id) {
         // Update existing promo video
-        response = await fetch(`https://spoffice-server.vercel.app/updatepromovideo/${promoVideo._id}`, {
+        response = await fetch(`${import.meta.env.VITE_API_URL}/updatepromovideo/${promoVideo._id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -125,7 +125,7 @@ function PromoVideo() {
         });
       } else {
         // Insert new promo video (only happens once)
-        response = await fetch('https://spoffice-server.vercel.app/insertpromovideo', {
+        response = await fetch(`${import.meta.env.VITE_API_URL}/insertpromovideo`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -292,12 +292,12 @@ function PromoVideo() {
               </p>
               {formData.url && extractYoutubeId(formData.url) && (
                 <div className="mt-2 text-sm text-green-600">
-                  ✓ Valid YouTube video detected: {extractYoutubeId(formData.url)}
+                  âœ“ Valid YouTube video detected: {extractYoutubeId(formData.url)}
                 </div>
               )}
               {formData.url && !extractYoutubeId(formData.url) && (
                 <div className="mt-2 text-sm text-red-600">
-                  ✗ Invalid YouTube URL. Please check the format.
+                  âœ— Invalid YouTube URL. Please check the format.
                 </div>
               )}
             </div>

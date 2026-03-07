@@ -1,23 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.4);
+    --premium-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+}
 
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    @apply bg-slate-50 text-slate-900 antialiased;
+}
 
+.active {
+    @apply bg-sky-50 text-sky-600 font-bold border-l-4 border-sky-600;
+}
 
-.active{
-    border-left: 3px solid rgb(38, 180, 216);
-    color: rgb(38, 180, 216);
-    
-    font-weight: bold;
+/* Premium UI Classes */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
+
+.mesh-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background-color: #f8fafc;
+    overflow: hidden;
+}
+
+.mesh-sphere {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.4;
+    animation: move 20s infinite alternate cubic-bezier(0.45, 0, 0.55, 1);
+}
+
+@keyframes move {
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    100% {
+        transform: translate(20%, 20%) scale(1.2);
+    }
+}
+
+.btn-premium {
+    @apply relative overflow-hidden transition-all duration-300 font-bold text-white shadow-lg shadow-indigo-200;
+    background: var(--premium-gradient);
+}
+
+.btn-premium:hover {
+    @apply shadow-xl shadow-indigo-300 -translate-y-0.5 scale-[1.02];
+    filter: brightness(1.1);
+}
+
+.input-premium {
+    @apply w-full px-5 py-4 rounded-2xl border-2 border-slate-100 bg-white/50 focus:border-indigo-400 focus:bg-white focus:outline-none transition-all font-semibold text-slate-700 placeholder:text-slate-300;
 }
 
 @media print {
-  .receipt-container {
-    /* Adjust padding and other styles as needed */
-    padding: 200px;
-    max-width: 800px;
-    margin: 0 auto; /* Center the content */
-  }
-  /* Other specific styles for printing can be added here */
+    .receipt-container {
+        padding: 40px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+}
+
+@keyframes scan {
+
+    0%,
+    100% {
+        top: 0;
+    }
+
+    50% {
+        top: 100%;
+    }
 }

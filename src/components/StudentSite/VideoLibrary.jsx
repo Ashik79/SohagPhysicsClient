@@ -19,7 +19,7 @@ function VideoLibrary() {
   const [filterType, setFilterType] = useState('all') // 'all', 'video', 'reel'
 
   useEffect(() => {
-    fetch('https://spoffice-server.vercel.app/getVideocourses')
+    fetch(`${import.meta.env.VITE_API_URL}/getVideocourses`)
       .then(res => res.json())
       .then(data => {
         const sorted = data.sort((a, b) => a.priority - b.priority)
@@ -74,7 +74,7 @@ function VideoLibrary() {
                 : 'bg-purple-500 bg-opacity-50 hover:bg-opacity-70'
             }`}
           >
-            📚 All Content
+            ðŸ“š All Content
           </button>
           <button
             onClick={() => setFilterType('video')}
@@ -84,7 +84,7 @@ function VideoLibrary() {
                 : 'bg-blue-500 bg-opacity-50 hover:bg-opacity-70'
             }`}
           >
-            🎥 Videos
+            ðŸŽ¥ Videos
           </button>
           <button
             onClick={() => setFilterType('reel')}
@@ -94,7 +94,7 @@ function VideoLibrary() {
                 : 'bg-pink-500 bg-opacity-50 hover:bg-opacity-70'
             }`}
           >
-            🎬 Reels
+            ðŸŽ¬ Reels
           </button>
         </div>
       </div>
@@ -126,8 +126,8 @@ function VideoLibrary() {
                   <div className='flex-grow'>
                     <h2 className='text-xl lg:text-2xl font-bold text-purple-700'>{course.title}</h2>
                     <div className='flex gap-4 mt-1 text-sm text-gray-600'>
-                      <span>📖 {course.chapters?.length || 0} Chapters</span>
-                      <span>🎥 {totalVideos} {filterType === 'all' ? 'Items' : filterType === 'video' ? 'Videos' : 'Reels'}</span>
+                      <span>ðŸ“– {course.chapters?.length || 0} Chapters</span>
+                      <span>ðŸŽ¥ {totalVideos} {filterType === 'all' ? 'Items' : filterType === 'video' ? 'Videos' : 'Reels'}</span>
                     </div>
                   </div>
                 </div>
@@ -197,7 +197,7 @@ function VideoLibrary() {
                                         ? 'bg-pink-500' 
                                         : 'bg-blue-500'
                                     }`}>
-                                      {video.type === 'reel' ? '🎬 Reel' : '🎥 Video'}
+                                      {video.type === 'reel' ? 'ðŸŽ¬ Reel' : 'ðŸŽ¥ Video'}
                                     </div>
                                   </div>
                                   {/* Title */}
@@ -244,7 +244,7 @@ function VideoLibrary() {
               className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-2xl z-10"
               onClick={closeModal}
             >
-              ✕
+              âœ•
             </button>
           </form>
           {selectedVideo && (
@@ -253,7 +253,7 @@ function VideoLibrary() {
                 <div className={`px-3 py-1 rounded-full text-sm font-bold text-white ${
                   selectedVideo.type === 'reel' ? 'bg-pink-500' : 'bg-blue-500'
                 }`}>
-                  {selectedVideo.type === 'reel' ? '🎬 Reel' : '🎥 Video'}
+                  {selectedVideo.type === 'reel' ? 'ðŸŽ¬ Reel' : 'ðŸŽ¥ Video'}
                 </div>
                 <h2 className='font-bold text-xl flex-grow'>{selectedVideo.title}</h2>
               </div>

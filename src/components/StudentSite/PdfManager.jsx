@@ -28,7 +28,7 @@ function PdfManager() {
   }, [])
 
   const fetchCourses = () => {
-    fetch('https://spoffice-server.vercel.app/getpdfcourses')
+    fetch(`${import.meta.env.VITE_API_URL}/getpdfcourses`)
       .then(res => res.json())
       .then(data => {
         const sorted = data.sort((a, b) => a.priority - b.priority)
@@ -63,7 +63,7 @@ function PdfManager() {
     const id = crypto.randomUUID()
     const details = { title, chapters: [], priority, thumbnail, id }
 
-    fetch('https://spoffice-server.vercel.app/addpdfcourse', {
+    fetch(`${import.meta.env.VITE_API_URL}/addpdfcourse`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(details)
@@ -98,7 +98,7 @@ function PdfManager() {
       id: courseModal.data.id
     }
 
-    fetch(`https://spoffice-server.vercel.app/pdfcourseupdate/${courseModal.data.id}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/pdfcourseupdate/${courseModal.data.id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(details)
@@ -133,7 +133,7 @@ function PdfManager() {
       cancelButtonText: 'Cancel',
     }).then((result) => {
       if (result.isConfirmed) {
-        fetch(`https://spoffice-server.vercel.app/pdfcourse/delete/${course.id}`, {
+        fetch(`${import.meta.env.VITE_API_URL}/pdfcourse/delete/${course.id}`, {
           method: "DELETE"
         })
           .then(res => res.json())
@@ -161,7 +161,7 @@ function PdfManager() {
     const updatedChapters = [...course.chapters, details]
     const updatedCourse = { ...course, chapters: updatedChapters }
 
-    fetch(`https://spoffice-server.vercel.app/pdfcourseupdate/${course.id}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/pdfcourseupdate/${course.id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(updatedCourse)
@@ -205,7 +205,7 @@ function PdfManager() {
     
     const updatedCourse = { ...course, chapters: updatedChapters }
 
-    fetch(`https://spoffice-server.vercel.app/updatepdfchapter/${chapterModal.data.id}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/updatepdfchapter/${chapterModal.data.id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(details)
@@ -243,7 +243,7 @@ function PdfManager() {
         const updatedChapters = course.chapters.filter(ch => ch.id !== chapter.id)
         const updatedCourse = { ...course, chapters: updatedChapters }
 
-        fetch(`https://spoffice-server.vercel.app/pdfcourseupdate/${course.id}`, {
+        fetch(`${import.meta.env.VITE_API_URL}/pdfcourseupdate/${course.id}`, {
           method: 'PUT',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(updatedCourse)
@@ -281,7 +281,7 @@ function PdfManager() {
     )
     const updatedCourse = { ...course, chapters: updatedChapters }
 
-    fetch(`https://spoffice-server.vercel.app/updatepdfchapter/${chapter.id}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/updatepdfchapter/${chapter.id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(updatedChapter)
@@ -326,7 +326,7 @@ function PdfManager() {
     )
     const updatedCourse = { ...course, chapters: updatedChapters }
 
-    fetch(`https://spoffice-server.vercel.app/updatepdffile/${pdfModal.data.id}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/updatepdffile/${pdfModal.data.id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(details)
@@ -368,7 +368,7 @@ function PdfManager() {
         )
         const updatedCourse = { ...course, chapters: updatedChapters }
 
-        fetch(`https://spoffice-server.vercel.app/updatepdfchapter/${chapter.id}`, {
+        fetch(`${import.meta.env.VITE_API_URL}/updatepdfchapter/${chapter.id}`, {
           method: 'PUT',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(updatedChapter)
@@ -541,7 +541,7 @@ function PdfManager() {
                             />
                             <div className='flex-grow cursor-pointer min-w-0' onClick={() => viewPdf(pdf)}>
                               <p className='font-medium text-xs sm:text-sm text-gray-800 truncate'>{pdf.title}</p>
-                              <p className='text-xs text-gray-500'>📄 PDF Document</p>
+                              <p className='text-xs text-gray-500'>ðŸ“„ PDF Document</p>
                             </div>
                             <div className='flex flex-col sm:flex-row gap-0.5 sm:gap-1 flex-shrink-0'>
                               <button

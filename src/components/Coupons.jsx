@@ -32,7 +32,7 @@ const loaded =useLoaderData()
             title,  month, year ,code,amount
         }
 
-        fetch('https://spoffice-server.vercel.app/addcoupon', {
+        fetch(`${import.meta.env.VITE_API_URL}/addcoupon`, {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'
@@ -70,7 +70,7 @@ const loaded =useLoaderData()
         }).then((result) => {
             if (result.isConfirmed) {
                 //console.log(id)
-                fetch(`https://spoffice-server.vercel.app/coupon/delete/${id}`, {
+                fetch(`${import.meta.env.VITE_API_URL}/coupon/delete/${id}`, {
                     method: "DELETE"
                 })
                     .then(res => res.json())

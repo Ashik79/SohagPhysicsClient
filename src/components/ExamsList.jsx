@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { IoCloudDownloadOutline } from "react-icons/io5";
+import { FiDownload, FiBarChart2, FiCalendar, FiBookOpen, FiAward, FiTarget } from "react-icons/fi";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import { motion } from 'framer-motion';
 
 const months = ['All', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const years = ['All', 2023, 2024, 2025,2026,2027]; // Add 'All' to the years
+const years = ['All', 2023, 2024, 2025, 2026, 2027];
 
 const ExamsList = ({ student }) => {
   const [selectedMonth, setSelectedMonth] = useState('All');
@@ -15,33 +18,27 @@ const ExamsList = ({ student }) => {
       if (student && student.id) {
         setLoading(true);
         try {
-          const response = await fetch(`https://spoffice-server.vercel.app/getexams/${student.id}`);
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/getexams/${student.id}`);
           const data = await response.json();
-         
-          // Process each exam to calculate merit position
+
           const processedExams = data.map(exam => {
-            // Sort results by total marks in descending order
             const sortedResults = [...exam.results].sort((a, b) => b.total - a.total);
-            
-            // Find the student's result and calculate merit
             const studentResult = sortedResults.find(result => result.id === student.id);
-            
+
             if (studentResult) {
-              // Calculate merit position (1-based)
               let merit = 1;
               for (let i = 0; i < sortedResults.length; i++) {
                 if (sortedResults[i].id === student.id) {
                   merit = i + 1;
                   break;
                 }
-                // Handle tied positions
                 if (i > 0 && sortedResults[i].total === sortedResults[i - 1].total) {
-                  merit = merit; // Keep the same merit as previous
+                  merit = merit;
                 } else if (i > 0) {
                   merit = i + 1;
                 }
               }
-              
+
               return {
                 title: exam.title,
                 date: exam.date,
@@ -56,7 +53,7 @@ const ExamsList = ({ student }) => {
             }
             return null;
           }).filter(exam => exam !== null);
-          
+
           setExams(processedExams);
         } catch (error) {
           console.error('Error fetching exams:', error);
@@ -65,93 +62,162 @@ const ExamsList = ({ student }) => {
         }
       }
     };
-    
+
     fetchExams();
   }, [student]);
 
   const filteredExams = exams.filter(exam => {
     const [examMonth, , examYear] = exam.date.split(' ');
-
     const isMonthMatch = selectedMonth === 'All' || examMonth === months[selectedMonth];
     const isYearMatch = selectedYear === 'All' || parseInt(examYear, 10) === parseInt(selectedYear, 10);
-
     return isMonthMatch && isYearMatch;
   });
 
+  const generateStudentReport = (exam) => {
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const accentRes = [79, 70, 229]; // Indigo 600
 
-  const handleDownload = async () => {
-    try {
-      // Add merit to each exam before downloading
-      const examsWithMerit = filteredExams.map(exam => ({
-        ...exam,
-        merit: exam.merit,
-        totalParticipants: exam.totalParticipants
-      }));
+    doc.setFillColor(...accentRes);
+    doc.rect(0, 0, 210, 40, 'F');
+    doc.setTextColor(255);
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PERFORMANCE ANALYTICS', 105, 18, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text(`SOHAG PHYSICS ACADEMIC SYSTEM`, 105, 25, { align: 'center' });
 
-      const downloadResponse = await fetch('https://spoffice-server.vercel.app/download/results', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify(examsWithMerit.reverse())
-      });
+    doc.setTextColor(40);
+    doc.setFontSize(12);
+    doc.text(`Student: ${student.name}`, 20, 55);
+    doc.text(`Academic Roll: ${student.id}`, 20, 62);
+    doc.text(`Batch: ${student.batch}`, 20, 69);
+    doc.text(`Exam: ${exam.title}`, 190, 55, { align: 'right' });
+    doc.text(`Assessment Date: ${exam.date}`, 190, 62, { align: 'right' });
 
-      if (downloadResponse.ok) {
-        const blob = await downloadResponse.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `results.xlsx`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      } else {
-        console.error('Failed to download Results');
-      }
-    } catch (err) {
-      console.log(err);
-    }
+    doc.setDrawColor(...accentRes);
+    doc.setLineWidth(1);
+    doc.roundedRect(65, 85, 80, 35, 4, 4, 'S');
+    doc.setFontSize(32);
+    doc.setTextColor(...accentRes);
+    doc.text(`${exam.total}`, 105, 108, { align: 'center' });
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`OBTAINED SCORE / ${exam.mcqTotal + exam.writenTotal}`, 105, 116, { align: 'center' });
+
+    doc.setFontSize(10);
+    doc.setTextColor(50);
+    doc.text(`Global Merit Position: ${exam.merit} out of ${exam.totalParticipants} Participants`, 105, 135, { align: 'center' });
+
+    doc.autoTable({
+      startY: 150,
+      head: [['Assessment Section', 'Obtained Marks', 'Segment Total']],
+      body: [
+        ['MCQ Components', exam.mcqMarks, exam.mcqTotal],
+        ['Written Assessment', exam.writenMarks, exam.writenTotal],
+        ['Aggregate Score', exam.total, exam.mcqTotal + exam.writenTotal]
+      ],
+      theme: 'grid',
+      headStyles: { fillColor: accentRes, fontSize: 10, halign: 'center' },
+      bodyStyles: { fontSize: 10, halign: 'center' },
+      margin: { left: 20, right: 20 }
+    });
+
+    const footerY = 280;
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text('This is an automated performance record generated by Sohag Physics Portal.', 105, footerY, { align: 'center' });
+    doc.save(`Result_${student.id}_${exam.title.replace(/\s+/g, '_')}.pdf`);
   };
 
   return (
-    <div className="p-4">
-      <div className="flex items-center gap-2 mb-4">
-        <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} className="mr-2 p-2 border">
-          {months.map((month, index) => (
-            <option key={index} value={index === 0 ? 'All' : index}>{month}</option>
-          ))}
-        </select>
-        <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} className="p-2 border">
-          {years.map((year, index) => (
-            <option key={index} value={year === 'All' ? 'All' : year}>{year}</option>
-          ))}
-        </select>
-        <button onClick={handleDownload} className='flex items-center -mt-1 justify-center gap-1  border-2 font-bold text-sky-600 hover:bg-slate-400 py-1  w-40 hover:text-white  rounded-lg border-sky-600'>
-          <IoCloudDownloadOutline /> Download
-        </button>
+    <div className="space-y-8">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+            <FiBookOpen size={18} />
+          </div>
+          <h3 className="font-black text-slate-800 text-sm uppercase tracking-widest">Academic Records</h3>
+        </div>
+        <div className="flex items-center gap-2">
+          <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} className="bg-white border border-slate-100 rounded-xl px-4 py-2 text-xs font-bold text-slate-500 shadow-sm outline-none">
+            {months.map((month, index) => (
+              <option key={index} value={index === 0 ? 'All' : index}>{month}</option>
+            ))}
+          </select>
+          <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} className="bg-white border border-slate-100 rounded-xl px-4 py-2 text-xs font-bold text-slate-500 shadow-sm outline-none">
+            {years.map((year, index) => (
+              <option key={index} value={year === 'All' ? 'All' : year}>{year}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center py-8">
-          <span className="loading loading-spinner loading-lg text-sky-600"></span>
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+          <span className="loading loading-dots loading-lg text-indigo-600"></span>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Synchronizing Data...</p>
         </div>
       ) : (
-        <div>
+        <div className="space-y-4">
           {filteredExams.length > 0 ? (
-            <ul>
+            <div className="grid grid-cols-1 gap-4">
               {filteredExams.reverse().map((exam, index) => (
-                <li key={index} className="p-2 border border-sky-600 rounded-xl px-5 py-2 mb-2">
-                  <p><strong>Title:</strong> {exam.title}</p>
-                  {exam.mcqTotal ? <p><strong>MCQ :</strong> {exam.mcqMarks}/{exam.mcqTotal}</p> : ''}
-                  {exam.writenTotal ? <p><strong>Written :</strong> {exam.writenMarks}/{exam.writenTotal}</p> : ''}
-                  <p><strong>Total:</strong> {exam.total}/{exam.mcqTotal + exam.writenTotal}</p>
-                  <p><strong>Merit Position:</strong> {exam.merit} out of {exam.totalParticipants}</p>
-                  <p><strong>Date:</strong> {exam.date}</p>
-                </li>
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  key={index}
+                  className="group bg-slate-50/50 hover:bg-white border border-slate-100 p-6 rounded-[2.2rem] transition-all duration-500 flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
+                >
+                  <div className="flex items-center gap-6">
+                    <div className="w-16 h-16 bg-white border border-slate-100 rounded-2xl flex flex-col items-center justify-center shadow-sm">
+                      <span className="text-xl font-black text-indigo-600 tracking-tighter">{exam.merit}</span>
+                      <span className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Pos.</span>
+                    </div>
+                    <div>
+                      <h4 className="font-black text-slate-800 tracking-tight group-hover:text-indigo-600 transition-colors uppercase italic">{exam.title}</h4>
+                      <div className="flex items-center gap-4 mt-1.5">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><FiCalendar /> {exam.date}</span>
+                        <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest flex items-center gap-1.5"><FiTarget /> {exam.totalParticipants} Comp.</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-8 w-full md:w-auto ml-auto">
+                    <div className="flex gap-6">
+                      {exam.mcqTotal > 0 && (
+                        <div className="text-center">
+                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">MCQ</p>
+                          <p className="font-black text-slate-700">{exam.mcqMarks}<span className="text-slate-200 ml-1">/{exam.mcqTotal}</span></p>
+                        </div>
+                      )}
+                      {exam.writenTotal > 0 && (
+                        <div className="text-center border-l border-slate-100 pl-6">
+                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Written</p>
+                          <p className="font-black text-slate-700">{exam.writenMarks}<span className="text-slate-200 ml-1">/{exam.writenTotal}</span></p>
+                        </div>
+                      )}
+                      <div className="text-center border-l border-slate-200 pl-6">
+                        <p className="text-[9px] font-black text-indigo-600 uppercase tracking-widest mb-0.5">Summary</p>
+                        <p className="font-black text-indigo-600 text-lg tracking-tighter">{exam.total}<span className="text-indigo-200 text-sm ml-1 font-bold">/{exam.mcqTotal + exam.writenTotal}</span></p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => generateStudentReport(exam)}
+                      className="h-12 w-12 bg-white border border-slate-100 rounded-2xl flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-100 shadow-sm transition-all"
+                      title="Download Performance Analysis"
+                    >
+                      <FiBarChart2 size={20} />
+                    </button>
+                  </div>
+                </motion.div>
               ))}
-            </ul>
+            </div>
           ) : (
-            <p>No exams found for the selected month and year.</p>
+            <div className="flex flex-col items-center justify-center py-20 text-slate-300">
+              <FiAward size={48} className="mb-4 opacity-20" />
+              <p className="font-extrabold text-sm uppercase tracking-widest">No Assessment Records Found</p>
+            </div>
           )}
         </div>
       )}

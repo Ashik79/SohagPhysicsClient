@@ -21,7 +21,7 @@ function AddUsers() {
         }
         // //console.log(user)
 
-        fetch('https://spoffice-server.vercel.app/adduser', {
+        fetch(`${import.meta.env.VITE_API_URL}/adduser`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

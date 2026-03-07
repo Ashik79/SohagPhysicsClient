@@ -1,315 +1,149 @@
 import React, { useContext, useState } from 'react'
 import StudentsList from './StudentList';
 import { AuthContext } from '../Provider';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiSearch, FiUser, FiHash, FiFilter, FiUserCheck } from 'react-icons/fi';
+
 function Students() {
     const { notifyFailed, notifySuccess, role } = useContext(AuthContext)
-
     const [students, setStudents] = useState([])
-
     const [loading, setLoading] = useState(false)
+
     const handleSearch = e => {
         setLoading(true)
         e.preventDefault();
         const query = {};
         const id = e.target.id.value
-        const batch = e.target.batch.value;
         const name = e.target.name.value;
-        const school = e.target.school.value;
-        const college = e.target.college.value;
-        const program = e.target.program.value;
-        const session = e.target.session.value;
-
-        const target = e.target.target.value;
         const phone = e.target.phone.value;
-        const gender = e.target.gender.value;
-        if (id) {
-            query.id = id;
-        }
 
-        if (name) {
-            query.name = name;
-        }
-        if (batch) {
-            query.batch = batch;
-        }
-        if (school) {
-            query.school = school;
-        }
-        if (college) {
-            query.college = college;
-        }
-        if (college) {
-            query.college = college;
-        }
+        if (id) query.id = id;
+        if (name) query.name = name;
+        if (phone) query.phone = phone;
 
-        if (session) {
-            query.session = session;
-        }
-        if (target) {
-            query.target = target;
-        }
-        if (phone) {
-            query.phone = phone;
-        }
-        if (gender) {
-            query.gender = gender;
-        }
-        //console.log(query)
-        if (role != 'CEO' && !query.phone && !query.id && !name) {
-            notifyFailed("Input Can't be blank")
+        if (!query.phone && !query.id && !name) {
+            notifyFailed("Please provide at least Name, ID or Phone")
             setLoading(false)
             return
         }
-        fetch(`https://spoffice-server.vercel.app/students`, {
-            method: 'POST',
-            headers: {
-                'content-type': 'application/json'
-            },
-            body: JSON.stringify(query)
 
+        fetch(`${import.meta.env.VITE_API_URL}/students`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(query)
         })
             .then(res => res.json())
             .then(data => {
-
-                if (program) {
-                    let filteredStudents = []
-                    if (program == "Free") {
-                        filteredStudents = data.filter(student => student.programs.length == 0)
-                    }
-                    else {
-                        filteredStudents = data.filter(student =>
-                            student.programs.some(p => p.program == program)
-
-                        )
-                    }
-                    if (filteredStudents.length == 0) {
-                        notifyFailed('Sorry, No student is found!')
-                        setLoading(false)
-                        setStudents([])
-                    }
-                    else if (filteredStudents.length) {
-                        notifySuccess(`Found ${filteredStudents.length} students !`)
-                        setLoading(false)
-
-                        setStudents(filteredStudents)
-                    }
+                if (data.length === 0) {
+                    notifyFailed("No results found")
+                    setStudents([])
+                } else {
+                    notifySuccess(`Found ${data.length} students`)
+                    setStudents(data)
                 }
-                else if (!program) {
-                    if (data.length == 0) {
-                        notifyFailed("Sorry, No student is found!")
-                        setLoading(false)
-                        setStudents([])
-                    }
-                    else if (data.length) {
-
-                        //console.log(data)
-                        notifySuccess(`Found ${data.length} students !`)
-                        setLoading(false)
-                        setStudents(data)
-                    }
-                }
-                //console.log(students)
+                setLoading(false)
+            })
+            .catch(() => {
+                notifyFailed("Search failed. Please try again.")
+                setLoading(false)
             })
     }
-    return (
-        <div className=''>
-            <h1 className=' text-center lg:text-left md:text-center font-semibold text-2xl text-cyan-500 underline mt-10'>Student Finder</h1>
-            <form className='mx-auto w-full' onSubmit={handleSearch} >
 
-                {/* students part */}
-                <div className='flex mt-2 flex-col lg:flex-row'>
-                    <h1 className='font-bold text-lg lg:w-1/4'>Searching Options :</h1>
-                    <div className='grid grid-cols-1 lg:w-2/3 lg:grid-cols-2 gap-3'>
-                        <div>
-                            <p className='font-semibold'>ID  </p>
-                            <input
-                                onWheel={(e) => e.target.blur()}
-                                name='id'
-                                type="number"
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
-                        </div>
-
-                        <div>
-                            <p className={`font-semibold`}>Name  </p>
-                            <input
-
-                                name='name'
-                                type="text"
-
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
-                        </div>
-
-
-                        <div>
-                            <p className='font-semibold'>Phone </p>
-                            <input
-
-                                name='phone'
-                                type="text"
-
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
-                        </div>
-
-                        <div className={` ${role == 'CEO' ? "" : "hidden"}`}>
-                            <p className='font-semibold'>School Name  </p>
-                            <input
-
-                                name='school'
-                                type="text"
-
-                                className="input input-bordered text-lg font-semibold  input-info w-full " />
-                        </div>
-                        <div className={` ${role == 'CEO' ? "" : "hidden"}`}>
-                            <p className='font-semibold'>College Name </p>
-                            <input
-                                name='college'
-                                type="text"
-
-                                className="input input-bordered text-lg font-semibold  input-info w-full " />
-                        </div>
-                        <div className={` ${role == 'CEO' ? "" : "hidden"}`}>
-                            <p className='font-semibold'>Gender </p>
-                            <select name='gender' className="select text-lg font-semibold  select-info w-full ">
-                                <option value={""}>All</option>
-                                <option>Male</option>
-                                <option>Female</option>
-
-
-                            </select>
-                        </div>
-
-                        <div className={` ${role == 'CEO' ? "" : "hidden"}`}>
-                            <p className='font-semibold'>Batch </p>
-
-                            <select name='batch' className="select text-lg font-semibold  select-info w-full ">
-                                <option value={""}>All</option>
-
-
-
-                                <option value={'Olympiad-HSC27'}>Olympiad HSC 27</option>
-                                <option value={'Sat 1'}>শনি ৭টা (HSC 27)</option>
-                                <option value={'Sat 2'}>শনি ৮টা (নিউ নাইন SSC 28 - HSC 30)</option>
-                                <option value={'Sat 3'}>শনি ৯টা (নিউ নাইন SSC 28 - HSC 30)</option>
-                                <option value={'Sat 4'}>শনি ১০টা (নিউ নাইন SSC 27 - HSC 29)</option>
-                                <option value={'Sat 5'}>শনি ১১টা - SSC 26 (All Batch) </option>
-                                <option value={'Sat 12'}>শনি ১২টা - New Nine (SSC 28 Special Batch) </option>
-
-                                <option value={'Sat 6'}>শনি ২টা (HSC 27)</option>
-                                <option value={'Sat 7'}>শনি ৩টা - HSC 27 (New Batch)</option>
-                                <option value={'Sat 8'}>শনি ৪টা (SSC 27)</option>
-                                <option value={'Sat 9'}>শনি ৫টা - SSC 28 (New Nine)</option>
-                                <option value={'Sat 10'}>শনি ৬টা (SSC 28)</option>
-                                <option value={'Sat 11'}>শনি ৭ টা ( SSC 27 - HSC 29)</option>
-                                <option value={'Sun 1'}>রবি ৭টা (HSC 27)</option>
-                                <option value={'Sun 2'}>রবি ৮টা (HSC 26)</option>
-                                <option value={'Sun 3'}>রবি ৯টা - HSC 27 (New Batch)</option>
-                                <option value={'Sun 4'}>রবি ১০টা (HSC 28)</option>
-                                <option value={'Sun 5'}>রবি ১১টা </option>
-
-                                <option value={'Sun 6'}>রবি ২টা (HSC 26) </option>
-                                <option value={'Sun 7'}>রবি ৩টা (HSC 27) </option>
-                                <option value={'Sun 8'}>রবি ৪টা (HSC 26) </option>
-                                <option value={'Sun 9'}>রবি ৫টা (HSC 27) </option>
-                                <option value={'Sun 10'}>রবি ৬টা (SSC 27 - HSC 29) </option>
-                                <option value={'Sun 11'}>রবি ৭টা - SSC 28 (New Nine) </option>
-                                <option>HSC 26 Admission cancel</option>
-                                <option>HSC 27 Admission cancel</option>
-                                <option>SSC 26 class 10 Admission cancel</option>
-                                <option>SSC 27 class 9 Admission cancel</option>
-                                <option>Exam Batch HSC 26</option>
-                                <option>Exam Batch (নিউ নাইন SSC 27 - HSC 29)</option>
-                                <option>Exam Batch (নিউ টেন SSC 26 - HSC 28)</option>
-                                <option value={'Olympiad-8'}>Olympiad 8 (ssc 28 - hsc 30)</option>
-                                <option value={'Olympiad-9'}>Olympiad 9 (ssc 27 - hsc 29)</option>
-                                <option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>
-
-
-                                <option>SSC 25 (Physics Olympiad)</option>
-                                <option>Class 9 (SSC 27) Phy Champ</option>
-                                <option>Class 10 (SSC 26) Phy Champ</option>
-
-                            </select>
-                        </div>
-
-                        <div className={` ${role == 'CEO' ? "" : "hidden"}`}>
-                            <p className='font-semibold'>Program  </p>
-                            <select name='program' className="select text-lg font-semibold  select-info w-full ">
-                                <option value={''}>All</option>
-                                <option value={'Free'}>Free Class</option>
-                                <option value={'HscPhy'}>HSC Physics</option>
-                                <option value={'HscPhyDue'}>HSC Physics Due</option>
-
-
-                                <option value={'SscPhy'}>SSC Physics</option>
-                                <option value={'SscPhyDue'}>SSC Physics Due</option>
-
-
-                                <option value={'suggestion'}>Suggestion Fee </option>
-
-
-
-
-
-                            </select>
-                        </div>
-                        <div className={` ${role == 'CEO' ? "" : "hidden"}`}>
-                            <p className='font-semibold'>Session  </p>
-                            <select name='session' className="select text-lg font-semibold  select-info w-full ">
-
-
-                                <option value={""}>All</option>
-                                <option>2023</option>
-                                <option>2024</option>
-                                <option>2025</option>
-                                <option>2026</option>
-                                <option>2027</option>
-                                <option>2028</option>
-                                <option>2029</option>
-                                <option>2030</option>
-
-
-                            </select>
-                        </div>
-                        <div className={` ${role == 'CEO' ? "" : "hidden"}`}>
-                            <p className='font-semibold'>Target </p>
-                            <select name='target' className="select text-lg font-semibold  select-info w-full ">
-
-                                <option value={""}>All</option>
-                                <option>Medical</option>
-                                <option>Varsity</option>
-                                <option>Engineering</option>
-
-
-
-                            </select>
-                        </div>
-
-
-
-                    </div>
-                </div>
-
-                {/* Guardian Part */}
-
-                <div className='flex mt-10 flex-col lg:flex-row'>
-                    <h1 className='font-bold text-lg lg:w-1/4'></h1>
-                    <div className='lg:w-2/3 text-center'>
-                        <input className=" text-lg font-semibold  w-full bg-blue-100  border-2 rounded-xl h-11   btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? '' : "Find Students"}`} />
-                        <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
-                    </div>
-                </div>
-
-            </form>
-            {
-                students.length ? <>
-                    <div>
-                        <h1 className='text-center my-3 text-2xl font-semibold text-black'>Total Students Found <span className='text-sky-600 font-bold '>{students.length}</span></h1>
-                        <StudentsList students={students}></StudentsList>
-                    </div>
-                </> : <></>
-            }
-
+    const inputGroup = (icon, label, name, type = "text", placeholder = "") => (
+        <div className="space-y-1.5">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                {icon} {label}
+            </label>
+            <input
+                name={name}
+                type={type}
+                className="input-premium"
+                placeholder={placeholder}
+                onWheel={(e) => e.target.blur()}
+            />
         </div>
+    )
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-1 lg:p-4"
+        >
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+                <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-100">
+                        <FiSearch className="text-3xl text-white" />
+                    </div>
+                    <div>
+                        <h1 className="text-3xl font-black text-slate-800 tracking-tight">Student Finder</h1>
+                        <p className="text-slate-500 font-semibold">Locate and manage profiles with precision</p>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl font-bold text-xs">
+                    <FiFilter /> Results Simplified
+                </div>
+            </div>
+
+            <form onSubmit={handleSearch} className="glass-panel p-6 lg:p-10 rounded-[2.5rem] relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                    {inputGroup(<FiHash />, "Student ID", "id", "number", "e.g. 12345")}
+                    {inputGroup(<FiUser />, "Full Name", "name", "text", "Enter name...")}
+                    {inputGroup(<FiUserCheck />, "Phone Number", "phone", "text", "017...")}
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 border-t border-slate-100 pt-8">
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="btn-premium px-12 py-5 rounded-2xl w-full sm:w-auto min-w-[240px]"
+                    >
+                        {loading ? (
+                            <div className="flex items-center gap-3">
+                                <span className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></span>
+                                <span className="uppercase tracking-widest text-sm font-black">Finding...</span>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-3 justify-center">
+                                <FiSearch className="text-xl" />
+                                <span className="uppercase tracking-[0.1em] text-sm font-black text-white">Perform Search</span>
+                            </div>
+                        )}
+                    </button>
+                    {students.length > 0 && (
+                        <button
+                            type="button"
+                            onClick={() => setStudents([])}
+                            className="px-8 py-5 rounded-2xl border-2 border-slate-100 text-slate-400 font-bold hover:bg-slate-50 transition-colors"
+                        >
+                            Reset Results
+                        </button>
+                    )}
+                </div>
+            </form>
+
+            <AnimatePresence>
+                {students.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="mt-12 space-y-6"
+                    >
+                        <div className="flex items-center gap-4 px-6">
+                            <div className="h-px flex-1 bg-slate-100"></div>
+                            <h2 className="text-xl font-extrabold text-slate-800">
+                                Match Summary: <span className="text-indigo-600 ml-2 bg-indigo-50 px-3 py-1 rounded-lg">{students.length} Students</span>
+                            </h2>
+                            <div className="h-px flex-1 bg-slate-100"></div>
+                        </div>
+                        <StudentsList students={students} />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </motion.div>
     )
 }
 

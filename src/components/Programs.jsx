@@ -13,7 +13,7 @@ const Programs = () => {
     setLoading(true)
     const id = event.target.id.value;
 
-    const res = await fetch(`https://spoffice-server.vercel.app/student/${id}`)
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/student/${id}`)
     const student = await res.json()
     if (student.id) {
       setId(id)

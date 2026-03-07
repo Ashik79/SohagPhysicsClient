@@ -52,7 +52,7 @@ function Download() {
         if (session) query.session = session;
 
         try {
-            const res = await fetch('https://spoffice-server.vercel.app/students', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/students`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(query),
@@ -113,7 +113,7 @@ function Download() {
 
     const handleDownload = async () => {
         try {
-            const downloadResponse = await fetch('https://spoffice-server.vercel.app/download/students', {
+            const downloadResponse = await fetch(`${import.meta.env.VITE_API_URL}/download/students`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(students),

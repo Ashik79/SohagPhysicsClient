@@ -13,7 +13,7 @@ const BatchCard = ({ batch }) => {
         // //console.log('d')
         try {
 
-            const downloadResponse = await fetch('https://spoffice-server.vercel.app/download/students', {
+            const downloadResponse = await fetch(`${import.meta.env.VITE_API_URL}/download/students`, {
                 method: 'POST',
                 headers: {
                     'content-type': 'application/json'
@@ -44,7 +44,7 @@ const BatchCard = ({ batch }) => {
         // //console.log('d')
         try {
 
-            const downloadResponse = await fetch('https://spoffice-server.vercel.app/download/students', {
+            const downloadResponse = await fetch(`${import.meta.env.VITE_API_URL}/download/students`, {
                 method: 'POST',
                 headers: {
                     'content-type': 'application/json'

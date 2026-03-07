@@ -1,17 +1,23 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { AuthContext } from '../Provider';
-import { MdLogout } from "react-icons/md";
+import { MdLogout, MdMenu, MdClose } from "react-icons/md";
+import {
+    FiPieChart, FiBarChart2, FiSearch, FiUsers, FiUserPlus,
+    FiMonitor, FiCheckSquare, FiFileText, FiEdit3, FiTag,
+    FiLayers, FiDownloadCloud, FiCreditCard, FiMessageSquare,
+    FiDollarSign, FiGlobe, FiUserCheck, FiPlusSquare, FiShield
+} from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function Nav() {
     const { loggedUser, role, logout, loggedPhoto } = useContext(AuthContext);
-    const [photo, setPhoto] = useState(null);  // Initially set to null
-   
-    // Ensure the photo is updated based on loggedPhoto or localStorage
+    const [photo, setPhoto] = useState(null);
+
     useEffect(() => {
         if (loggedPhoto) {
             setPhoto(loggedPhoto);
-            localStorage.setItem("loggedPhoto", loggedPhoto);  // Save the photo in localStorage on login
+            localStorage.setItem("loggedPhoto", loggedPhoto);
         } else {
             const storedPhoto = localStorage.getItem("loggedPhoto");
             if (storedPhoto) {
@@ -19,92 +25,111 @@ function Nav() {
             }
         }
     }, [loggedPhoto]);
-   
-    const [disabled, setDisabled] = useState(false);
 
-    const handleSelect = e => {
-        setDisabled(true);
-        setTimeout(() => {
-            setDisabled(false);
-        }, 500);
-    };
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+    const allLinks = [
+        { to: '/overview', label: 'Payment Overview', icon: <FiPieChart className="text-blue-500" /> },
+        { to: '/studentoverview', label: 'Student Overview', role: 'CEO', icon: <FiBarChart2 className="text-indigo-500" /> },
+        { to: '/finder', label: 'Finder', icon: <FiSearch className="text-sky-500" /> },
+        { to: '/staffs', label: 'Staffs', role: 'CEO', icon: <FiUsers className="text-purple-500" /> },
+        { to: '/entry', label: 'Staff Entry', icon: <FiUserPlus className="text-emerald-500" /> },
+        { to: '/monitor', label: 'Live Monitor', icon: <FiMonitor className="text-orange-500" /> },
+        { to: '/attendance', label: 'Attendance', icon: <FiCheckSquare className="text-teal-500" /> },
+        { to: '/exams', label: 'Exams', icon: <FiFileText className="text-rose-500" /> },
+        { to: '/note', label: 'Notes', icon: <FiEdit3 className="text-amber-500" /> },
+        { to: '/coupons', label: 'Coupons', icon: <FiTag className="text-pink-500" /> },
+        { to: '/batch', label: 'Batch Students', icon: <FiLayers className="text-indigo-400" /> },
+        { to: '/download', label: 'Download Center', icon: <FiDownloadCloud className="text-blue-400" /> },
+        { to: '/payment', label: 'Batch Payments', icon: <FiCreditCard className="text-cyan-500" /> },
+        { to: '/message', label: 'Message', icon: <FiMessageSquare className="text-violet-500" /> },
+        { to: '/paymententry', label: 'Payment Entry', icon: <FiDollarSign className="text-green-500" /> },
+        { to: '/editor', label: 'Student Website', icon: <FiGlobe className="text-sky-600" /> },
+        { to: '/register', label: 'Register', icon: <FiUserCheck className="text-indigo-600" /> },
+        { to: '/programentry', label: 'Program Entry', role: 'CEO', icon: <FiPlusSquare className="text-purple-600" /> },
+        { to: '/adduser', label: 'Add Role', role: 'CEO', icon: <FiShield className="text-slate-600" /> },
+    ];
 
     return (
-        <div>
-            <div className="navbar bg-slate-100">
-                <div className="navbar-start">
-                    <div className="dropdown text-base font-semibold">
-                        <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M4 6h16M4 12h8m-8 6h16" />
-                            </svg>
-                        </div>
-                        <ul onClick={() => handleSelect()}
-                            tabIndex={0}
-                            className={`menu menu-lg gap-2 text-base bg-gray-100 dropdown-content rounded-box z-[1] mt-3 w-52 p-2 shadow ${disabled ? 'hidden' : ''}`}>
-                            {
-                            
-
-                                <NavLink to={'/overview'}><li className='pl-2 hover:bg-gray-200 '>Payment Overview</li></NavLink>
-                            }
-                            {role === 'CEO' && <NavLink to={'/studentoverview'}><li className='pl-2 hover:bg-gray-200 '>Student Overview</li></NavLink>}
-                            <NavLink to={'/finder'}><li className='pl-2 hover:bg-gray-200 '>Finder</li></NavLink>
-                            {role === 'CEO' && <NavLink to={'/staffs'}><li className='pl-2 hover:bg-gray-200'>Staffs</li></NavLink>}
-                            <NavLink to={'/entry'}><li className='pl-2 hover:bg-gray-200 '>Staff Entry</li></NavLink>
-                            <NavLink to={'/monitor'}><li className='pl-2 hover:bg-gray-200 '>Live Monitor</li></NavLink>
-                            <NavLink to={'/attendance'}><li className='pl-2 hover:bg-gray-200'>Attendance</li></NavLink>
-                            <NavLink to={'/exams'}><li className='pl-2 hover:bg-gray-200'>Exams</li></NavLink>
-                            <NavLink to={'/note'}><li className='pl-2 hover:bg-gray-200'>Notes</li></NavLink>
-                            {role === 'CEO' && <NavLink to={'/coupons'}><li className='pl-2 hover:bg-gray-200'>Coupons</li></NavLink>}
-                            {(role == 'CEO' || role == 'Manager') && <NavLink to={'/batch'}><li className='pl-2 hover:bg-gray-200'>Batch Students</li></NavLink>}
-                            {(role == 'CEO' || role == 'Manager') && <NavLink to={'/download'}><li className='pl-2 hover:bg-gray-200'>Download Center</li></NavLink>}
-
-                            {(role == 'CEO' || role == 'Manager') && <NavLink to={'/message'}><li className='pl-2 hover:bg-gray-200'>Message</li></NavLink>}
-                            {
-                                (role == 'CEO' || loggedUser == 'Sree Krishno')? <NavLink to={'/payment'}><li className='pl-2 hover:bg-gray-200'>Payment Entry</li></NavLink> : ''
-                            }
-
- 
-                            {
-                                ((role == 'CEO' )|| (loggedUser =="Badhon")) ? <NavLink to={'/editor'}><li className='pl-2 hover:bg-gray-200'>Student Website</li></NavLink> : ''
-                            }
-
-                            <NavLink to={'/register'}><li className='pl-2 hover:bg-gray-200'>Register</li></NavLink>
-                            {role == 'CEO' && <NavLink to={'/programentry'}><li className='pl-2 hover:bg-gray-200'>Program Entry</li></NavLink>}
-                            {role === 'CEO' && <NavLink to={'/adduser'}><li className='pl-2 hover:bg-gray-200'>Add Role</li></NavLink>}
-                            {
-                                role == 'CEO' ? <NavLink to={'/user-management'}><li className='pl-2 hover:bg-gray-200'>User Management</li></NavLink> : ''
-                            }
-                        </ul>
-                    </div>
-                    <Link to={'/'}><img className='w-16 rounded-full lg:w-24' src={`/logo.png`} alt="Logo" /></Link>
-
+        <div className="w-full bg-white border-b border-slate-100 sticky top-0 z-50">
+            <div className="flex items-center justify-between px-4 py-3">
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => setIsMenuOpen(true)}
+                        className="lg:hidden p-2 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
+                    >
+                        <MdMenu size={28} />
+                    </button>
+                    <Link to="/" className="flex items-center gap-2">
+                        <img className="w-8 h-8 lg:w-10 lg:h-10" src="/logo.png" alt="Logo" />
+                    </Link>
                 </div>
-                <div className='navbar-end flex gap-4 justify-end items-center'>
-                    <div className=' justify-end gap-1 lg:gap-3 flex items-center'>
-                        {/* Fallback to a default image if photo is not available */}
-                        <img className='w-8 h-8 lg:w-12 lg:h-12 rounded-full border-2 border-sky-600 ' src={`${photo ? photo : 'profile.jpg'} `} alt="Profile" />
-                        <div className='flex flex-col items-end'>
-                            <h1 className='font-semibold text-sm lg:text-base text-right '>{loggedUser}</h1>
-                            <p className='text-xs lg:text-sm text-gray-600'>{role}</p>
 
+                <div className="flex items-center gap-3 lg:gap-6">
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-100">
+                        <img className="w-8 h-8 rounded-full object-cover ring-2 ring-white" src={photo ? photo : 'profile.jpg'} alt="Profile" />
+                        <div className="hidden sm:block text-right">
+                            <h1 className="font-bold text-xs text-slate-800">{loggedUser}</h1>
+                            <p className="text-[9px] text-indigo-600 font-extrabold uppercase tracking-widest">{role}</p>
                         </div>
                     </div>
-                    <div>
-                        <button className='text-base' onClick={() => logout()}><MdLogout /></button>
-                    </div>
+                    <button onClick={() => logout()} className="text-slate-400 hover:text-red-600 p-2 transition-colors">
+                        <MdLogout size={24} />
+                    </button>
                 </div>
             </div>
+
+            {/* Mobile Drawer */}
+            <AnimatePresence>
+                {isMenuOpen && (
+                    <div className="fixed inset-0 z-[100] lg:hidden">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"
+                            onClick={() => setIsMenuOpen(false)}
+                        ></motion.div>
+                        <motion.div
+                            initial={{ x: '-100%' }}
+                            animate={{ x: 0 }}
+                            exit={{ x: '-100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                            className="absolute left-0 top-0 bottom-0 w-[280px] bg-white shadow-2xl flex flex-col"
+                        >
+                            <div className="p-5 flex items-center justify-between border-b border-slate-50">
+                                <span className="font-black text-xl text-slate-800 tracking-tight">Navigation</span>
+                                <button
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-colors"
+                                >
+                                    <MdClose size={24} />
+                                </button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto py-4 custom-scrollbar">
+                                {allLinks.map((link) => (
+                                    (!link.role || link.role === role) && (
+                                        <NavLink
+                                            key={link.to}
+                                            to={link.to}
+                                            onClick={() => setIsMenuOpen(false)}
+                                            className={({ isActive }) => `
+                                                flex items-center gap-4 px-6 py-3 text-sm font-bold transition-all
+                                                ${isActive
+                                                    ? 'bg-indigo-50 text-indigo-700 border-l-4 border-indigo-600'
+                                                    : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600'}
+                                            `}
+                                        >
+                                            <span className="text-xl">{link.icon}</span>
+                                            {link.label}
+                                        </NavLink>
+                                    )
+                                ))}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

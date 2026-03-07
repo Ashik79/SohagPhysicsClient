@@ -2,7 +2,8 @@ import React, { useContext, useState } from 'react';
 import { AuthContext } from '../Provider';
 import { TbCurrencyTaka } from "react-icons/tb";
 import { useLoaderData } from 'react-router-dom';
-import { FaDownload } from "react-icons/fa";
+import { FiDownload, FiFilter, FiCalendar, FiUser, FiPieChart, FiTrendingUp, FiCheckCircle, FiBookOpen, FiMoreHorizontal } from "react-icons/fi";
+import { motion, AnimatePresence } from 'framer-motion';
 
 const PaymentComponent = () => {
 
@@ -22,142 +23,32 @@ const PaymentComponent = () => {
     const day = e.target.day.value
     const year = e.target.year.value
     const taker = e.target.taker.value
-    const data = {
+    const filterData = {
       month, day, year, taker
     }
-    
-    fetch('https://spoffice-server.vercel.app/api/payments', {
 
+    fetch(`${import.meta.env.VITE_API_URL}/api/payments`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(filterData)
     })
       .then(res => res.json())
       .then(data => {
-        // //console.log(data)
         setData(data)
-
         setLoading(false)
       })
-  };
-  const handleReportDownload = async () => {
-    try {
-      // Create jsPDF instance with landscape orientation
-      const doc = new jsPDF("landscape");
-
-      let isFirstPage = true; // Track if it's the first page for adding title and logo
-
-      // Table headers
-      const headers = [
-        "Sl No", "Roll", "Name", "Date", "Amount", "Payment Type",
-      ];
-
-      // Table data rows for students
-      const sortedStudents = sortArray(students)
-      const tableData = sortedStudents.map((student, index) => {
-        const payment = student.payments.find(payment => payment.pmonth == paymentMonth && payment.pyear == paymentYear);
-        return [
-          index + 1,
-          student.id,
-          student.name,
-          student.phone,
-          (student.programs.length) ? student.programs[student.programs.length - 1].program : "Free Class",
-          payment ?
-            getFirstName(payment.ptaken) : "Unpaid",
-
-
-        ]
+      .catch(err => {
+        console.error(err)
+        setLoading(false)
+        notifyFailed("Failed to fetch payments")
       })
-
-      // Column width configuration (fixed widths)
-
-
-      // Fetch the logo image as a base64 URL
-      const fetchLogo = async () => {
-        const logoUrl = "/logo.png"; // Replace with the correct URL to your logo
-        const response = await fetch(logoUrl);
-        const blob = await response.blob();
-        const reader = new FileReader();
-        return new Promise((resolve, reject) => {
-          reader.onloadend = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
-      };
-
-      // Wait for the logo to be loaded before generating the PDF
-      const logoUrlBase64 = await fetchLogo();
-
-      // Add table using autoTable plugin
-      doc.autoTable({
-        head: [headers],
-        body: tableData,
-        startY: 40,
-        columnStyles: {
-          0: { cellWidth: 10 }, // Sl No
-          1: { cellWidth: 15 }, // Roll
-          2: { cellWidth: 30 }, // Name
-          3: { cellWidth: 25 }, // Phone
-          4: { cellWidth: 27 }, // Program
-          5: { cellWidth: 18 }, // Payment
-          ...Array.from({ length: 31 }, (_, i) => ({ [i + 6]: { cellWidth: 5 } })).reduce(
-            (acc, curr) => ({ ...acc, ...curr }),
-            {}
-          ), // Day columns
-
-        },
-        theme: "grid",
-        headStyles: {
-          fillColor: [242, 242, 242],
-          textColor: [0, 0, 0],
-          fontStyle: "bold",
-          halign: "center",
-          minCellHeight: 5,
-          cellPadding: 1,
-          lineWidth: 0.5,
-          lineColor: [200, 200, 200],
-        },
-        bodyStyles: {
-          minCellHeight: 4,
-          cellPadding: 1,
-          lineWidth: 0.5,
-          lineColor: [200, 200, 200],
-        },
-        margin: { top: 10, bottom: 10, left: 10, right: 10 },
-        didDrawPage: (data) => {
-          if (isFirstPage) {
-            doc.addImage(logoUrlBase64, "PNG", 10, 10, 30, 30);
-            const pageWidth = doc.internal.pageSize.width;
-            doc.setFontSize(16);
-            doc.text("Sohag Physics", pageWidth / 2, 20, { align: "center" });
-            doc.setFontSize(12);
-            doc.text(
-              `Attendance Sheet for ${batch} - ${getMonth(paymentMonth)}, ${paymentYear}`,
-              pageWidth / 2,
-              30,
-              { align: "center" }
-            );
-            isFirstPage = false;
-          }
-        },
-        pageBreak: "auto",
-      });
-
-
-      // Save the generated PDF
-      doc.save(`Attendance sheet of batch ${students[0].batch} ${getMonth(paymentMonth)},${paymentYear}.pdf`);
-    } catch (err) {
-      //console.log("Error generating PDF:", err);
-    }
   };
-  const handleDownload = async (type) => {
 
+  const handleDownload = async (type) => {
     const array = data.paymentArray.filter(payment => payment.type == type)
-    if (type == 'Monthly') {
-      setmLoading(true)
-    }
+    if (type == 'Monthly') setmLoading(true)
     if (type == 'Exam Fee') {
       setpLoading(true)
       data.paymentArray.map(payment => {
@@ -174,15 +65,12 @@ const PaymentComponent = () => {
         }
       })
     }
-    //console.log(array)
+
     try {
-
-      const downloadResponse = await fetch('https://spoffice-server.vercel.app/download/overview', {
-
+      const downloadResponse = await fetch(`${import.meta.env.VITE_API_URL}/download/overview`, {
         method: 'POST',
         headers: {
           'content-type': 'application/json'
-
         },
         body: JSON.stringify(array)
       })
@@ -192,143 +80,215 @@ const PaymentComponent = () => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `payments.xlsx`;
+        a.download = `${type}_payments.xlsx`;
         document.body.appendChild(a);
         a.click();
         a.remove();
-        setLoading(false)
-        setpLoading(false)
-        setmLoading(false)
-        setoLoading(false)
       } else {
         console.error('Failed to download results');
-        setLoading(false)
       }
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err)
-      setLoading(false)
       notifyFailed("Something went wrong!")
+    } finally {
+      setmLoading(false)
+      setpLoading(false)
+      setoLoading(false)
     }
   }
-  return (
-    <div className="container mx-auto p-4">
-      <form onSubmit={fetchPayments} className="mb-4 grid ">
-        <div className='grid grid-cols-1 gap-3 lg:grid-cols-2'>
-          <div className="mb-4">
-            <label className="block text-gray-700  font-bold mb-2">Day:</label>
-            <select
-              defaultValue={date}
-              name='day'
-              className="block w-full bg-white border border-gray-300 rounded py-2 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-            >
-              <option value="">All</option>
-              {[...Array(31)].map((_, i) => (
-                <option key={i + 1} value={i + 1}>
-                  {i + 1}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="mb-4 ">
-            <label className="block text-gray-700  font-bold mb-2">Month:</label>
-            <select
-              defaultValue={month}
-              name='month'
 
-              className="block w-full bg-white border border-gray-300 rounded py-2 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-            >
-              <option value="">All</option>
-              <option value="1">January</option>
-              <option value="2">February</option>
-              <option value="3">March</option>
-              <option value="4">April</option>
-              <option value="5">May</option>
-              <option value="6">June</option>
-              <option value="7">July</option>
-              <option value="8">August</option>
-              <option value="9">September</option>
-              <option value="10">October</option>
-              <option value="11">November</option>
-              <option value="12">December</option>
-            </select>
-          </div>
-          <div className="mb-4 w-full">
-            <label className="block text-gray-700  font-bold mb-2">Year:</label>
-            <select
-              name='year'
-              defaultValue={year}
-              className="p-2 border border-gray-300 rounded w-full"
-            > <option value={""}>All</option>
-              {[2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030].map(year => (
-                <option key={year} value={year}>{year}</option>
-              ))}
-            </select>
-          </div>
-
-
-          {
-            role == 'CEO' ? <div className="mb-4">
-              <label className="block text-gray-700  font-bold mb-2">Taken by :</label>
-              <select
-
-                name='taker'
-                className="block w-full bg-white border border-gray-300 rounded py-2 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-              >
-                <option value={""}>All</option>
-                {userNames.map((name, i) => (
-                  <option key={i + 1} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            </div> : <div className="mb-4">
-              <label className="block text-gray-700  font-bold mb-2">Taken by :</label>
-              <select
-
-                name='taker'
-                className="block w-full bg-white border border-gray-300 rounded py-2 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-              >
-                <option value={loggedUser}>{loggedUser}</option>
-
-              </select>
-            </div>
-          }
+  const SummaryCard = ({ title, icon: Icon, mainValue, subItems, colorClass, downloadHandler, dlLoading }) => (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="bg-white/50 backdrop-blur-xl border border-white/20 p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 flex flex-col h-full"
+    >
+      <div className="flex justify-between items-start mb-8">
+        <div className={`p-4 rounded-2xl ${colorClass} text-white shadow-lg`}>
+          <Icon size={24} />
         </div>
-        <button
-          type="submit"
-          className="bg-blue-500 h-11 w-full hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-        >
-          {loading ? "" : "Submit"}
-        </button>
-        <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
+        {downloadHandler && (
+          <button
+            onClick={downloadHandler}
+            disabled={dlLoading}
+            className="p-3 bg-white border border-slate-100 rounded-xl text-slate-400 hover:text-cyan-600 hover:border-cyan-100 transition-all shadow-sm"
+          >
+            {dlLoading ? <span className="loading loading-spinner loading-xs"></span> : <FiDownload size={18} />}
+          </button>
+        )}
+      </div>
+
+      <h3 className="text-slate-500 font-black text-xs uppercase tracking-widest mb-2">{title}</h3>
+      <p className="text-3xl font-black text-slate-800 flex items-center gap-1 mb-8">
+        {mainValue} <TbCurrencyTaka className="text-slate-400" />
+      </p>
+
+      <div className="space-y-4 mt-auto">
+        {subItems.map((item, idx) => (
+          <div key={idx} className="flex justify-between items-center bg-slate-50/50 p-3 rounded-xl border border-slate-100">
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{item.label}</span>
+            <div className="flex items-center gap-1 font-bold text-slate-700">
+              {item.value} {item.showTaka && <TbCurrencyTaka size={14} className="text-slate-400" />}
+            </div>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+
+  return (
+    <div className="pb-20">
+      {/* Header Area */}
+      <div className="flex items-center gap-3 mb-10">
+        <div className="p-3 bg-indigo-100 rounded-2xl text-indigo-600">
+          <FiTrendingUp size={24} />
+        </div>
+        <h1 className='font-black text-2xl lg:text-3xl text-slate-800 tracking-tight'>Payment Overview</h1>
+      </div>
+
+      {/* Filter Form */}
+      <form onSubmit={fetchPayments} className="bg-white/50 backdrop-blur-xl border border-white/20 p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 mb-12">
+        <div className="flex items-center gap-2 mb-8 text-slate-800">
+          <FiFilter className="text-cyan-500" />
+          <h2 className="font-black text-lg">Quick Filters</h2>
+        </div>
+
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-xs font-black text-slate-500 uppercase tracking-widest ml-1">
+              <FiCalendar size={12} /> Day
+            </label>
+            <select defaultValue={date} name='day' className="input-premium w-full pt-3 h-12">
+              <option value="">All Days</option>
+              {[...Array(31)].map((_, i) => (<option key={i + 1} value={i + 1}>{i + 1}</option>))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-xs font-black text-slate-500 uppercase tracking-widest ml-1">
+              <FiCalendar size={12} /> Month
+            </label>
+            <select defaultValue={month} name='month' className="input-premium w-full pt-3 h-12">
+              <option value="">All Months</option>
+              {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map((m, i) => (
+                <option key={i + 1} value={i + 1}>{m}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-xs font-black text-slate-500 uppercase tracking-widest ml-1">
+              <FiCalendar size={12} /> Year
+            </label>
+            <select name='year' defaultValue={year} className="input-premium w-full pt-3 h-12">
+              <option value={""}>All Years</option>
+              {[2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030].map(y => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-xs font-black text-slate-500 uppercase tracking-widest ml-1">
+              <FiUser size={12} /> Taken By
+            </label>
+            <select name='taker' className="input-premium w-full pt-3 h-12">
+              {role === 'CEO' ? (
+                <>
+                  <option value={""}>Everyone</option>
+                  {userNames.map((name, i) => (<option key={i} value={name}>{name}</option>))}
+                </>
+              ) : (
+                <option value={loggedUser}>{loggedUser}</option>
+              )}
+            </select>
+          </div>
+        </div>
+
+        <div className="mt-8 flex justify-end">
+          <button type="submit" disabled={loading} className="btn-premium px-12 h-12 font-bold flex items-center gap-2">
+            {loading ? <span className="loading loading-spinner loading-sm"></span> : <><FiTrendingUp /> Calculate Analytics</>}
+          </button>
+        </div>
       </form>
 
-      {data ? <>
-        <h1 className='text-center text-base flex gap-2 items-center justify-center my-5 lg:text-2xl font-semibold'>Total Amount Recieved : <span className='font-bold flex items-center gap-1 text-lg lg:text-3xl text-sky-800'> {data.total} <TbCurrencyTaka /></span></h1>
-        <div className='flex flex-col font-semibold text-base lg:text-xl lg:flex-row w-full gap-4 text-center  justify-between'>
-          <div className='w-full py-2 flex flex-col items-center justify-center gap-3  lg:w-1/4 border-2 border-sky-900 rounded-xl shadow-xl bg-gray-200'>
-            <p>Monthly Payments : {data.monthlyCount}</p>
-            <p className='flex items-center gap-2'> Total : <span className='font-bold flex items-center gap-1  text-sky-800'>{data.monthly} <TbCurrencyTaka /></span></p>
-            <button className='text-blue-700 h-11' onClick={() => handleDownload("Monthly")}>{!mloading ? <FaDownload /> : ""}</button>
-            <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${mloading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> </p>
-          </div>
-          <div className='w-full py-2 flex flex-col border-2 border-sky-900 rounded-xl shadow-xl bg-gray-200   justify-center gap-3  px-2  lg:w-1/2'>
-            <p>Admission: {data.admissionCount}</p>
-            <div className='flex flex-col items-center '>
-              <p className='lg:w-1/2 flex items-center gap-2'>Exam Fee : <span className='font-bold flex items-center gap-1  text-sky-800'>{data.exam} <TbCurrencyTaka /></span></p>
-              <p className='lg:w-1/2 flex items-center gap-2'>Note Fee : <span className='font-bold  flex items-center gap-1 text-sky-800'>{data.note} <TbCurrencyTaka /></span></p>
-              <button className='text-blue-700 h-11' onClick={() => handleDownload("Exam Fee")}>{!ploading ? <FaDownload /> : ""}</button>
-              <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${ploading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> </p>
-
+      {/* Results Area */}
+      <AnimatePresence mode="wait">
+        {data ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="space-y-12"
+          >
+            {/* Grand Total */}
+            <div className="text-center bg-gradient-to-br from-slate-900 to-slate-800 p-12 rounded-[3rem] shadow-2xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-1000"></div>
+              <div className="relative z-10">
+                <h2 className='text-cyan-400 font-black text-xs uppercase tracking-[0.3em] mb-4'>Total Revenue Received</h2>
+                <div className='flex items-center justify-center gap-2'>
+                  <span className="text-5xl lg:text-7xl font-black text-white tracking-tighter">{data.total}</span>
+                  <TbCurrencyTaka className="text-cyan-500 text-4xl lg:text-6xl" />
+                </div>
+              </div>
             </div>
-          </div>
-          <div className='w-full py-2 flex flex-col justify-center border-2 border-sky-900 rounded-xl shadow-xl bg-gray-200 items-center  gap-3 lg:w-1/4'>
-            <p>Other : <span className='font-bold flex items-center gap-1  text-sky-800'>{data.other} <TbCurrencyTaka /></span></p>
-            <button className='text-blue-700 h-11' onClick={() => handleDownload("other")}>{!oloading ? <FaDownload /> : ""}</button>
-            <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${oloading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> </p>
-          </div>
-        </div></> : <></>}
+
+            {/* Breakdown Grid */}
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
+              <SummaryCard
+                title="Monthly Subscriptions"
+                icon={FiCalendar}
+                mainValue={data.monthly}
+                colorClass="bg-gradient-to-br from-cyan-500 to-blue-600"
+                dlLoading={mloading}
+                downloadHandler={() => handleDownload("Monthly")}
+                subItems={[
+                  { label: "Total Transactions", value: data.monthlyCount, showTaka: false },
+                  { label: "Average per student", value: Math.round(data.monthly / (data.monthlyCount || 1)), showTaka: true }
+                ]}
+              />
+
+              <SummaryCard
+                title="Academic Fees"
+                icon={FiBookOpen}
+                mainValue={data.exam + data.note}
+                colorClass="bg-gradient-to-br from-indigo-500 to-purple-600"
+                dlLoading={ploading}
+                downloadHandler={() => handleDownload("Exam Fee")}
+                subItems={[
+                  { label: "Exam Fees", value: data.exam, showTaka: true },
+                  { label: "Note Fees", value: data.note, showTaka: true },
+                  { label: "Admissions", value: data.admissionCount, showTaka: false }
+                ]}
+              />
+
+              <SummaryCard
+                title="Other Revenue"
+                icon={FiMoreHorizontal}
+                mainValue={data.other}
+                colorClass="bg-gradient-to-br from-emerald-500 to-teal-600"
+                dlLoading={oloading}
+                downloadHandler={() => handleDownload("other")}
+                subItems={[
+                  { label: "Miscellaneous", value: data.other, showTaka: true }
+                ]}
+              />
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-20 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200"
+          >
+            <div className="inline-flex p-6 bg-white rounded-3xl text-slate-300 mb-4 shadow-sm">
+              <FiPieChart size={48} />
+            </div>
+            <h3 className="text-xl font-black text-slate-400">No Analytics to display</h3>
+            <p className="text-slate-400 mt-2">Adjust your filters and click calculate to see financial insights.</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -1,66 +1,97 @@
 import React, { useContext, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../Provider';
+import { FiCreditCard, FiSearch, FiArrowRight, FiUser } from 'react-icons/fi';
+import { motion } from 'framer-motion';
 
 const Payment = () => {
-const {notifyFailed,role}=useContext(AuthContext)
+  const { notifyFailed, role } = useContext(AuthContext)
   const [id, setId] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [student,setStudent] =useState({})
+  const [student, setStudent] = useState({})
+
   const handleIdInput = async (event) => {
     event.preventDefault();
     setLoading(true)
     const id = event.target.id.value;
 
-    const res = await fetch(`https://spoffice-server.vercel.app/student/${id}`)
-    const student = await res.json()
-    if (student.id) {
-      setId(id)
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/student/${id}`)
+      const studentData = await res.json()
+      if (studentData.id) {
+        setId(id)
+        setStudent(studentData)
+      } else {
+        notifyFailed("No student found with this Roll Number!")
+      }
+    } catch (error) {
+      notifyFailed("Something went wrong!")
+    } finally {
       setLoading(false)
-      setStudent(student)
-
     }
-    else {
-      notifyFailed("No student Found !")
-      setLoading(false)
-    }
-
   };
 
   return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-xl mx-auto py-12 px-4"
+    >
+      <div className="text-center mb-10">
+        <div className="inline-flex p-4 bg-cyan-100 rounded-3xl text-cyan-600 mb-4 shadow-inner">
+          <FiCreditCard size={32} />
+        </div>
+        <h1 className="text-3xl font-black text-slate-800 tracking-tight">Student Payment</h1>
+        <p className="text-slate-500 mt-2">Enter the roll number to process student fees.</p>
+      </div>
 
-    <div>
-      <form className='mx-auto w-full' onSubmit={handleIdInput} >
+      <form
+        className='bg-white/50 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/20 shadow-2xl shadow-slate-200/50 space-y-8'
+        onSubmit={handleIdInput}
+      >
+        <div className="space-y-3">
+          <label className='flex items-center gap-2 font-bold text-sm text-slate-700 uppercase tracking-wider ml-1'>
+            Roll Number <span className='text-red-500'>*</span>
+          </label>
+          <div className="relative group">
+            <input
+              required
+              name='id'
+              type="number"
+              placeholder="e.g. 23001"
+              onWheel={(e) => e.target.blur()}
+              className="input-premium w-full px-6 h-16 text-xl font-bold tracking-widest"
+            />
+          </div>
+        </div>
 
-        {/* students part */}
-        <div className='flex mt-2 flex-col lg:flex-row'>
-          <h1 className='font-bold text-lg lg:w-1/4'>Take Payment :</h1>
-          <div className='grid grid-cols-1 lg:w-2/3  gap-3'>
-
-
-            <div>
-              <p className='font-semibold'>Roll Number <span className='text-red-700'>*</span> </p>
-              <input
-                required
-                name='id'
-                type="number"
-                onWheel={(e) => e.target.blur()}
-                className="input input-bordered input-info w-full " />
+        <button
+          type='submit'
+          disabled={loading}
+          className="btn-premium w-full h-16 flex items-center justify-center gap-3 text-lg font-bold group"
+        >
+          {loading ? (
+            <div className="flex items-center gap-2">
+              <span className="loading loading-spinner"></span>
+              <span>Verifying...</span>
             </div>
-
-          </div>
-        </div>
-        <div className='flex mt-2 flex-col lg:flex-row'>
-          <h1 className='font-bold text-lg lg:w-1/4'></h1>
-          <div className='lg:w-2/3 text-center'>
-            <input className="font-semibold w-full bg-blue-100  border-2 rounded-xl   btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ?"":"Next"}`} />
-            <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
-          </div>
-        </div>
-
+          ) : (
+            <>
+              <span>Continue to Payment</span>
+              <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
+            </>
+          )}
+        </button>
       </form>
+
+      <div className="mt-8 flex items-center justify-center gap-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
+        <span className="h-px w-8 bg-slate-200"></span>
+        Secure Transaction
+        <span className="h-px w-8 bg-slate-200"></span>
+      </div>
+
       {id && <Navigate to={`/payment/${id}`} state={student}></Navigate>}
-    </div>
+    </motion.div>
   );
 };
 

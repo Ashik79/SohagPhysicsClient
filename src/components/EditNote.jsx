@@ -16,47 +16,47 @@ const EditNote = () => {
         setPaid(notePayments.some(payment => payment.pamount != 0))
     }, [student])
     const firstPaperNotes = [
-        { value: 'vouto', label: '১. ভৌতজগৎ' },
-        { value: 'vector', label: '২. ভেক্টর' },
-        { value: 'gotibidda', label: '৩. গতিবিদ্যা' },
-        { value: 'neutonian', label: '৪. নিউটনিয়ান' },
-        { value: 'kajshokti', label: '৫. কাজ শক্তি' },
-        { value: 'mohakorsho', label: '৬. মহাকর্ষ ' },
-        { value: 'gathonik', label: '৭. গাঠনিক ধর্ম' },
-        { value: 'porjabritto', label: '৮. পর্যাবৃত্ত গতি' },
-        { value: 'torongo', label: '৯. তরঙ্গ' },
-        { value: 'adorsho', label: '১০. আদর্শ গ্যাস' },
+        { value: 'vouto', label: 'à§§. à¦­à§Œà¦¤à¦œà¦—à§Ž' },
+        { value: 'vector', label: 'à§¨. à¦­à§‡à¦•à§à¦Ÿà¦°' },
+        { value: 'gotibidda', label: 'à§©. à¦—à¦¤à¦¿à¦¬à¦¿à¦¦à§à¦¯à¦¾' },
+        { value: 'neutonian', label: 'à§ª. à¦¨à¦¿à¦‰à¦Ÿà¦¨à¦¿à§Ÿà¦¾à¦¨' },
+        { value: 'kajshokti', label: 'à§«. à¦•à¦¾à¦œ à¦¶à¦•à§à¦¤à¦¿' },
+        { value: 'mohakorsho', label: 'à§¬. à¦®à¦¹à¦¾à¦•à¦°à§à¦· ' },
+        { value: 'gathonik', label: 'à§­. à¦—à¦¾à¦ à¦¨à¦¿à¦• à¦§à¦°à§à¦®' },
+        { value: 'porjabritto', label: 'à§®. à¦ªà¦°à§à¦¯à¦¾à¦¬à§ƒà¦¤à§à¦¤ à¦—à¦¤à¦¿' },
+        { value: 'torongo', label: 'à§¯. à¦¤à¦°à¦™à§à¦—' },
+        { value: 'adorsho', label: 'à§§à§¦. à¦†à¦¦à¦°à§à¦¶ à¦—à§à¦¯à¦¾à¦¸' },
     ];
 
     const secondPaperNotes = [
-        { value: 'tapgotibidda', label: '১. তাপগতিবিদ্যা' },
-        { value: 'sthirtorit', label: '২. স্থির তড়িৎ' },
-        { value: 'cholotorit', label: '৩. চল তড়িৎ' },
-        { value: 'choumbok', label: '৪. চৌম্বক ও চৌম্বকত্ব' },
-        { value: 'taritchoumbokiyoAbesh', label: '৫. তাড়িৎচৌম্বকীয় আবেশ' },
-        { value: 'jamitikAlokbiggan', label: '৬. জ্যামিতিক আলোকবিজ্ঞান' },
-        { value: 'voutoalokbiggan', label: '৭. ভৌত আলোকবিজ্ঞান' },
-        { value: 'adhunik', label: '৮. আধুনিক পদার্থবিজ্ঞান' },
-        { value: 'poromanuModel', label: '৯. পরমাণু মডেল' },
-        { value: 'semiconductor', label: '১০. সেমিকন্ডাক্টর' },
-        { value: 'jotirbiggan', label: '১১. জ্যোতির্বিজ্ঞান' },
+        { value: 'tapgotibidda', label: 'à§§. à¦¤à¦¾à¦ªà¦—à¦¤à¦¿à¦¬à¦¿à¦¦à§à¦¯à¦¾' },
+        { value: 'sthirtorit', label: 'à§¨. à¦¸à§à¦¥à¦¿à¦° à¦¤à§œà¦¿à§Ž' },
+        { value: 'cholotorit', label: 'à§©. à¦šà¦² à¦¤à§œà¦¿à§Ž' },
+        { value: 'choumbok', label: 'à§ª. à¦šà§Œà¦®à§à¦¬à¦• à¦“ à¦šà§Œà¦®à§à¦¬à¦•à¦¤à§à¦¬' },
+        { value: 'taritchoumbokiyoAbesh', label: 'à§«. à¦¤à¦¾à§œà¦¿à§Žà¦šà§Œà¦®à§à¦¬à¦•à§€à§Ÿ à¦†à¦¬à§‡à¦¶' },
+        { value: 'jamitikAlokbiggan', label: 'à§¬. à¦œà§à¦¯à¦¾à¦®à¦¿à¦¤à¦¿à¦• à¦†à¦²à§‹à¦•à¦¬à¦¿à¦œà§à¦žà¦¾à¦¨' },
+        { value: 'voutoalokbiggan', label: 'à§­. à¦­à§Œà¦¤ à¦†à¦²à§‹à¦•à¦¬à¦¿à¦œà§à¦žà¦¾à¦¨' },
+        { value: 'adhunik', label: 'à§®. à¦†à¦§à§à¦¨à¦¿à¦• à¦ªà¦¦à¦¾à¦°à§à¦¥à¦¬à¦¿à¦œà§à¦žà¦¾à¦¨' },
+        { value: 'poromanuModel', label: 'à§¯. à¦ªà¦°à¦®à¦¾à¦£à§ à¦®à¦¡à§‡à¦²' },
+        { value: 'semiconductor', label: 'à§§à§¦. à¦¸à§‡à¦®à¦¿à¦•à¦¨à§à¦¡à¦¾à¦•à§à¦Ÿà¦°' },
+        { value: 'jotirbiggan', label: 'à§§à§§. à¦œà§à¦¯à§‹à¦¤à¦¿à¦°à§à¦¬à¦¿à¦œà§à¦žà¦¾à¦¨' },
     ];
 
     const SscNotes = [
-        { value: 'রাশি', label: '১. ভৌত রাশি এবং পরিমাপ' },
-        { value: 'গতি', label: '২. গতি' },
-        { value: 'বল', label: '৩. বল' },
-        { value: 'শক্তি', label: '৪. কাজ, ক্ষমতা ও শক্তি' },
-        { value: 'চাপ', label: '৫. পদার্থের অবস্থা ও চাপ' },
-        { value: 'তাপ', label: '৬. বৃহত্তর ওপর তাপের প্রভাব' },
-        { value: 'তরঙ্গ', label: '৭. তরঙ্গ ও শব্দ' },
-        { value: 'প্রতিফলন', label: '৮. আলোর প্রতিফলন' },
-        { value: 'প্রতিসরণ', label: '৯. আলোর প্রতিসরণ' },
-        { value: 'স্থিরবিদ্যুৎ', label: '১০. স্থির বিদ্যুৎ' },
-        { value: 'চলবিদ্যুৎ', label: '১১. চল বিদ্যুৎ' },
-        { value: 'চৌম্বক', label: '১২. বিদ্যুতের চৌম্বক ক্রিয়া' },
-        { value: 'ইলেকট্রনিক্স', label: '১৩. আধুনিক পদার্থবিজ্ঞান ও ইলেকট্রনিক্স' },
-        { value: 'জীবন', label: '১৪. জীবন বাঁচাতে পদার্থবিজ্ঞান' },
+        { value: 'à¦°à¦¾à¦¶à¦¿', label: 'à§§. à¦­à§Œà¦¤ à¦°à¦¾à¦¶à¦¿ à¦à¦¬à¦‚ à¦ªà¦°à¦¿à¦®à¦¾à¦ª' },
+        { value: 'à¦—à¦¤à¦¿', label: 'à§¨. à¦—à¦¤à¦¿' },
+        { value: 'à¦¬à¦²', label: 'à§©. à¦¬à¦²' },
+        { value: 'à¦¶à¦•à§à¦¤à¦¿', label: 'à§ª. à¦•à¦¾à¦œ, à¦•à§à¦·à¦®à¦¤à¦¾ à¦“ à¦¶à¦•à§à¦¤à¦¿' },
+        { value: 'à¦šà¦¾à¦ª', label: 'à§«. à¦ªà¦¦à¦¾à¦°à§à¦¥à§‡à¦° à¦…à¦¬à¦¸à§à¦¥à¦¾ à¦“ à¦šà¦¾à¦ª' },
+        { value: 'à¦¤à¦¾à¦ª', label: 'à§¬. à¦¬à§ƒà¦¹à¦¤à§à¦¤à¦° à¦“à¦ªà¦° à¦¤à¦¾à¦ªà§‡à¦° à¦ªà§à¦°à¦­à¦¾à¦¬' },
+        { value: 'à¦¤à¦°à¦™à§à¦—', label: 'à§­. à¦¤à¦°à¦™à§à¦— à¦“ à¦¶à¦¬à§à¦¦' },
+        { value: 'à¦ªà§à¦°à¦¤à¦¿à¦«à¦²à¦¨', label: 'à§®. à¦†à¦²à§‹à¦° à¦ªà§à¦°à¦¤à¦¿à¦«à¦²à¦¨' },
+        { value: 'à¦ªà§à¦°à¦¤à¦¿à¦¸à¦°à¦£', label: 'à§¯. à¦†à¦²à§‹à¦° à¦ªà§à¦°à¦¤à¦¿à¦¸à¦°à¦£' },
+        { value: 'à¦¸à§à¦¥à¦¿à¦°à¦¬à¦¿à¦¦à§à¦¯à§à§Ž', label: 'à§§à§¦. à¦¸à§à¦¥à¦¿à¦° à¦¬à¦¿à¦¦à§à¦¯à§à§Ž' },
+        { value: 'à¦šà¦²à¦¬à¦¿à¦¦à§à¦¯à§à§Ž', label: 'à§§à§§. à¦šà¦² à¦¬à¦¿à¦¦à§à¦¯à§à§Ž' },
+        { value: 'à¦šà§Œà¦®à§à¦¬à¦•', label: 'à§§à§¨. à¦¬à¦¿à¦¦à§à¦¯à§à¦¤à§‡à¦° à¦šà§Œà¦®à§à¦¬à¦• à¦•à§à¦°à¦¿à¦¯à¦¼à¦¾' },
+        { value: 'à¦‡à¦²à§‡à¦•à¦Ÿà§à¦°à¦¨à¦¿à¦•à§à¦¸', label: 'à§§à§©. à¦†à¦§à§à¦¨à¦¿à¦• à¦ªà¦¦à¦¾à¦°à§à¦¥à¦¬à¦¿à¦œà§à¦žà¦¾à¦¨ à¦“ à¦‡à¦²à§‡à¦•à¦Ÿà§à¦°à¦¨à¦¿à¦•à§à¦¸' },
+        { value: 'à¦œà§€à¦¬à¦¨', label: 'à§§à§ª. à¦œà§€à¦¬à¦¨ à¦¬à¦¾à¦à¦šà¦¾à¦¤à§‡ à¦ªà¦¦à¦¾à¦°à§à¦¥à¦¬à¦¿à¦œà§à¦žà¦¾à¦¨' },
     ];
 
     const toggleOption = (value) => {
@@ -73,7 +73,7 @@ const EditNote = () => {
         setLoading(true)
         student.notes = selectedValues;
         try {
-            const response = await fetch(`https://spoffice-server.vercel.app/addpayment/${student.id}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/addpayment/${student.id}`, {
                 method: 'PUT',
                 headers: {
                     'content-type': 'application/json'

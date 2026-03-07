@@ -2,29 +2,26 @@ import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../Provider';
 import { Navigate, useLoaderData } from 'react-router-dom';
 import ImageUpload from './ImageUpload';
+import { FiUser, FiInfo, FiUsers, FiPhone, FiBook, FiMapPin, FiStar, FiMessageCircle, FiHeart, FiSave, FiCreditCard } from 'react-icons/fi';
+import { motion } from 'framer-motion';
 
 function UpdateStudent() {
 
-    const { month, year, date, notifySuccess, notifyFailed, role,loggedUser } = useContext(AuthContext)
+    const { month, year, date, notifySuccess, notifyFailed, role, loggedUser } = useContext(AuthContext)
     const [navigate, setNavigate] = useState(false)
     const [uploadedImageUrl, setUploadedImageUrl] = useState('');
+    const [loading, setLoading] = useState(false)
     const student = useLoaderData()
-    const { address, batch, college, gender, gname, gphone, id, monthlyAmount, name, phone, program, reference, school,note, session, target, group } = student
+    const { address, batch, college, gender, gname, gphone, id, monthlyAmount, name, phone, program, reference, school, note, session, target, group } = student
 
     const [error, setError] = useState('')
     const handleImageUpload = (url) => {
         setUploadedImageUrl(url);
-        //console.log("Image URL received in parent:", url);
     };
 
-
-
     const handleAdmission = async (e) => {
-
-        const admissionDate = `${date}-${month}-${year}`
-        //console.log(admissionDate)
-        //console.log("admission clicked")
         e.preventDefault();
+        setLoading(true)
         let image = student?.image
         if (uploadedImageUrl) {
             image = uploadedImageUrl
@@ -36,7 +33,6 @@ function UpdateStudent() {
         const school = e.target.school.value;
         const college = e.target.college.value;
 
-
         const session = e.target.session.value;
         const target = e.target.target.value;
         const phone = e.target.phone.value;
@@ -47,19 +43,12 @@ function UpdateStudent() {
         const gender = e.target.gender.value;
         const note = e.target.note.value;
 
-
-
-
-
-
-        //sob data diye object banai
         const formData = {
-            id, monthlyAmount, batch, name,note,image, school, college, session, target, phone, address, reference, gname, gphone, gender,lastEdit:loggedUser
+            id, monthlyAmount, batch, name, note, image, school, college, session, target, phone, address, reference, gname, gphone, gender, lastEdit: loggedUser
         }
-        //console.log(formData)
 
         try {
-            const response = await fetch(`https://spoffice-server.vercel.app/student/update/${id}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/student/update/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -68,25 +57,25 @@ function UpdateStudent() {
             });
 
             if (!response.ok) {
-                // If response is not ok, handle error
                 const errorText = await response.text();
                 notifyFailed(errorText)
-
+                setLoading(false)
             } else {
-                // Handle successful response
                 const result = await response.json();
-                //console.log('Updated:', result);
                 if (result.modifiedCount) {
                     notifySuccess("Student info updated")
                     setNavigate(true)
+                } else {
+                    notifySuccess("No changes made")
+                    setNavigate(true)
                 }
-                // Clear the form or show success message as needed
+                setLoading(false)
             }
         }
         catch (error) {
-            // Handle network or other errors
             setError('An error occurred while submitting the form.');
-            console.log(error)
+            notifyFailed("Update failed")
+            setLoading(false)
         }
     };
 
@@ -97,228 +86,252 @@ function UpdateStudent() {
     }
 
     return (
-        <div className=''>
-            <h1 className=' text-center lg:text-left md:text-center font-semibold  text-2xl text-cyan-500 underline mt-10'>Update Student</h1>
-            <form className='mx-auto w-full' onSubmit={handleAdmission} onKeyPress={handleKeyPress}>
+        <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className='pb-20'
+        >
+            <div className="flex items-center gap-3 mb-8">
+                <div className="p-3 bg-cyan-100 rounded-2xl text-cyan-600">
+                    <FiUser size={24} />
+                </div>
+                <h1 className='font-black text-2xl lg:text-3xl text-slate-800 tracking-tight'>Update Student</h1>
+            </div>
+
+            <form className='mx-auto w-full space-y-12' onSubmit={handleAdmission} onKeyPress={handleKeyPress}>
 
                 {/* students part */}
-                <div className='flex mt-2 flex-col lg:flex-row'>
-                    <h1 className='font-bold text-lg lg:w-1/4'>Student's Information :</h1>
-                    <div className='lg:col-span-2'>
-                        <ImageUpload onUpload={handleImageUpload}></ImageUpload>
-
+                <div className='flex flex-col lg:flex-row gap-8'>
+                    <div className="lg:w-1/4">
+                        <div className="flex items-center gap-2 mb-2">
+                            <FiInfo className="text-cyan-500" />
+                            <h2 className='font-bold text-lg text-slate-800 uppercase tracking-wider'>Student Info</h2>
+                        </div>
+                        <p className="text-sm text-slate-500">Update personal and academic details.</p>
                     </div>
-                    <div className='grid grid-cols-1 lg:w-2/3 lg:grid-cols-2 gap-3'>
 
+                    <div className='lg:w-3/4 bg-white/50 backdrop-blur-md p-8 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50'>
+                        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+                            <div className='lg:col-span-2 mb-4'>
+                                <ImageUpload onUpload={handleImageUpload}></ImageUpload>
+                            </div>
 
-                        <div>
-                            <p className='font-semibold'>Name <span className='text-red-700'>*</span> </p>
-                            <input
-                                required
-                                name='name'
-                                type="text"
-                                defaultValue={name}
+                            <div>
+                                <p className='font-bold text-sm text-slate-700 mb-2'>Name <span className='text-red-500'>*</span></p>
+                                <input
+                                    required
+                                    name='name'
+                                    type="text"
+                                    defaultValue={name}
+                                    className="input-premium w-full"
+                                />
+                            </div>
 
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
-                        </div>
-                        <div>
-                            <p className='font-semibold'>Batch <span className='text-red-700'>*</span> </p>
+                            <div>
+                                <p className='font-bold text-sm text-slate-700 mb-2 flex items-center gap-1'><FiUsers className="text-indigo-400" /> Batch <span className='text-red-500'>*</span></p>
+                                <select name='batch' defaultValue={batch} className="input-premium w-full pt-3">
+                                    <option value={'Olympiad-HSC27'}>Olympiad HSC 27</option>
+                                    <option value={'Sat 1'}>à¦¶à¦¨à¦¿ à§­à¦Ÿà¦¾ (HSC 27)</option>
+                                    <option value={'Sat 2'}>à¦¶à¦¨à¦¿ à§®à¦Ÿà¦¾ (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡à¦¨ SSC 28 - HSC 30)</option>
+                                    <option value={'Sat 3'}>à¦¶à¦¨à¦¿ à§¯à¦Ÿà¦¾ (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡à¦¨ SSC 28 - HSC 30)</option>
+                                    <option value={'Sat 4'}>à¦¶à¦¨à¦¿ à§§à§¦à¦Ÿà¦¾ (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡à¦¨ SSC 27 - HSC 29)</option>
+                                    <option value={'Sat 5'}>à¦¶à¦¨à¦¿ à§§à§§à¦Ÿà¦¾ - SSC 26 (All Batch) </option>
+                                    <option value={'Sat 12'}>à¦¶à¦¨à¦¿ à§§à§¨à¦Ÿà¦¾ - New Nine (SSC 28 Special Batch) </option>
+                                    <option value={'Sat 6'}>à¦¶à¦¨à¦¿ à§¨à¦Ÿà¦¾ (HSC 27)</option>
+                                    <option value={'Sat 7'}>à¦¶à¦¨à¦¿ à§©à¦Ÿà¦¾ - HSC 27 (New Batch)</option>
+                                    <option value={'Sat 8'}>à¦¶à¦¨à¦¿ à§ªà¦Ÿà¦¾ (SSC 27)</option>
+                                    <option value={'Sat 9'}>à¦¶à¦¨à¦¿ à§«à¦Ÿà¦¾ - SSC 28 (New Nine)</option>
+                                    <option value={'Sat 10'}>à¦¶à¦¨à¦¿ à§¬à¦Ÿà¦¾ (SSC 28)</option>
+                                    <option value={'Sat 11'}>à¦¶à¦¨à¦¿ à§­ à¦Ÿà¦¾ ( SSC 27 - HSC 29)</option>
+                                    <option value={'Sun 1'}>à¦°à¦¬à¦¿ à§­à¦Ÿà¦¾ (HSC 27)</option>
+                                    <option value={'Sun 2'}>à¦°à¦¬à¦¿ à§®à¦Ÿà¦¾ (HSC 26)</option>
+                                    <option value={'Sun 3'}>à¦°à¦¬à¦¿ à§¯à¦Ÿà¦¾ - HSC 27 (New Batch)</option>
+                                    <option value={'Sun 4'}>à¦°à¦¬à¦¿ à§§à§¦à¦Ÿà¦¾ (HSC 28)</option>
+                                    <option value={'Sun 5'}>à¦°à¦¬à¦¿ à§§à§§à¦Ÿà¦¾ </option>
+                                    <option value={'Sun 6'}>à¦°à¦¬à¦¿ à§¨à¦Ÿà¦¾ (HSC 26) </option>
+                                    <option value={'Sun 7'}>à¦°à¦¬à¦¿ à§©à¦Ÿà¦¾ (HSC 27) </option>
+                                    <option value={'Sun 8'}>à¦°à¦¬à¦¿ à§ªà¦Ÿà¦¾ (HSC 26) </option>
+                                    <option value={'Sun 9'}>à¦°à¦¬à¦¿ à§«à¦Ÿà¦¾ (HSC 27) </option>
+                                    <option value={'Sun 10'}>à¦°à¦¬à¦¿ à§¬à¦Ÿà¦¾ (SSC 27 - HSC 29) </option>
+                                    <option value={'Sun 11'}>à¦°à¦¬à¦¿ à§­à¦Ÿà¦¾ - SSC 28 (New Nine) </option>
+                                    <option>HSC 26 Admission cancel</option>
+                                    <option>HSC 27 Admission cancel</option>
+                                    <option>SSC 26 class 10 Admission cancel</option>
+                                    <option>SSC 27 class 9 Admission cancel</option>
+                                    <option>Exam Batch HSC 26</option>
+                                    <option>Exam Batch (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡à¦¨ SSC 27 - HSC 29)</option>
+                                    <option>Exam Batch (à¦¨à¦¿à¦‰ à¦Ÿà§‡à¦¨ SSC 26 - HSC 28)</option>
+                                    <option value={'Olympiad-8'}>Olympiad 8 (ssc 28 - hsc 30)</option>
+                                    <option value={'Olympiad-9'}>Olympiad 9 (ssc 27 - hsc 29)</option>
+                                    <option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>
+                                    <option>SSC 25 (Physics Olympiad)</option>
+                                    <option>Class 9 (SSC 27) Phy Champ</option>
+                                    <option>Class 10 (SSC 26) Phy Champ</option>
+                                </select>
+                            </div>
 
-                            <select name='batch' defaultValue={batch} className="select text-lg font-semibold  select-info w-full ">
+                            <div>
+                                <p className='font-bold text-sm text-slate-700 mb-2 flex items-center gap-1'><FiPhone className="text-green-500" /> Phone <span className='text-red-500'>*</span></p>
+                                <input
+                                    required
+                                    name='phone'
+                                    type="text"
+                                    defaultValue={phone}
+                                    className="input-premium w-full"
+                                />
+                            </div>
 
-                                
-                                
-                                
-                                <option value={'Olympiad-HSC27'}>Olympiad HSC 27</option>                                
-                                <option value={'Sat 1'}>শনি ৭টা (HSC 27)</option>
-                                <option value={'Sat 2'}>শনি ৮টা (নিউ নাইন SSC 28 - HSC 30)</option>
-                                <option value={'Sat 3'}>শনি ৯টা (নিউ নাইন SSC 28 - HSC 30)</option>
-                                <option value={'Sat 4'}>শনি ১০টা (নিউ নাইন SSC 27 - HSC 29)</option>
-                                <option value={'Sat 5'}>শনি ১১টা - SSC 26 (All Batch) </option>
-                                <option value={'Sat 12'}>শনি ১২টা - New Nine (SSC 28 Special Batch) </option>
+                            <div className={`${role === 'CEO' ? '' : 'hidden'}`}>
+                                <p className='font-bold text-sm text-slate-700 mb-2 flex items-center gap-1'><FiCreditCard className="text-teal-500" /> Monthly Fee <span className='text-red-500'>*</span></p>
+                                <input
+                                    name='monthlyAmount'
+                                    type="text"
+                                    defaultValue={monthlyAmount}
+                                    className="input-premium w-full"
+                                />
+                            </div>
 
-                                <option value={'Sat 6'}>শনি ২টা (HSC 27)</option>
-                                <option value={'Sat 7'}>শনি ৩টা - HSC 27 (New Batch)</option>
-                                <option value={'Sat 8'}>শনি ৪টা (SSC 27)</option>
-                                <option value={'Sat 9'}>শনি ৫টা - SSC 28 (New Nine)</option>
-                                <option value={'Sat 10'}>শনি ৬টা (SSC 28)</option>
-                                <option value={'Sat 11'}>শনি ৭ টা ( SSC 27 - HSC 29)</option>
-                                <option value={'Sun 1'}>রবি ৭টা (HSC 27)</option>
-                                <option value={'Sun 2'}>রবি ৮টা (HSC 26)</option>
-                                <option value={'Sun 3'}>রবি ৯টা - HSC 27 (New Batch)</option>
-                                <option value={'Sun 4'}>রবি ১০টা (HSC 28)</option>
-                                <option value={'Sun 5'}>রবি ১১টা </option>
+                            <div>
+                                <p className='font-bold text-sm text-slate-700 mb-2 flex items-center gap-1'><FiBook className="text-blue-500" /> School Name <span className='text-red-500'>*</span></p>
+                                <input
+                                    required
+                                    name='school'
+                                    type="text"
+                                    defaultValue={school}
+                                    className="input-premium w-full"
+                                />
+                            </div>
 
-                                <option value={'Sun 6'}>রবি ২টা (HSC 26) </option>
-                                <option value={'Sun 7'}>রবি ৩টা (HSC 27) </option>
-                                <option value={'Sun 8'}>রবি ৪টা (HSC 26) </option>
-                                <option value={'Sun 9'}>রবি ৫টা (HSC 27) </option>
-                                <option value={'Sun 10'}>রবি ৬টা (SSC 27 - HSC 29) </option>
-                                <option value={'Sun 11'}>রবি ৭টা - SSC 28 (New Nine) </option>
-                                <option>HSC 26 Admission cancel</option>
-                                <option>HSC 27 Admission cancel</option>
-                                <option>SSC 26 class 10 Admission cancel</option>
-                                <option>SSC 27 class 9 Admission cancel</option>
-                                <option>Exam Batch HSC 26</option>
-                                <option>Exam Batch (নিউ নাইন SSC 27 - HSC 29)</option>
-                                <option>Exam Batch (নিউ টেন SSC 26 - HSC 28)</option>
-<option value={'Olympiad-8'}>Olympiad 8 (ssc 28 - hsc 30)</option>
-<option value={'Olympiad-9'}>Olympiad 9 (ssc 27 - hsc 29)</option>
-<option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>
-                                
-                                
-                                <option>SSC 25 (Physics Olympiad)</option>
-                                <option>Class 9 (SSC 27) Phy Champ</option>
-                                <option>Class 10 (SSC 26) Phy Champ</option>
+                            <div>
+                                <p className='font-bold text-sm text-slate-700 mb-2 flex items-center gap-1'><FiBook className="text-indigo-500" /> College Name</p>
+                                <input
+                                    name='college'
+                                    type="text"
+                                    defaultValue={college}
+                                    className="input-premium w-full"
+                                />
+                            </div>
 
-                            </select>
-                        </div>
+                            <div>
+                                <p className='font-bold text-sm text-slate-700 mb-2'>Gender</p>
+                                <select name='gender' defaultValue={gender} className="input-premium w-full pt-3">
+                                    <option>Male</option>
+                                    <option>Female</option>
+                                </select>
+                            </div>
 
-                        <div>
-                            <p className='font-semibold'>Phone <span className='text-red-700'>*</span> </p>
-                            <input
-                                required
-                                name='phone'
-                                type="text"
-                                defaultValue={phone}
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
-                        </div>
+                            <div>
+                                <p className='font-bold text-sm text-slate-700 mb-2 flex items-center gap-1'>Session <span className='text-red-500'>*</span></p>
+                                <select name='session' defaultValue={session} className="input-premium w-full pt-3">
+                                    {['2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'].map(yr => (
+                                        <option key={yr}>{yr}</option>
+                                    ))}
+                                </select>
+                            </div>
 
+                            <div>
+                                <p className='font-bold text-sm text-slate-700 mb-2 flex items-center gap-1'><FiStar className="text-amber-500" /> Target</p>
+                                <select name='target' defaultValue={target} className="input-premium w-full pt-3">
+                                    <option>Medical</option>
+                                    <option>Varsity</option>
+                                    <option>Engineering</option>
+                                </select>
+                            </div>
 
-                        <div className={`${role == 'CEO' ? '' : 'hidden'}`}>
-                            <p className='font-semibold'>Monthly Fee <span className='text-red-700'>*</span> </p>
-                            <input
+                            <div>
+                                <p className='font-bold text-sm text-slate-700 mb-2 flex items-center gap-1'><FiMapPin className="text-rose-500" /> Address</p>
+                                <input
+                                    name='address'
+                                    type="text"
+                                    defaultValue={address}
+                                    className="input-premium w-full"
+                                />
+                            </div>
 
-                                name='monthlyAmount'
-                                type="text"
-                                defaultValue={monthlyAmount}
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
-                        </div>
-                        <div>
-                            <p className='font-semibold'>School Name <span className='text-red-700'>*</span> </p>
-                            <input
-                                required
-                                name='school'
-                                type="text"
-                                defaultValue={school}
-                                className="input input-bordered text-lg font-semibold  input-info w-full " />
-                        </div>
-                        <div>
-                            <p className='font-semibold'>College Name </p>
-                            <input
-                                name='college'
-                                type="text"
-                                defaultValue={college}
-                                className="input input-bordered text-lg font-semibold  input-info w-full " />
-                        </div>
-                        <div>
-                            <p className='font-semibold'>Gender </p>
-                            <select name='gender' defaultValue={gender} className="select text-lg font-semibold  select-info w-full ">
+                            <div>
+                                <p className='font-bold text-sm text-slate-700 mb-2 flex items-center gap-1'><FiHeart className="text-pink-500" /> Referenced By</p>
+                                <input
+                                    name='reference'
+                                    type="text"
+                                    defaultValue={reference}
+                                    className="input-premium w-full"
+                                />
+                            </div>
 
-                                <option>Male</option>
-                                <option>Female</option>
-
-
-                            </select>
-                        </div>
-
-                        <div>
-                            <p className='font-semibold'>Session <span className='text-red-700'>*</span> </p>
-                            <select name='session' defaultValue={session} className="select text-lg font-semibold  select-info w-full ">
-
-
-                                <option>2023</option>
-                                <option>2024</option>
-                                <option>2025</option>
-                                <option>2026</option>
-                                <option>2027</option>
-                                <option>2028</option>
-                                <option>2029</option>
-                                <option>2030</option>
-
-
-                            </select>
-                        </div>
-                        <div>
-                            <p className='font-semibold'>Target </p>
-                            <select name='target' defaultValue={target} className="select text-lg font-semibold  select-info w-full ">
-
-                                <option>Medical</option>
-                                <option>Varsity</option>
-                                <option>Engineering</option>
-
-
-
-                            </select>
-                        </div>
-
-                        <div>
-                            <p className='font-semibold'>Address </p>
-                            <input
-                                name='address'
-                                type="text"
-                                defaultValue={address}
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
-                        </div>
-                        <div>
-                            <p className='font-semibold'>referenced by  </p>
-                            <input
-                                name='reference'
-                                type="text"
-                                defaultValue={reference}
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
-                        </div>
-                        <div>
-                            <p className='font-semibold'>Note (মন্তব্য)  </p>
-                            <input
-                                name='note'
-                                type="text"
-                                defaultValue={note}
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
+                            <div>
+                                <p className='font-bold text-sm text-slate-700 mb-2 flex items-center gap-1'><FiMessageCircle className="text-purple-500" /> Note (à¦®à¦¨à§à¦¤à¦¬à§à¦¯)</p>
+                                <input
+                                    name='note'
+                                    type="text"
+                                    defaultValue={note}
+                                    className="input-premium w-full"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Guardian Part */}
-                <div className='flex mt-10 flex-col lg:flex-row'>
-                    <h1 className='font-bold text-lg lg:w-1/4'>Guardian's Information :</h1>
-                    <div className='grid grid-cols-1 lg:w-2/3 lg:grid-cols-2 gap-3'>
-
-                        <div>
-                            <p className='font-semibold'>Guardian Name  </p>
-                            <input
-
-                                name='gname'
-                                type="text"
-                                defaultValue={gname}
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
+                <div className='flex flex-col lg:flex-row gap-8'>
+                    <div className="lg:w-1/4">
+                        <div className="flex items-center gap-2 mb-2">
+                            <FiUsers className="text-violet-500" />
+                            <h2 className='font-bold text-lg text-slate-800 uppercase tracking-wider'>Guardian Info</h2>
                         </div>
+                        <p className="text-sm text-slate-500">Parent or local guardian contact information.</p>
+                    </div>
 
+                    <div className='lg:w-3/4 bg-white/50 backdrop-blur-md p-8 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50'>
+                        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+                            <div>
+                                <p className='font-bold text-sm text-slate-700 mb-2'>Guardian Name</p>
+                                <input
+                                    name='gname'
+                                    type="text"
+                                    defaultValue={gname}
+                                    className="input-premium w-full"
+                                />
+                            </div>
 
-
-                        <div>
-                            <p className='font-semibold'>Guardian Phone </p>
-                            <input
-
-                                name='gphone'
-                                type="text"
-                                defaultValue={gphone}
-                                className="input text-lg font-semibold  input-bordered input-info w-full " />
+                            <div>
+                                <p className='font-bold text-sm text-slate-700 mb-2'>Guardian Phone</p>
+                                <input
+                                    name='gphone'
+                                    type="text"
+                                    defaultValue={gphone}
+                                    className="input-premium w-full"
+                                />
+                            </div>
                         </div>
-
                     </div>
                 </div>
-                <div className='flex mt-10 flex-col lg:flex-row'>
-                    <h1 className='font-bold text-lg lg:w-1/4'></h1>
-                    <div className='lg:w-2/3 text-center'>
-                        <input className=" text-lg font-semibold  w-full bg-blue-100  border-2 rounded-xl    btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value='Update' />
+
+                <div className='flex flex-col lg:flex-row gap-8 pt-6'>
+                    <div className='lg:w-1/4'></div>
+                    <div className='lg:w-3/4'>
+                        <button
+                            type='submit'
+                            disabled={loading}
+                            className="btn-premium w-full h-14 flex items-center justify-center gap-2 relative overflow-hidden group"
+                        >
+                            {loading ? (
+                                <div className="flex items-center gap-2">
+                                    <span className="loading loading-spinner"></span>
+                                    <span>Updating...</span>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2">
+                                    <FiSave size={20} />
+                                    <span>Update Student Info</span>
+                                </div>
+                            )}
+                        </button>
                     </div>
                 </div>
 
             </form>
             {navigate ? <Navigate to={`/students/${id}`}></Navigate> : <></>}
-
-        </div>
+        </motion.div>
     )
 }
 

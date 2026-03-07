@@ -25,7 +25,7 @@ function PasswordChangeModal({ email }) {
         }
 
         try {
-            const response = await axios.post('https://spoffice-server.vercel.app/change-user-password', { email, newPassword: newPass }, {
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/change-user-password`, { email, newPassword: newPass }, {
                 headers: {
                     "Content-Type": "application/json"
                 }

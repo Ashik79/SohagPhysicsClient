@@ -13,7 +13,7 @@ const OfficialsManagement = () => {
         const fetchUsers = async () => {
             try {
                 // Replace with your server endpoint
-                const response = await axios.get("https://spoffice-server.vercel.app/getusersmanage");
+                const response = await axios.get(`${import.meta.env.VITE_API_URL}/getusersmanage`);
                 setUsers(response.data);
             } catch (error) {
                 console.error("Error fetching users:", error);

@@ -56,8 +56,8 @@ import TakeAttendanceId from './components/TakeAttendanceId';
 
 
 const fetchStudent = async ({ params }) => {
-  const response = await fetch(`https://spoffice-server.vercel.app/student/${params.id}`);
-  
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/student/${params.id}`);
+
   if (!response.ok) {
     throw new Response(JSON.stringify({ message: 'Student not found' }), {
       status: 404,
@@ -68,8 +68,8 @@ const fetchStudent = async ({ params }) => {
   return student;
 };
 const fetchStaff = async ({ params }) => {
-  const response = await fetch(`https://spoffice-server.vercel.app/staff/${params.id}`);
-  
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/staff/${params.id}`);
+
   if (!response.ok) {
     throw new Response(JSON.stringify({ message: 'Staff not found' }), {
       status: 404,
@@ -82,8 +82,8 @@ const fetchStaff = async ({ params }) => {
 
 
 const fetchUsers = async () => {
-  const response = await fetch(`https://spoffice-server.vercel.app/getusers`);
-  
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/getusers`);
+
   if (!response.ok) {
     throw new Response(JSON.stringify({ message: 'users not found' }), {
       status: 404,
@@ -94,8 +94,8 @@ const fetchUsers = async () => {
   return users;
 };
 const fetchUsersFull = async () => {
-  const response = await fetch(`https://spoffice-server.vercel.app/getusersfull`);
-  
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/getusersfull`);
+
   if (!response.ok) {
     throw new Response(JSON.stringify({ message: 'users not found' }), {
       status: 404,
@@ -111,7 +111,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Root></Root>,
-    errorElement:<NotFound></NotFound>,
+    errorElement: <NotFound></NotFound>,
     children: [
       {
         path: "/",
@@ -119,182 +119,187 @@ const router = createBrowserRouter([
       }
       ,
       {
-        path:'/login',
-        element:<Login></Login>
+        path: '/login',
+        element: <Login></Login>
       }
       ,
       {
-        path:'/register',
-        element:<PrivateRoute><Admission></Admission></PrivateRoute>
+        path: '/register',
+        element: <PrivateRoute><Admission></Admission></PrivateRoute>
       }
       ,
       {
-        path:'/staffs',
-        element:<PrivateRoute><Staffs></Staffs></PrivateRoute>,
-        loader:fetchUsersFull
+        path: '/staffs',
+        element: <PrivateRoute><Staffs></Staffs></PrivateRoute>,
+        loader: fetchUsersFull
       }
       ,
-     
+
       {
-        path:'/adduser',
-        element:<PrivateRoute><AddUsers></AddUsers></PrivateRoute>
-      }
-      ,
-      {
-        path:'/payment',
-        element:<PrivateRoute><Payment></Payment></PrivateRoute>
+        path: '/adduser',
+        element: <PrivateRoute><AddUsers></AddUsers></PrivateRoute>
       }
       ,
       {
-        path:'/note',
-        element:<PrivateRoute><Note></Note></PrivateRoute>
+        path: '/payment',
+        element: <PrivateRoute><Payment></Payment></PrivateRoute>
       }
       ,
       {
-        path:'/editor',
-        element:<PrivateRoute><EditorDashboard></EditorDashboard></PrivateRoute>
+        path: '/paymententry',
+        element: <PrivateRoute><Payment></Payment></PrivateRoute>
       }
       ,
       {
-        path:'/studentoverview',
-        element:<PrivateRoute><StudentOverview></StudentOverview></PrivateRoute>
+        path: '/note',
+        element: <PrivateRoute><Note></Note></PrivateRoute>
       }
       ,
       {
-        path:'/programentry',
-        element:<PrivateRoute><Programs></Programs></PrivateRoute>
+        path: '/editor',
+        element: <PrivateRoute><EditorDashboard></EditorDashboard></PrivateRoute>
       }
       ,
       {
-        path:'/batch',
-        element:<PrivateRoute><Batch></Batch></PrivateRoute>,
-        loader:() =>fetch ('https://spoffice-server.vercel.app/students')
+        path: '/studentoverview',
+        element: <PrivateRoute><StudentOverview></StudentOverview></PrivateRoute>
       }
       ,
       {
-        path:'/finder',
-        element:<PrivateRoute><Students></Students></PrivateRoute>
+        path: '/programentry',
+        element: <PrivateRoute><Programs></Programs></PrivateRoute>
       }
       ,
       {
-        path:'/payment/:id',
-        element:<PrivateRoute><AddPayment></AddPayment></PrivateRoute>,
-        loader:fetchStudent,
+        path: '/batch',
+        element: <PrivateRoute><Batch></Batch></PrivateRoute>,
+        loader: () => fetch(`${import.meta.env.VITE_API_URL}/students`)
       }
       ,
       {
-        path:'/note/:id',
-        element:<PrivateRoute><EditNote></EditNote></PrivateRoute>,
-        loader:fetchStudent,
+        path: '/finder',
+        element: <PrivateRoute><Students></Students></PrivateRoute>
       }
       ,
       {
-        path:'/programentry/:id',
-        element:<PrivateRoute><ProgramEntry></ProgramEntry></PrivateRoute>,
-        loader:fetchStudent,
+        path: '/payment/:id',
+        element: <PrivateRoute><AddPayment></AddPayment></PrivateRoute>,
+        loader: fetchStudent,
       }
       ,
       {
-        path:'/students/:id',
-        element:<PrivateRoute><StudentDetails></StudentDetails></PrivateRoute>,
-        loader:fetchStudent,
+        path: '/note/:id',
+        element: <PrivateRoute><EditNote></EditNote></PrivateRoute>,
+        loader: fetchStudent,
       }
       ,
       {
-        path:'/staffs/:id',
-        element:<PrivateRoute><StaffDetails></StaffDetails></PrivateRoute>,
-        loader:fetchStaff,
+        path: '/programentry/:id',
+        element: <PrivateRoute><ProgramEntry></ProgramEntry></PrivateRoute>,
+        loader: fetchStudent,
       }
       ,
       {
-        path:'/overview',
-        element:<PrivateRoute><PaymentComponent></PaymentComponent></PrivateRoute>,
-        loader:fetchUsers,
-        
+        path: '/students/:id',
+        element: <PrivateRoute><StudentDetails></StudentDetails></PrivateRoute>,
+        loader: fetchStudent,
       }
       ,
       {
-        path:'/student/update/:id',
-        element:<PrivateRoute><UpdateStudent></UpdateStudent></PrivateRoute>,
-        loader:fetchStudent,
+        path: '/staffs/:id',
+        element: <PrivateRoute><StaffDetails></StaffDetails></PrivateRoute>,
+        loader: fetchStaff,
       }
       ,
       {
-        path:'/attendance/:id',
-        element:<PrivateRoute><TakeAttendanceId></TakeAttendanceId></PrivateRoute>,
-        loader:fetchStudent,
+        path: '/overview',
+        element: <PrivateRoute><PaymentComponent></PaymentComponent></PrivateRoute>,
+        loader: fetchUsers,
+
       }
       ,
       {
-        path:'/attendance',
-        element:<PrivateRoute><AttendanceBatch></AttendanceBatch></PrivateRoute>,
-     
-        
+        path: '/student/update/:id',
+        element: <PrivateRoute><UpdateStudent></UpdateStudent></PrivateRoute>,
+        loader: fetchStudent,
+      }
+      ,
+      {
+        path: '/attendance/:id',
+        element: <PrivateRoute><TakeAttendanceId></TakeAttendanceId></PrivateRoute>,
+        loader: fetchStudent,
+      }
+      ,
+      {
+        path: '/attendance',
+        element: <PrivateRoute><AttendanceBatch></AttendanceBatch></PrivateRoute>,
+
+
       },
       {
-        path:'/exams',
-        element:<PrivateRoute><Exams></Exams></PrivateRoute>,
-                
+        path: '/exams',
+        element: <PrivateRoute><Exams></Exams></PrivateRoute>,
+
       },
       {
-        path:'/coupons',
-        element:<PrivateRoute><Coupons></Coupons></PrivateRoute>,
-        loader:()=>fetch('https://spoffice-server.vercel.app/getcoupons')
-        
+        path: '/coupons',
+        element: <PrivateRoute><Coupons></Coupons></PrivateRoute>,
+        loader: () => fetch(`${import.meta.env.VITE_API_URL}/getcoupons`)
+
       },
       {
-        path:'/message',
-        element:<PrivateRoute><Message></Message></PrivateRoute>,
-            
+        path: '/message',
+        element: <PrivateRoute><Message></Message></PrivateRoute>,
+
       },
       {
-        path:'/entry',
-        element:<PrivateRoute><MyEntry></MyEntry></PrivateRoute>,
-            
+        path: '/entry',
+        element: <PrivateRoute><MyEntry></MyEntry></PrivateRoute>,
+
       },
       {
-        path:'/monitor',
-        element:<PrivateRoute><Monitor></Monitor></PrivateRoute>,
-        loader:fetchUsersFull
-            
+        path: '/monitor',
+        element: <PrivateRoute><Monitor></Monitor></PrivateRoute>,
+        loader: fetchUsersFull
+
       },
       {
-        path:'/print-receipt',
-        element:<PrivateRoute><PrintReceipt></PrintReceipt></PrivateRoute>,
-            
+        path: '/print-receipt',
+        element: <PrivateRoute><PrintReceipt></PrintReceipt></PrivateRoute>,
+
       },
-     
+
       {
-        path:'/download',
-        element:<PrivateRoute><DownloadCenter></DownloadCenter></PrivateRoute>,
-            
+        path: '/download',
+        element: <PrivateRoute><DownloadCenter></DownloadCenter></PrivateRoute>,
+
       },
-      
+
       {
-        path:'/user-management',
-        element:<PrivateRoute><ManagementContainer></ManagementContainer></PrivateRoute>,
-            
-      },
-      {
-        path:'/user-management/user',
-        element:<PrivateRoute><User></User></PrivateRoute>,
-            
+        path: '/user-management',
+        element: <PrivateRoute><ManagementContainer></ManagementContainer></PrivateRoute>,
+
       },
       {
-        path:'/exam/:id',
-        element:<PrivateRoute><Exam></Exam></PrivateRoute>,
-        loader:({params})=>fetch(`https://spoffice-server.vercel.app/getexam/${params.id}`)
-        
+        path: '/user-management/user',
+        element: <PrivateRoute><User></User></PrivateRoute>,
+
       },
       {
-        path:'/videos',
-        element:<PrivateRoute><VideoManager></VideoManager></PrivateRoute>,
+        path: '/exam/:id',
+        element: <PrivateRoute><Exam></Exam></PrivateRoute>,
+        loader: ({ params }) => fetch(`${import.meta.env.VITE_API_URL}/getexam/${params.id}`)
+
       },
       {
-        path:'/video-library',
-        element:<VideoLibrary></VideoLibrary>,
+        path: '/videos',
+        element: <PrivateRoute><VideoManager></VideoManager></PrivateRoute>,
       },
-      
+      {
+        path: '/video-library',
+        element: <VideoLibrary></VideoLibrary>,
+      },
+
     ],
   },
 ]);
@@ -302,6 +307,6 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-   <Provider><RouterProvider router={router} /></Provider>
+    <Provider><RouterProvider router={router} /></Provider>
   </React.StrictMode>,
 )

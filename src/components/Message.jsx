@@ -75,7 +75,7 @@ function Message() {
         if (session) query.session = session;
 
         try {
-            const res = await fetch('https://spoffice-server.vercel.app/students', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/students`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(query),
@@ -160,7 +160,7 @@ function Message() {
 
             })
 
-            const res = await fetch('https://spoffice-server.vercel.app/getnumbers', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/getnumbers`, {
                 method: 'POST',
                 headers: {
                     'content-type': 'application/json'
@@ -238,38 +238,38 @@ function Message() {
 
 
                                 <option value={'Olympiad-HSC27'}>Olympiad HSC 27</option>
-                                <option value={'Sat 1'}>শনি ৭টা (HSC 27)</option>
-                                <option value={'Sat 2'}>শনি ৮টা (নিউ নাইন SSC 28 - HSC 30)</option>
-                                <option value={'Sat 3'}>শনি ৯টা (নিউ নাইন SSC 28 - HSC 30)</option>
-                                <option value={'Sat 4'}>শনি ১০টা (নিউ নাইন SSC 27 - HSC 29)</option>
-                                <option value={'Sat 5'}>শনি ১১টা - SSC 26 (All Batch) </option>
-                                <option value={'Sat 12'}>শনি ১২টা - New Nine (SSC 28 Special Batch) </option>
+                                <option value={'Sat 1'}>à¦¶à¦¨à¦¿ à§­à¦Ÿà¦¾ (HSC 27)</option>
+                                <option value={'Sat 2'}>à¦¶à¦¨à¦¿ à§®à¦Ÿà¦¾ (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡à¦¨ SSC 28 - HSC 30)</option>
+                                <option value={'Sat 3'}>à¦¶à¦¨à¦¿ à§¯à¦Ÿà¦¾ (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡à¦¨ SSC 28 - HSC 30)</option>
+                                <option value={'Sat 4'}>à¦¶à¦¨à¦¿ à§§à§¦à¦Ÿà¦¾ (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡à¦¨ SSC 27 - HSC 29)</option>
+                                <option value={'Sat 5'}>à¦¶à¦¨à¦¿ à§§à§§à¦Ÿà¦¾ - SSC 26 (All Batch) </option>
+                                <option value={'Sat 12'}>à¦¶à¦¨à¦¿ à§§à§¨à¦Ÿà¦¾ - New Nine (SSC 28 Special Batch) </option>
 
-                                <option value={'Sat 6'}>শনি ২টা (HSC 27)</option>
-                                <option value={'Sat 7'}>শনি ৩টা - HSC 27 (New Batch)</option>
-                                <option value={'Sat 8'}>শনি ৪টা (SSC 27)</option>
-                                <option value={'Sat 9'}>শনি ৫টা - SSC 28 (New Nine)</option>
-                                <option value={'Sat 10'}>শনি ৬টা (SSC 28)</option>
-                                <option value={'Sat 11'}>শনি ৭ টা ( SSC 27 - HSC 29)</option>
-                                <option value={'Sun 1'}>রবি ৭টা (HSC 27)</option>
-                                <option value={'Sun 2'}>রবি ৮টা (HSC 26)</option>
-                                <option value={'Sun 3'}>রবি ৯টা - HSC 27 (New Batch)</option>
-                                <option value={'Sun 4'}>রবি ১০টা (HSC 28)</option>
-                                <option value={'Sun 5'}>রবি ১১টা </option>
+                                <option value={'Sat 6'}>à¦¶à¦¨à¦¿ à§¨à¦Ÿà¦¾ (HSC 27)</option>
+                                <option value={'Sat 7'}>à¦¶à¦¨à¦¿ à§©à¦Ÿà¦¾ - HSC 27 (New Batch)</option>
+                                <option value={'Sat 8'}>à¦¶à¦¨à¦¿ à§ªà¦Ÿà¦¾ (SSC 27)</option>
+                                <option value={'Sat 9'}>à¦¶à¦¨à¦¿ à§«à¦Ÿà¦¾ - SSC 28 (New Nine)</option>
+                                <option value={'Sat 10'}>à¦¶à¦¨à¦¿ à§¬à¦Ÿà¦¾ (SSC 28)</option>
+                                <option value={'Sat 11'}>à¦¶à¦¨à¦¿ à§­ à¦Ÿà¦¾ ( SSC 27 - HSC 29)</option>
+                                <option value={'Sun 1'}>à¦°à¦¬à¦¿ à§­à¦Ÿà¦¾ (HSC 27)</option>
+                                <option value={'Sun 2'}>à¦°à¦¬à¦¿ à§®à¦Ÿà¦¾ (HSC 26)</option>
+                                <option value={'Sun 3'}>à¦°à¦¬à¦¿ à§¯à¦Ÿà¦¾ - HSC 27 (New Batch)</option>
+                                <option value={'Sun 4'}>à¦°à¦¬à¦¿ à§§à§¦à¦Ÿà¦¾ (HSC 28)</option>
+                                <option value={'Sun 5'}>à¦°à¦¬à¦¿ à§§à§§à¦Ÿà¦¾ </option>
 
-                                <option value={'Sun 6'}>রবি ২টা (HSC 26) </option>
-                                <option value={'Sun 7'}>রবি ৩টা (HSC 27) </option>
-                                <option value={'Sun 8'}>রবি ৪টা (HSC 26) </option>
-                                <option value={'Sun 9'}>রবি ৫টা (HSC 27) </option>
-                                <option value={'Sun 10'}>রবি ৬টা (SSC 27 - HSC 29) </option>
-                                <option value={'Sun 11'}>রবি ৭টা - SSC 28 (New Nine) </option>
+                                <option value={'Sun 6'}>à¦°à¦¬à¦¿ à§¨à¦Ÿà¦¾ (HSC 26) </option>
+                                <option value={'Sun 7'}>à¦°à¦¬à¦¿ à§©à¦Ÿà¦¾ (HSC 27) </option>
+                                <option value={'Sun 8'}>à¦°à¦¬à¦¿ à§ªà¦Ÿà¦¾ (HSC 26) </option>
+                                <option value={'Sun 9'}>à¦°à¦¬à¦¿ à§«à¦Ÿà¦¾ (HSC 27) </option>
+                                <option value={'Sun 10'}>à¦°à¦¬à¦¿ à§¬à¦Ÿà¦¾ (SSC 27 - HSC 29) </option>
+                                <option value={'Sun 11'}>à¦°à¦¬à¦¿ à§­à¦Ÿà¦¾ - SSC 28 (New Nine) </option>
                                 <option>HSC 26 Admission cancel</option>
                                 <option>HSC 27 Admission cancel</option>
                                 <option>SSC 26 class 10 Admission cancel</option>
                                 <option>SSC 27 class 9 Admission cancel</option>
                                 <option>Exam Batch HSC 26</option>
-                                <option>Exam Batch (নিউ নাইন SSC 27 - HSC 29)</option>
-                                <option>Exam Batch (নিউ টেন SSC 26 - HSC 28)</option>
+                                <option>Exam Batch (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡à¦¨ SSC 27 - HSC 29)</option>
+                                <option>Exam Batch (à¦¨à¦¿à¦‰ à¦Ÿà§‡à¦¨ SSC 26 - HSC 28)</option>
                                 <option value={'Olympiad-8'}>Olympiad 8 (ssc 28 - hsc 30)</option>
                                 <option value={'Olympiad-9'}>Olympiad 9 (ssc 27 - hsc 29)</option>
                                 <option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>
@@ -489,7 +489,7 @@ function Message() {
                                                 checked={selectedOption === 'bangla'} // Bind the checked property to state
                                                 onChange={handleOptionChange}
                                             />
-                                            বাংলা
+                                            à¦¬à¦¾à¦‚à¦²à¦¾
                                         </label>
                                     </div>
                                     <div>

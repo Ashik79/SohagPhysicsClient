@@ -1,13 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../Provider'
-import { Link, Navigate, useLoaderData } from 'react-router-dom'
-import { IoMdClose } from "react-icons/io";
-import { MdDeleteForever } from "react-icons/md";
+import { Link, Navigate } from 'react-router-dom'
+import { FiPlus, FiFilter, FiCalendar, FiBookOpen, FiActivity, FiX, FiTrash2, FiCamera, FiArrowRight, FiCheckCircle, FiMoreHorizontal } from "react-icons/fi";
 import Swal from 'sweetalert2';
 import LoadingPage from './OtherPages.jsx/LoadingPage';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function Exams() {
-
     const { month, year, date, getMonth, notifySuccess } = useContext(AuthContext)
     const [loading, setLoading] = useState(false)
     const [firstLoading, setFirstLoading] = useState(true)
@@ -15,7 +14,7 @@ function Exams() {
     const [displayExams, setDisplayExams] = useState([]);
 
     useEffect(() => {
-        fetch('https://spoffice-server.vercel.app/getexams')
+        fetch(`${import.meta.env.VITE_API_URL}/getexams`)
             .then(res => res.json())
             .then(data => {
                 setAllExams(data)
@@ -25,27 +24,27 @@ function Exams() {
             })
     }, []);
 
-    const [navigate, setNavigate] = useState(false)
     const handleAddExam = e => {
         setLoading(true)
         e.preventDefault()
         const title = e.target.title.value
         const day = e.target.day.value
-        const month = e.target.month.value
-        const year = e.target.year.value
+        const monthValue = e.target.month.value
+        const yearValue = e.target.year.value
         const program = e.target.program.value
         const mcqTotal = e.target.mcqTotal.value ? parseInt(e.target.mcqTotal.value) : 0;
         const writenTotal = e.target.writenTotal.value ? parseInt(e.target.writenTotal.value) : 0;
         const batch = e.target.batch.value
         const session = e.target.session.value
-        const date = `${getMonth(month)} ${day}, ${year}`
+        const examDate = `${getMonth(monthValue)} ${day}, ${yearValue}`
         const results = []
+        const category = e.target.category.value
 
         const details = {
-            title, day, month, year, date, batch, program, session, results, mcqTotal, writenTotal
+            title, day, month: monthValue, year: yearValue, date: examDate, batch, program, session, results, mcqTotal, writenTotal, category
         }
 
-        fetch('https://spoffice-server.vercel.app/addexam', {
+        fetch(`${import.meta.env.VITE_API_URL}/addexam`, {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'
@@ -54,529 +53,333 @@ function Exams() {
         })
             .then(res => res.json())
             .then(data => {
-                // //console.log(data)
                 if (data.insertedId) {
-                    notifySuccess("Exam added Successfully")
-                    const newDisplay = [...displayExams, details]
-                    setDisplayExams(newDisplay)
+                    notifySuccess("Exam added successfully")
+                    const newExam = { ...details, _id: data.insertedId }
+                    setAllExams(prev => [newExam, ...prev])
+                    setDisplayExams(prev => [newExam, ...prev])
                     setLoading(false)
-                    document.getElementById('my_modal_1').close()
-                    setNavigate(true)
+                    document.getElementById('add_exam_modal').close()
+                    e.target.reset()
                 }
             })
-        e.target.reset()
+            .catch(err => {
+                console.error(err)
+                setLoading(false)
+            })
     }
-
 
     const handleFilter = e => {
         e.preventDefault()
-        // //console.log('status changed')
         const program = e.target.program.value
         const batch = e.target.batch.value
         const session = e.target.session.value
         const day = e.target.day.value
-        const month = e.target.month.value
-        const year = e.target.year.value
-
+        const monthValue = e.target.month.value
+        const yearValue = e.target.year.value
 
         let filtered = allExams.filter(exam => {
-            return (!program || exam.program === program) &&
-                (!batch || exam.batch === batch) &&
-                (!session || exam.session === session) &&
-                (!day || exam.day === day) &&
-                (!month || exam.month === month) &&
-                (!year || exam.year === year)
+            const matchProgram = !program || exam.program === program;
+            const matchBatch = !batch || exam.batch === batch || (batch === 'Universal' && exam.batch === '');
+            const matchSession = !session || exam.session === session;
+            const matchDay = !day || String(exam.day) === String(day);
+            const matchMonth = !monthValue || String(exam.month) === String(monthValue);
+            const matchYear = !yearValue || String(exam.year) === String(yearValue);
 
+            return matchProgram && (matchBatch || exam.batch === 'Universal') && matchSession && matchDay && matchMonth && matchYear;
         })
-
-        // //console.log(filtered)
-        setDisplayExams(filtered.reverse())
-
-
+        setDisplayExams(filtered);
     }
 
-
     const handleDelete = (id) => {
-
         Swal.fire({
-            title: 'Are You Sure?',
-            text: 'Do you want to delete the exam?',
+            title: 'Delete Exam?',
+            text: 'This action cannot be undone!',
             icon: 'warning',
             showCancelButton: true,
+            confirmButtonColor: '#e11d48',
             confirmButtonText: 'Yes, Delete',
-            cancelButtonText: 'Cancel',
+            customClass: {
+                popup: 'rounded-[2rem]',
+                confirmButton: 'rounded-xl px-6 py-3 font-bold',
+                cancelButton: 'rounded-xl px-6 py-3 font-bold'
+            }
         }).then((result) => {
             if (result.isConfirmed) {
-
-                fetch(`https://spoffice-server.vercel.app/exam/delete/${id}`, {
+                fetch(`${import.meta.env.VITE_API_URL}/exam/delete/${id}`, {
                     method: "DELETE"
                 })
                     .then(res => res.json())
                     .then(data => {
                         if (data.deletedCount) {
-                            notifySuccess("Successfully Deleted Exam")
-                            setDisplayExams(prevExams => prevExams.filter(exam => exam._id !== id));
-
+                            notifySuccess("Exam removed")
+                            setAllExams(prev => prev.filter(exam => exam._id !== id));
+                            setDisplayExams(prev => prev.filter(exam => exam._id !== id));
                         }
                     })
-            } else if (result.isDismissed) {
-                return
             }
         })
-
-
-
-
     }
 
+    const filterOmrExams = () => {
+        const filtered = allExams.filter(exam => exam.mcqTotal > 0);
+        setDisplayExams(filtered);
+    };
+
+    if (firstLoading) return <LoadingPage />
+
     return (
-        !firstLoading ? <div>
-            {/* Open the modal using document.getElementById('ID').showModal() method */}
-            <div className='flex justify-between items-center'>
-                <p className=' font-bold text-xl text-cyan-600 underline lg:text-2xl'>Exam Management</p>
-                <button className="btn border-2 border-cyan-600 text-cyan-600 font-bold hover:border-black  hover:text-black" onClick={() => document.getElementById('my_modal_1').showModal()}>Add Exam</button>
-            </div>
-            {/* add korar modal edit */}
-            <dialog id="my_modal_1" className="modal ">
-                <div className="modal-box ">
-                    <div className="modal-action">
-                        <form method="dialog">
-                            {/* if there is a button in form, it will close the modal */}
-                            <button className="text-red-600 px-1 lg:text-lg"><IoMdClose /></button>
-                        </form>
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="pb-20"
+        >
+            {/* Action Bar */}
+            <div className='flex flex-col lg:flex-row justify-between items-start lg:items-center bg-white/50 backdrop-blur-xl p-6 rounded-[2rem] shadow-sm border border-slate-100 mb-10 gap-6'>
+                <div className="flex items-center gap-4">
+                    <div className="p-3 bg-indigo-100 rounded-2xl text-indigo-600">
+                        <FiBookOpen size={24} />
                     </div>
-                    <form className='mx-auto  w-full' onSubmit={handleAddExam} >
+                    <div>
+                        <h1 className='font-black text-2xl text-slate-800 tracking-tight'>Examination <span className="text-indigo-600">Hub</span></h1>
+                        <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">{displayExams.length} Exams scheduled</p>
+                    </div>
+                </div>
 
+                <div className="flex items-center gap-3 w-full lg:w-auto">
+                    <button
+                        onClick={filterOmrExams}
+                        className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 h-12 bg-white text-slate-600 font-black text-sm rounded-2xl border border-slate-200 hover:border-cyan-200 hover:text-cyan-600 transition-all shadow-sm"
+                    >
+                        <FiCamera size={18} /> OMR List
+                    </button>
+                    <button
+                        onClick={() => document.getElementById('add_exam_modal').showModal()}
+                        className="flex-1 lg:flex-none btn-premium px-8 h-12 font-black text-sm flex items-center justify-center gap-2"
+                    >
+                        <FiPlus size={20} /> Create New
+                    </button>
+                </div>
+            </div>
 
-                        {/* students part */}
-                        <div className='flex  flex-col '>
-                            <h1 className='font-bold text-center underline mb-2 text-xl '>Exam Details </h1>
-                            <div className='grid grid-cols-1   gap-3'>
+            {/* Quick Filters */}
+            <form onSubmit={handleFilter} className="bg-white/50 backdrop-blur-xl border border-white/20 p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 mb-12">
+                <div className="flex items-center gap-2 mb-8 text-slate-800">
+                    <FiFilter className="text-indigo-500" />
+                    <h2 className="font-black text-lg">Search Exams</h2>
+                </div>
 
+                <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6'>
+                    <div className="space-y-2">
+                        <label className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Day</label>
+                        <select name='day' className="input-premium w-full h-14 px-4 text-sm">
+                            <option value="">All Days</option>
+                            {[...Array(31)].map((_, i) => (<option key={i + 1} value={i + 1}>{i + 1}</option>))}
+                        </select>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Month</label>
+                        <select name='month' className="input-premium w-full h-14 px-4 text-sm">
+                            <option value="">All Months</option>
+                            {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((m, i) => (<option key={i + 1} value={i + 1}>{m}</option>))}
+                        </select>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Year</label>
+                        <select name='year' className="input-premium w-full h-14 px-4 text-sm">
+                            <option value="">All Years</option>
+                            {[2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030].map(yr => (<option key={yr} value={yr}>{yr}</option>))}
+                        </select>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Batch</label>
+                        <select name='batch' className="input-premium w-full h-14 px-4 text-sm">
+                            <option value="Universal">Universal</option>
+                            <option value={'Olympiad-HSC27'}>Olympiad 27</option>
+                            <option value={'Sat 1'}>à¦¶à¦¨à¦¿ à§­à¦Ÿà¦¾ (27)</option>
+                            <option value={'Sat 2'}>à¦¶à¦¨à¦¿ à§®à¦Ÿà¦¾</option>
+                        </select>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Program</label>
+                        <select name='program' className="input-premium w-full h-14 px-4 text-sm">
+                            <option value=''>All Programs</option>
+                            <option value={'HscPhy'}>HSC Physics</option>
+                            <option value={'SscPhy'}>SSC Physics</option>
+                        </select>
+                    </div>
+                    <div className="flex items-end">
+                        <button type="submit" className="w-full h-14 bg-slate-800 text-white rounded-[1.25rem] font-black uppercase tracking-widest text-xs hover:bg-black transition-all shadow-lg shadow-slate-200">Filter</button>
+                    </div>
+                </div>
+            </form>
 
-                                <div>
-                                    <p className='font-semibold'>Title <span className='text-red-700'>*</span> </p>
-                                    <input
-                                        required
-                                        name='title'
-                                        type="text"
+            {/* Exam Table */}
+            <div className="space-y-2">
+                <div className="hidden md:grid grid-cols-12 gap-4 px-8 py-3 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                    <div className="col-span-5">Examination details</div>
+                    <div className="col-span-2 text-center">Batch context</div>
+                    <div className="col-span-1 text-center">MCQ</div>
+                    <div className="col-span-1 text-center">Writ.</div>
+                    <div className="col-span-1 text-center">Total</div>
+                    <div className="col-span-2 text-right text-rose-500">Actions</div>
+                </div>
 
-                                        className="input text-lg font-semibold  input-bordered input-info w-full " />
-                                </div>
-                                <div>
-                                    <p className='font-semibold'>Date <span className='text-red-700'>*</span> </p>
-                                    <div className='flex justify-between gap-2'>
-                                        <div className="mb-4 w-1/3">
-
-                                            <select
-                                                defaultValue={date}
-                                                name='day'
-                                                className="block w-full bg-white border border-gray-300 rounded py-2 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                                            >
-
-                                                {[...Array(31)].map((_, i) => (
-                                                    <option key={i + 1} value={i + 1}>
-                                                        {i + 1}
-                                                    </option>
-                                                ))}
-                                            </select>
+                <AnimatePresence>
+                    {displayExams.map((exam, idx) => (
+                        <motion.div
+                            key={exam._id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.03 }}
+                            className='group relative bg-white border border-slate-100 p-4 rounded-2xl shadow-sm hover:shadow-md transition-all'
+                        >
+                            <div className="flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 items-center">
+                                <Link to={`/exam/${exam._id}`} className="w-full md:w-auto md:col-span-5 flex items-center justify-between md:justify-start gap-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-3 bg-slate-50 rounded-2xl text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                                            <FiCalendar size={20} />
                                         </div>
-
-                                        <div className="mb-4 w-1/3">
-
-                                            <select
-                                                defaultValue={month}
-                                                name='month'
-
-                                                className="block w-full bg-white border border-gray-300 rounded py-2 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                                            >
-
-                                                <option value="1">January</option>
-                                                <option value="2">February</option>
-                                                <option value="3">March</option>
-                                                <option value="4">April</option>
-                                                <option value="5">May</option>
-                                                <option value="6">June</option>
-                                                <option value="7">July</option>
-                                                <option value="8">August</option>
-                                                <option value="9">September</option>
-                                                <option value="10">October</option>
-                                                <option value="11">November</option>
-                                                <option value="12">December</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="mb-4 w-1/3">
-
-                                            <select
-                                                name='year'
-                                                defaultValue={year}
-                                                className="p-2 border border-gray-300 rounded w-full"
-                                            >
-                                                {[2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030].map(year => (
-                                                    <option key={year} value={year}>{year}</option>
-                                                ))}
-                                            </select>
+                                        <div>
+                                            <h3 className="font-black text-slate-800 tracking-tight group-hover:text-indigo-600 transition-colors">{exam.title}</h3>
+                                            <p className="text-xs font-bold text-slate-400 mt-0.5">{exam.date}</p>
                                         </div>
                                     </div>
-                                </div>
-                                <div>
-                                    <p className='font-semibold'>Batch <span className='text-red-700'>*</span> </p>
+                                </Link>
 
-                                    <select name='batch' className="select text-lg font-semibold  select-info w-full ">
-
-                                        <option value={""} >All</option>
-                                        <option value={'Olympiad-HSC27'}>Olympiad HSC 27</option>
-                                        <option value={'Sat 1'}>শনি ৭টা (HSC 27)</option>
-                                        <option value={'Sat 2'}>শনি ৮টা (নিউ নাইন SSC 28 - HSC 30)</option>
-                                        <option value={'Sat 3'}>শনি ৯টা (নিউ নাইন SSC 28 - HSC 30)</option>
-                                        <option value={'Sat 4'}>শনি ১০টা (নিউ নাইন SSC 27 - HSC 29)</option>
-                                        <option value={'Sat 5'}>শনি ১১টা - SSC 26 (All Batch) </option>
-                                        <option value={'Sat 12'}>শনি ১২টা - New Nine (SSC 28 Special Batch) </option>
-
-                                        <option value={'Sat 6'}>শনি ২টা (HSC 27)</option>
-                                        <option value={'Sat 7'}>শনি ৩টা - HSC 27 (New Batch)</option>
-                                        <option value={'Sat 8'}>শনি ৪টা (SSC 27)</option>
-                                        <option value={'Sat 9'}>শনি ৫টা - SSC 28 (New Nine)</option>
-                                        <option value={'Sat 10'}>শনি ৬টা (SSC 28)</option>
-                                        <option value={'Sat 11'}>শনি ৭ টা ( SSC 27 - HSC 29)</option>
-                                        <option value={'Sun 1'}>রবি ৭টা (HSC 27)</option>
-                                        <option value={'Sun 2'}>রবি ৮টা (HSC 26)</option>
-                                        <option value={'Sun 3'}>রবি ৯টা - HSC 27 (New Batch)</option>
-                                        <option value={'Sun 4'}>রবি ১০টা (HSC 28)</option>
-                                        <option value={'Sun 5'}>রবি ১১টা </option>
-
-                                        <option value={'Sun 6'}>রবি ২টা (HSC 26) </option>
-                                        <option value={'Sun 7'}>রবি ৩টা (HSC 27) </option>
-                                        <option value={'Sun 8'}>রবি ৪টা (HSC 26) </option>
-                                        <option value={'Sun 9'}>রবি ৫টা (HSC 27) </option>
-                                        <option value={'Sun 10'}>রবি ৬টা (SSC 27 - HSC 29) </option>
-                                        <option value={'Sun 11'}>রবি ৭টা - SSC 28 (New Nine) </option>
-                                        <option>HSC 26 Admission cancel</option>
-                                        <option>HSC 27 Admission cancel</option>
-                                        <option>SSC 26 class 10 Admission cancel</option>
-                                        <option>SSC 27 class 9 Admission cancel</option>
-                                        <option>Exam Batch HSC 26</option>
-                                        <option>Exam Batch (নিউ নাইন SSC 27 - HSC 29)</option>
-                                        <option>Exam Batch (নিউ টেন SSC 26 - HSC 28)</option>
-                                        <option value={'Olympiad-8'}>Olympiad 8 (ssc 28 - hsc 30)</option>
-                                        <option value={'Olympiad-9'}>Olympiad 9 (ssc 27 - hsc 29)</option>
-                                        <option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>
-
-
-                                        <option>SSC 25 (Physics Olympiad)</option>
-                                        <option>Class 9 (SSC 27) Phy Champ</option>
-                                        <option>Class 10 (SSC 26) Phy Champ</option>
-
-                                    </select>
+                                <div className="w-full md:w-auto md:col-span-2 flex justify-center md:block text-center">
+                                    <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-lg text-[10px] font-black uppercase tracking-wider border border-slate-200">
+                                        {exam.batch || 'Universal'}
+                                    </span>
                                 </div>
 
-
-
-                                <div>
-                                    <p className='font-semibold'>Program <span className='text-red-700'>*</span> </p>
-                                    <select name='program' className="select text-lg font-semibold  select-info w-full ">
-
-                                        <option value={''}>All</option>
-                                        <option value={'HscPhy'}>HSC Physics</option>
-                                        <option value={'HscPhyDue'}>HSC Physics Due</option>
-
-                                        <option value={'SscPhy'}>SSC Physics</option>
-
-
-
-                                        <option value={'suggestion'}>Suggestion Fee </option>
-
-
-
-
-
-                                    </select>
-                                </div>
-                                <div>
-                                    <p className='font-semibold'>Session <span className='text-red-700'>*</span> </p>
-                                    <select name='session' className="select text-lg font-semibold  select-info w-full ">
-
-                                        <option >All</option>
-                                        <option>2023</option>
-                                        <option>2024</option>
-                                        <option>2025</option>
-                                        <option>2026</option>
-                                        <option>2027</option>
-                                        <option>2028</option>
-                                        <option>2029</option>
-                                        <option>2030</option>
-
-
-                                    </select>
-                                </div>
-                                <div>
-                                    <p className='font-semibold'>Total MCQ Marks  </p>
-                                    <input
-
-                                        name='mcqTotal'
-                                        type="text"
-
-                                        className="input text-lg font-semibold  input-bordered input-info w-full " />
-                                </div>
-                                <div>
-                                    <p className='font-semibold'>Total Written Marks  </p>
-                                    <input
-
-                                        name='writenTotal'
-                                        type="text"
-
-                                        className="input text-lg font-semibold  input-bordered input-info w-full " />
+                                <div className="w-full md:w-auto md:col-span-3 flex justify-center gap-8 md:grid md:grid-cols-3 md:gap-4 text-center">
+                                    <div className="text-center">
+                                        <p className="text-[10px] text-slate-400 font-bold block md:hidden mb-1">MCQ</p>
+                                        <p className="text-xs font-black text-slate-700">{exam.mcqTotal || '-'}</p>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-[10px] text-slate-400 font-bold block md:hidden mb-1">WRITTEN</p>
+                                        <p className="text-xs font-black text-slate-700">{exam.writenTotal || '-'}</p>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-[10px] text-slate-400 font-bold block md:hidden mb-1">TOTAL</p>
+                                        <p className="text-sm font-black text-indigo-600">{(exam.mcqTotal || 0) + (exam.writenTotal || 0)}</p>
+                                    </div>
                                 </div>
 
-
+                                <div className="w-full md:w-auto md:col-span-2 flex justify-center md:justify-end gap-2 mt-2 md:mt-0">
+                                    <Link to={`/exam/${exam._id}`} className="p-2 md:p-3 bg-slate-50 text-slate-400 hover:bg-cyan-50 hover:text-cyan-600 rounded-xl transition-all shadow-sm">
+                                        <FiArrowRight size={18} />
+                                    </Link>
+                                    <button
+                                        onClick={() => handleDelete(exam._id)}
+                                        className="p-2 md:p-3 bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-600 rounded-xl transition-all shadow-sm"
+                                    >
+                                        <FiTrash2 size={18} />
+                                    </button>
+                                </div>
                             </div>
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
+
+                {displayExams.length === 0 && (
+                    <div className="py-20 text-center bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-200">
+                        <FiBookOpen size={48} className="mx-auto text-slate-300 mb-4" />
+                        <h3 className="text-xl font-black text-slate-400">No exams matched filters</h3>
+                    </div>
+                )}
+            </div>
+
+            {/* Add Exam Modal */}
+            <dialog id="add_exam_modal" className="modal modal-bottom sm:modal-middle backdrop-blur-md">
+                <div className="modal-box bg-white/90 p-0 rounded-[2.5rem] shadow-2xl border border-white/20 overflow-hidden max-w-2xl">
+                    <div className="bg-slate-900 p-8 text-white relative">
+                        <button
+                            onClick={() => document.getElementById('add_exam_modal').close()}
+                            className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all"
+                        >
+                            <FiX size={20} />
+                        </button>
+                        <FiBookOpen size={32} className="text-cyan-400 mb-4" />
+                        <h2 className="text-2xl font-black tracking-tight">Create New Examination</h2>
+                        <p className="text-slate-400 text-sm mt-1">Schedule a new test for your students.</p>
+                    </div>
+
+                    <form onSubmit={handleAddExam} className="p-8 lg:p-10 space-y-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="col-span-2 space-y-2">
+                                <label className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Exam Title <span className="text-rose-500">*</span></label>
+                                <input required name='title' type="text" className="input-premium w-full h-14 font-bold" placeholder="e.g. Physics Chapter 3 Quiz" />
+                            </div>
+
+                            <div className="col-span-2 space-y-2">
+                                <label className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Examination Date <span className="text-rose-500">*</span></label>
+                                <div className="grid grid-cols-3 gap-3">
+                                    <select defaultValue={date} name='day' className="input-premium h-14">
+                                        {[...Array(31)].map((_, i) => (<option key={i + 1} value={i + 1}>{i + 1}</option>))}
+                                    </select>
+                                    <select defaultValue={month} name='month' className="input-premium h-14">
+                                        {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map((m, i) => (<option key={i + 1} value={i + 1}>{m}</option>))}
+                                    </select>
+                                    <select defaultValue={year} name='year' className="input-premium h-14">
+                                        {[2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030].map(yr => (<option key={yr}>{yr}</option>))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Target Batch</label>
+                                <select name='batch' className="input-premium w-full h-14">
+                                    <option value={""}>Universal (All)</option>
+                                    <option value={'Olympiad-HSC27'}>Olympiad HSC 27</option>
+                                    <option value={'Sat 1'}>à¦¶à¦¨à¦¿ à§­à¦Ÿà¦¾ (HSC 27)</option>
+                                    <option value={'Sat 2'}>à¦¶à¦¨à¦¿ à§®à¦Ÿà¦¾</option>
+                                </select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Program</label>
+                                <select name='program' className="input-premium w-full h-14">
+                                    <option value={'HscPhy'}>HSC Physics</option>
+                                    <option value={'SscPhy'}>SSC Physics</option>
+                                </select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">MCQ Total Marks</label>
+                                <input name='mcqTotal' type="number" className="input-premium w-full h-14" placeholder="0" />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Written Total Marks</label>
+                                <input name='writenTotal' type="number" className="input-premium w-full h-14" placeholder="0" />
+                            </div>
+
+                            <div className="col-span-2 space-y-2">
+                                <label className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Category</label>
+                                <select name='category' required className="input-premium w-full h-14">
+                                    <option value="Only MCQ">Only MCQ (OMR)</option>
+                                    <option value="MCQ & Written">Mixed (OMR + Manual)</option>
+                                </select>
+                            </div>
+
+                            <input type="hidden" name="session" value="2025" />
                         </div>
 
-
-                        <div className='flex mt-10 flex-col lg:flex-row'>
-                            <h1 className='font-bold text-lg lg:w-1/4'></h1>
-                            <div className='lg:w-2/3 text-center'>
-                                <input className=" text-lg font-semibold  w-full bg-blue-100  border-2 rounded-xl  h-11  btn-outline btn-info py-2 px-6 text-blue-950" type='submit' value={`${loading ? '' : "Add"}`} />
-                                <p className={`flex items-center  gap-1 justify-center -mt-9 font-semibold text-orange-800 ${loading ? "" : 'hidden'}`}>   <span className="loading loading-dots loading-sm"></span> Loading</p>
-                            </div>
-                        </div>
-
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="btn-premium w-full h-16 flex items-center justify-center gap-3 text-lg font-bold"
+                        >
+                            {loading ? <span className="loading loading-spinner"></span> : <><FiPlus size={24} /> Schedule Examination</>}
+                        </button>
                     </form>
-
-
-
-
-
-
-
-
-
-
                 </div>
             </dialog>
-
-
-
-
-            {/* Uporer dialog ta modal er part */}
-
-            <div className='mt-2 w-full flex  flex-col lg:flex-row'>
-                <p className='font-bold text-lg w-1/3'>Filter Exams :</p>
-                <div className='w-full lg:w-2/3'>
-                    <form className='' onSubmit={handleFilter}>
-
-
-                        <div className='flex  flex-col gap-1 '>
-
-                            <div className='grid grid-cols-3 gap-3 font-semibold lg:grid-cols-3'>
-                                <div className="mb-4">
-                                    <label className="block text-gray-700  font-bold mb-2 ">Day:</label>
-                                    <select
-                                        defaultValue={""}
-                                        name='day'
-                                        className="block w-full border-sky-600 bg-white border  rounded py-2 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                                    >
-                                        <option value="">All</option>
-                                        {[...Array(31)].map((_, i) => (
-                                            <option key={i + 1} value={i + 1}>
-                                                {i + 1}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="mb-4 ">
-                                    <label className="block text-gray-700  font-bold mb-2">Month:</label>
-                                    <select
-                                        defaultValue={""}
-                                        name='month'
-
-                                        className="block w-full bg-white border border-sky-600 rounded py-2 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                                    >
-                                        <option value="">All</option>
-                                        <option value="1">January</option>
-                                        <option value="2">February</option>
-                                        <option value="3">March</option>
-                                        <option value="4">April</option>
-                                        <option value="5">May</option>
-                                        <option value="6">June</option>
-                                        <option value="7">July</option>
-                                        <option value="8">August</option>
-                                        <option value="9">September</option>
-                                        <option value="10">October</option>
-                                        <option value="11">November</option>
-                                        <option value="12">December</option>
-                                    </select>
-                                </div>
-                                <div className="mb-4 w-full">
-                                    <label className="block text-gray-700  font-bold mb-2">Year:</label>
-                                    <select
-                                        name='year'
-                                        defaultValue={""}
-                                        className="p-2 border border-sky-600 rounded w-full"
-                                    > <option value={""}>All</option>
-                                        {[2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030].map(year => (
-                                            <option key={year} value={year}>{year}</option>
-                                        ))}
-                                    </select>
-                                </div>
-
-
-
-                            </div>
-
-                            <div className=' w-full flex gap-2 flex-col lg:flex-row'>
-                                <div className='w-full lg:w-1/3'>
-                                    <p className='font-semibold'>Batch  </p>
-
-                                    <select name='batch' className="select text-lg font-semibold  select-info w-full  ">
-
-                                        <option value={''}>All</option>
-                                        <option value={'Olympiad-HSC27'}>Olympiad HSC 27</option>
-                                        <option value={'Sat 1'}>শনি ৭টা (HSC 27)</option>
-                                        <option value={'Sat 2'}>শনি ৮টা (নিউ নাইন SSC 28 - HSC 30)</option>
-                                        <option value={'Sat 3'}>শনি ৯টা (নিউ নাইন SSC 28 - HSC 30)</option>
-                                        <option value={'Sat 4'}>শনি ১০টা (নিউ নাইন SSC 27 - HSC 29)</option>
-                                        <option value={'Sat 5'}>শনি ১১টা - SSC 26 (All Batch) </option>
-                                        <option value={'Sat 12'}>শনি ১২টা - New Nine (SSC 28 Special Batch) </option>
-
-                                        <option value={'Sat 6'}>শনি ২টা (HSC 27)</option>
-                                        <option value={'Sat 7'}>শনি ৩টা - HSC 27 (New Batch)</option>
-                                        <option value={'Sat 8'}>শনি ৪টা (SSC 27)</option>
-                                        <option value={'Sat 9'}>শনি ৫টা - SSC 28 (New Nine)</option>
-                                        <option value={'Sat 10'}>শনি ৬টা (SSC 28)</option>
-                                        <option value={'Sat 11'}>শনি ৭ টা ( SSC 27 - HSC 29)</option>
-                                        <option value={'Sun 1'}>রবি ৭টা (HSC 27)</option>
-                                        <option value={'Sun 2'}>রবি ৮টা (HSC 26)</option>
-                                        <option value={'Sun 3'}>রবি ৯টা - HSC 27 (New Batch)</option>
-                                        <option value={'Sun 4'}>রবি ১০টা (HSC 28)</option>
-                                        <option value={'Sun 5'}>রবি ১১টা </option>
-
-                                        <option value={'Sun 6'}>রবি ২টা (HSC 26) </option>
-                                        <option value={'Sun 7'}>রবি ৩টা (HSC 27) </option>
-                                        <option value={'Sun 8'}>রবি ৪টা (HSC 26) </option>
-                                        <option value={'Sun 9'}>রবি ৫টা (HSC 27) </option>
-                                        <option value={'Sun 10'}>রবি ৬টা (SSC 27 - HSC 29) </option>
-                                        <option value={'Sun 11'}>রবি ৭টা - SSC 28 (New Nine) </option>
-                                        <option>HSC 26 Admission cancel</option>
-                                        <option>HSC 27 Admission cancel</option>
-                                        <option>SSC 26 class 10 Admission cancel</option>
-                                        <option>SSC 27 class 9 Admission cancel</option>
-                                        <option>Exam Batch HSC 26</option>
-                                        <option>Exam Batch (নিউ নাইন SSC 27 - HSC 29)</option>
-                                        <option>Exam Batch (নিউ টেন SSC 26 - HSC 28)</option>
-                                        <option value={'Olympiad-8'}>Olympiad 8 (ssc 28 - hsc 30)</option>
-                                        <option value={'Olympiad-9'}>Olympiad 9 (ssc 27 - hsc 29)</option>
-                                        <option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>
-
-
-                                        <option>SSC 25 (Physics Olympiad)</option>
-                                        <option>Class 9 (SSC 27) Phy Champ</option>
-                                        <option>Class 10 (SSC 26) Phy Champ</option>
-
-                                    </select>
-                                </div>
-
-
-
-                                <div className='w-full lg:w-1/3'>
-                                    <p className='font-semibold'>Program  </p>
-                                    <select name='program' className="select text-lg font-semibold  select-info w-full ">
-                                        <option value={''}>All</option>
-                                        <option value={'HscPhy'}>HSC Physics</option>
-                                        <option value={'HscPhyDue'}>HSC Physics Due</option>
-
-                                        <option value={'SscPhy'}>SSC Physics</option>
-
-
-
-                                        <option value={'suggestion'}>Suggestion Fee </option>
-
-
-
-
-                                    </select>
-                                </div>
-                                <div className='w-full lg:w-1/3'>
-                                    <p className='font-semibold'>Session  </p>
-                                    <select name='session' className="select text-lg font-semibold  select-info w-full ">
-
-                                        <option value={''}>All</option>
-                                        <option>2023</option>
-                                        <option>2024</option>
-                                        <option>2025</option>
-                                        <option>2026</option>
-                                        <option>2027</option>
-                                        <option>2028</option>
-                                        <option>2029</option>
-                                        <option>2030</option>
-
-
-                                    </select>
-                                </div>
-                            </div>
-
-
-
-                        </div>
-
-                        <div className='w-full mt-2  flex items-end'>
-
-                            <div className='w-full text-center'>
-                                <input className=" text-lg font-semibold border-2   hover:border-black text-sky-600 w-full bg-blue-100  rounded-xl    btn-outline  py-1  px-3  " type='submit' value='Filter' />
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            {/* Sob Exam dekhai */}
-
-            <div className='flex text-gray-500 font-semibold mt-8 mb-2 w-full'>
-                <div className='w-3/5'>
-                    <p>NAME</p>
-                </div>
-
-                <div className='w-2/5 flex'>
-                    <p className='w-1/2'>MCQ</p>
-                    <p className='w-1/2'>WRITTEN</p>
-                </div>
-            </div>
-
-            {
-                displayExams.map((exam, index) => <>
-                    <div key={index} className='flex w-full cursor-pointer items-center border-b  p-1 border-sky-600 '>
-                        <Link className='w-3/5' to={`/exam/${exam._id}`}>
-                            <div  >
-                                <p className='font-semibold'>{exam.title}</p>
-                                <p className='text-sm text-gray-500'>{exam.date}</p>
-                            </div>
-                        </Link>
-
-                        <Link className='w-2/5' to={`/exam/${exam._id}`}>
-                            <div className='  flex text-gray-500 font-semibold'>
-                                <p className='w-1/2 ml-6'>{exam.mcqTotal}</p>
-                                <p className='w-1/2 ml-10'>{exam.writenTotal}</p>
-                            </div>
-                        </Link>
-
-
-                        <a onClick={() => handleDelete(exam._id)} className='flex items-center text-lg gap-1 text-red-600'><MdDeleteForever /></a>
-
-
-                    </div>
-                </>)
-            }
-
-
-            {
-                navigate ? <Navigate to={'/exams'}></Navigate> : ''
-            }
-        </div> :
-            <div>
-                <LoadingPage></LoadingPage>
-            </div>
-    )
+        </motion.div>
+    );
 }
 
 export default Exams

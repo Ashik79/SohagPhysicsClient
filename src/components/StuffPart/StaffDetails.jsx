@@ -108,7 +108,7 @@ const StaffDetails = () => {
     //console.log(staff)
 
     try {
-      const response = await fetch(`https://spoffice-server.vercel.app/updatestaff/${staff._id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/updatestaff/${staff._id}`, {
         method: 'PUT',
         headers: {
           'content-type': 'application/json'
@@ -164,7 +164,7 @@ const StaffDetails = () => {
         try {
           // Update the server with the modified staff object
           const response = await fetch(
-            `https://spoffice-server.vercel.app/updatestaff/${staff._id}`,
+            `${import.meta.env.VITE_API_URL}/updatestaff/${staff._id}`,
             {
               method: "PUT",
               headers: {

@@ -16,10 +16,10 @@ const LoadingPage = () => {
       </div>
       
       <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mt-6 animate-pulse">
-        ✨ Loading ... 🔮
+        âœ¨ Loading ... ðŸ”®
       </h1>
       <p className="text-lg md:text-xl mt-4 max-w-lg">
-        Getting Some Magic for You! 🪄⚡
+        Getting Some Magic for You! ðŸª„âš¡
       </p>
       
       {/* Loading Animation */}

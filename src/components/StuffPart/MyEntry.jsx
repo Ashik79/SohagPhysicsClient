@@ -69,7 +69,7 @@ function MyEntry() {
             };
 
             try {
-                const response = await fetch(`https://spoffice-server.vercel.app/updatestaff/${staff._id}`, {
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/updatestaff/${staff._id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ ...staff, sessions: [...sessions, newSession] }),
@@ -104,7 +104,7 @@ function MyEntry() {
             updatedSession.durationMin = durationMinutes % 60;
 
             try {
-                const response = await fetch(`https://spoffice-server.vercel.app/updatestaff/${staff._id}`, {
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/updatestaff/${staff._id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

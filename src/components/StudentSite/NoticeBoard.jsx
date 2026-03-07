@@ -24,7 +24,7 @@ function NoticeBoard() {
   const fetchNotice = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://spoffice-server.vercel.app/getnotice');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/getnotice`);
       
       if (!response.ok) {
         // Handle server errors
@@ -118,7 +118,7 @@ function NoticeBoard() {
       
       if (notice && notice._id) {
         // Update existing notice
-        response = await fetch(`https://spoffice-server.vercel.app/updatenotice/${notice._id}`, {
+        response = await fetch(`${import.meta.env.VITE_API_URL}/updatenotice/${notice._id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -127,7 +127,7 @@ function NoticeBoard() {
         });
       } else {
         // Insert new notice (only happens once)
-        response = await fetch('https://spoffice-server.vercel.app/insertnotice', {
+        response = await fetch(`${import.meta.env.VITE_API_URL}/insertnotice`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

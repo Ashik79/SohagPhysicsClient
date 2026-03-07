@@ -2,6 +2,8 @@ import React, { useContext, useState } from 'react'
 import { AuthContext } from '../../Provider';
 import { IoCloudDownloadOutline } from "react-icons/io5";
 import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import Swal from 'sweetalert2';
 
 import { jsPDF } from "jspdf";
 import "jspdf-autotable"; // Importing jsPDF autoTable plugin if necessary
@@ -74,7 +76,7 @@ function ExamReport() {
 
 
         try {
-            const res = await fetch('https://spoffice-server.vercel.app/students', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/students`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(query),
@@ -86,7 +88,7 @@ function ExamReport() {
 
             const data = await res.json();
             //exam find kore ana
-            const res2 = await fetch('https://spoffice-server.vercel.app/exams', {
+            const res2 = await fetch(`${import.meta.env.VITE_API_URL}/exams`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(examQuery),
@@ -235,40 +237,49 @@ function ExamReport() {
             // Column width configuration (fixed widths)
 
 
-            // Fetch the logo image as a base64 URL
+            // Fetch logic
             const fetchLogo = async () => {
-                const logoUrl = "/logo.png"; // Replace with the correct URL to your logo
-                const response = await fetch(logoUrl);
-                const blob = await response.blob();
-                const reader = new FileReader();
-                return new Promise((resolve, reject) => {
-                    reader.onloadend = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(blob);
-                });
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 2000);
+                    const response = await fetch("/logo.png", { signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    if (!response.ok) return null;
+                    const blob = await response.blob();
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.onerror = () => resolve(null);
+                        reader.readAsDataURL(blob);
+                    });
+                } catch (e) { return null; }
             };
 
-            // Wait for the logo to be loaded before generating the PDF
-            const logoUrlBase64 = await fetchLogo();
+            Swal.fire({
+                title: 'Generating PDF...',
+                html: 'Preparing full exam report',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
 
-            // Add table using autoTable plugin
+            const logoBase64 = await fetchLogo();
+
             doc.autoTable({
                 head: [headers],
                 body: tableData,
                 startY: 40,
                 columnStyles: {
-                    0: { cellWidth: 7 }, // Sl No
-                    1: { cellWidth: 15 }, // Roll
-                    2: { cellWidth: 30 }, // Name
-                    3: { cellWidth: 25 }, // Phone
-                    4: { cellWidth: 18 }, // Program
-                    5: { cellWidth: 18 }, // payment
-                    6: { cellWidth: 10 }, // session
+                    0: { cellWidth: 7 },
+                    1: { cellWidth: 15 },
+                    2: { cellWidth: 30 },
+                    3: { cellWidth: 25 },
+                    4: { cellWidth: 18 },
+                    5: { cellWidth: 18 },
+                    6: { cellWidth: 10 },
                     ...Array.from({ length: exams.length }, (_, i) => ({ [i + 7]: { cellWidth: 40 } })).reduce(
                         (acc, curr) => ({ ...acc, ...curr }),
                         {}
-                    ), // Day columns
-
+                    ),
                 },
                 theme: "grid",
                 headStyles: {
@@ -276,42 +287,42 @@ function ExamReport() {
                     textColor: [0, 0, 0],
                     fontStyle: "bold",
                     halign: "center",
-                    minCellHeight: 5,
+                    fontSize: 8,
                     cellPadding: 1,
-                    lineWidth: 0.5,
-                    lineColor: [200, 200, 200],
                 },
                 bodyStyles: {
-                    minCellHeight: 4,
+                    fontSize: 8,
                     cellPadding: 1,
-                    lineWidth: 0.5,
-                    lineColor: [200, 200, 200],
                 },
                 margin: { top: 10, bottom: 10, left: 10, right: 10 },
                 didDrawPage: (data) => {
                     if (isFirstPage) {
-                        doc.addImage(logoUrlBase64, "PNG", 10, 10, 30, 30);
+                        if (logoBase64) {
+                            try { doc.addImage(logoBase64, "PNG", 10, 10, 20, 20); } catch (e) { }
+                        }
                         const pageWidth = doc.internal.pageSize.width;
                         doc.setFontSize(16);
                         doc.text("Sohag Physics", pageWidth / 2, 20, { align: "center" });
-                        doc.setFontSize(12);
+                        doc.setFontSize(11);
                         doc.text(
-                            `Exam Sheet for Batch: ${batch} , Session: ${session ? session : 'All'} , Month: ${getMonth(paymentMonth)}, ${paymentYear}`,
+                            `Exam Sheet: Batch ${batch}, Month ${getMonth(paymentMonth)} ${paymentYear}`,
                             pageWidth / 2,
-                            30,
+                            28,
                             { align: "center" }
                         );
                         isFirstPage = false;
                     }
                 },
-                pageBreak: "auto",
             });
 
-
-            // Save the generated PDF
-            doc.save(`Exam sheet of batch: ${students[0].batch}, Session: ${session ? session : 'All'}, Month: ${getMonth(paymentMonth)},${paymentYear}.pdf`);
+            const pdfBlob = doc.output('blob');
+            saveAs(pdfBlob, `Exam_Report_${batch}_${getMonth(paymentMonth)}.pdf`);
+            Swal.close();
+            Swal.fire({ icon: 'success', title: 'PDF Ready!', timer: 1500, showConfirmButton: false });
         } catch (err) {
-            //console.log("Error generating PDF:", err);
+            console.error(err);
+            Swal.close();
+            Swal.fire({ icon: 'error', title: 'Generation Failed', text: err.message });
         }
     };
 
@@ -350,38 +361,38 @@ function ExamReport() {
 
 
                                 <option value={'Olympiad-HSC27'}>Olympiad HSC 27</option>
-                                <option value={'Sat 1'}>শনি ৭টা (HSC 27)</option>
-                                <option value={'Sat 2'}>শনি ৮টা (নিউ নাইন SSC 28 - HSC 30)</option>
-                                <option value={'Sat 3'}>শনি ৯টা (নিউ নাইন SSC 28 - HSC 30)</option>
-                                <option value={'Sat 4'}>শনি ১০টা (নিউ নাইন SSC 27 - HSC 29)</option>
-                                <option value={'Sat 5'}>শনি ১১টা - SSC 26 (All Batch) </option>
-                                <option value={'Sat 12'}>শনি ১২টা - New Nine (SSC 28 Special Batch) </option>
+                                <option value={'Sat 1'}>à¦¶à¦¨à¦¿ à§­à¦Ÿà¦¾ (HSC 27)</option>
+                                <option value={'Sat 2'}>à¦¶à¦¨à¦¿ à§®à¦Ÿà¦¾ (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡à¦¨ SSC 28 - HSC 30)</option>
+                                <option value={'Sat 3'}>à¦¶à¦¨à¦¿ à§¯à¦Ÿà¦¾ (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡à¦¨ SSC 28 - HSC 30)</option>
+                                <option value={'Sat 4'}>à¦¶à¦¨à¦¿ à§§à§¦à¦Ÿà¦¾ (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡à¦¨ SSC 27 - HSC 29)</option>
+                                <option value={'Sat 5'}>à¦¶à¦¨à¦¿ à§§à§§à¦Ÿà¦¾ - SSC 26 (All Batch) </option>
+                                <option value={'Sat 12'}>à¦¶à¦¨à¦¿ à§§à§¨à¦Ÿà¦¾ - New Nine (SSC 28 Special Batch) </option>
 
-                                <option value={'Sat 6'}>শনি ২টা (HSC 27)</option>
-                                <option value={'Sat 7'}>শনি ৩টা - HSC 27 (New Batch)</option>
-                                <option value={'Sat 8'}>শনি ৪টা (SSC 27)</option>
-                                <option value={'Sat 9'}>শনি ৫টা - SSC 28 (New Nine)</option>
-                                <option value={'Sat 10'}>শনি ৬টা (SSC 28)</option>
-                                <option value={'Sat 11'}>শনি ৭ টা ( SSC 27 - HSC 29)</option>
-                                <option value={'Sun 1'}>রবি ৭টা (HSC 27)</option>
-                                <option value={'Sun 2'}>রবি ৮টা (HSC 26)</option>
-                                <option value={'Sun 3'}>রবি ৯টা - HSC 27 (New Batch)</option>
-                                <option value={'Sun 4'}>রবি ১০টা (HSC 28)</option>
-                                <option value={'Sun 5'}>রবি ১১টা </option>
+                                <option value={'Sat 6'}>à¦¶à¦¨à¦¿ à§¨à¦Ÿà¦¾ (HSC 27)</option>
+                                <option value={'Sat 7'}>à¦¶à¦¨à¦¿ à§©à¦Ÿà¦¾ - HSC 27 (New Batch)</option>
+                                <option value={'Sat 8'}>à¦¶à¦¨à¦¿ à§ªà¦Ÿà¦¾ (SSC 27)</option>
+                                <option value={'Sat 9'}>à¦¶à¦¨à¦¿ à§«à¦Ÿà¦¾ - SSC 28 (New Nine)</option>
+                                <option value={'Sat 10'}>à¦¶à¦¨à¦¿ à§¬à¦Ÿà¦¾ (SSC 28)</option>
+                                <option value={'Sat 11'}>à¦¶à¦¨à¦¿ à§­ à¦Ÿà¦¾ ( SSC 27 - HSC 29)</option>
+                                <option value={'Sun 1'}>à¦°à¦¬à¦¿ à§­à¦Ÿà¦¾ (HSC 27)</option>
+                                <option value={'Sun 2'}>à¦°à¦¬à¦¿ à§®à¦Ÿà¦¾ (HSC 26)</option>
+                                <option value={'Sun 3'}>à¦°à¦¬à¦¿ à§¯à¦Ÿà¦¾ - HSC 27 (New Batch)</option>
+                                <option value={'Sun 4'}>à¦°à¦¬à¦¿ à§§à§¦à¦Ÿà¦¾ (HSC 28)</option>
+                                <option value={'Sun 5'}>à¦°à¦¬à¦¿ à§§à§§à¦Ÿà¦¾ </option>
 
-                                <option value={'Sun 6'}>রবি ২টা (HSC 26) </option>
-                                <option value={'Sun 7'}>রবি ৩টা (HSC 27) </option>
-                                <option value={'Sun 8'}>রবি ৪টা (HSC 26) </option>
-                                <option value={'Sun 9'}>রবি ৫টা (HSC 27) </option>
-                                <option value={'Sun 10'}>রবি ৬টা (SSC 27 - HSC 29) </option>
-                                <option value={'Sun 11'}>রবি ৭টা - SSC 28 (New Nine) </option>
+                                <option value={'Sun 6'}>à¦°à¦¬à¦¿ à§¨à¦Ÿà¦¾ (HSC 26) </option>
+                                <option value={'Sun 7'}>à¦°à¦¬à¦¿ à§©à¦Ÿà¦¾ (HSC 27) </option>
+                                <option value={'Sun 8'}>à¦°à¦¬à¦¿ à§ªà¦Ÿà¦¾ (HSC 26) </option>
+                                <option value={'Sun 9'}>à¦°à¦¬à¦¿ à§«à¦Ÿà¦¾ (HSC 27) </option>
+                                <option value={'Sun 10'}>à¦°à¦¬à¦¿ à§¬à¦Ÿà¦¾ (SSC 27 - HSC 29) </option>
+                                <option value={'Sun 11'}>à¦°à¦¬à¦¿ à§­à¦Ÿà¦¾ - SSC 28 (New Nine) </option>
                                 <option>HSC 26 Admission cancel</option>
                                 <option>HSC 27 Admission cancel</option>
                                 <option>SSC 26 class 10 Admission cancel</option>
                                 <option>SSC 27 class 9 Admission cancel</option>
                                 <option>Exam Batch HSC 26</option>
-                                <option>Exam Batch (নিউ নাইন SSC 27 - HSC 29)</option>
-                                <option>Exam Batch (নিউ টেন SSC 26 - HSC 28)</option>
+                                <option>Exam Batch (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡à¦¨ SSC 27 - HSC 29)</option>
+                                <option>Exam Batch (à¦¨à¦¿à¦‰ à¦Ÿà§‡à¦¨ SSC 26 - HSC 28)</option>
                                 <option value={'Olympiad-8'}>Olympiad 8 (ssc 28 - hsc 30)</option>
                                 <option value={'Olympiad-9'}>Olympiad 9 (ssc 27 - hsc 29)</option>
                                 <option value={'Hsc-27-Marketing'}>Hsc-27 (Marketing)</option>

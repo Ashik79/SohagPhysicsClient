@@ -13,20 +13,20 @@ function Provider({ children }) {
     const utc = now.getTime() + now.getTimezoneOffset() * 60000; // Convert to UTC
     return new Date(utc + offset * 60000); // Convert to GMT+6
   };
-  
- 
-    const [month, setMonth] = useState(0);
-    const [year, setYear] = useState(0);
-    const [date, setDate] = useState(0);
-  
-    useEffect(() => {
-      const dhakaTime = getDhakaTime();
-      setMonth(dhakaTime.getMonth() + 1);
-      setYear(dhakaTime.getFullYear());
-      setDate(dhakaTime.getDate());
-    }, []);
 
- 
+
+  const [month, setMonth] = useState(0);
+  const [year, setYear] = useState(0);
+  const [date, setDate] = useState(0);
+
+  useEffect(() => {
+    const dhakaTime = getDhakaTime();
+    setMonth(dhakaTime.getMonth() + 1);
+    setYear(dhakaTime.getFullYear());
+    setDate(dhakaTime.getDate());
+  }, []);
+
+
 
   const getMonth = (m) => {
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -72,13 +72,13 @@ function Provider({ children }) {
 
   useEffect(() => {
     if (loggedEmail) {
-      fetch(`https://spoffice-server.vercel.app/getuser/${loggedEmail}`)
+      fetch(`${import.meta.env.VITE_API_URL}/getuser/${loggedEmail}`)
         .then(res => res.json())
         .then(data => {
-          
+
           setRole(data.role);
           setStaff(data)
-        
+
           localStorage.setItem("loggedPhoto", data.photo);
           localStorage.setItem("loggedUser", data.name);
         })
@@ -95,7 +95,7 @@ function Provider({ children }) {
   const notifyFailed = (message) => {
     toast.error(message);
   }
-const today=`${date}-${month}-${year}`
+  const today = `${date}-${month}-${year}`
   const providerInfo = {
     login,
     user,
@@ -115,7 +115,7 @@ const today=`${date}-${month}-${year}`
     notifyFailed,
     loggedPhoto,
     today
-    
+
   };
 
   return (
