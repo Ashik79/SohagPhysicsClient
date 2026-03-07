@@ -13,7 +13,7 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
 /**
- * OMR HUB â€” THE PREMIUM EXAM WORKFLOW
+ * OMR HUB — THE PREMIUM EXAM WORKFLOW
  * 1. Answer Key & Design
  * 2. Pro Scanner (with Universal Identity)
  * 3. Results Management
@@ -209,7 +209,7 @@ const OmrHub = ({ exam, onClose, students }) => {
         doc.setFont('helvetica', 'bold');
         doc.text('EXAM ACHIEVEMENT REPORT', 105, 18, { align: 'center' });
         doc.setFontSize(10);
-        doc.text(`SOHAG PHYSICS â€” PRO ASSESSMENT SERIES`, 105, 25, { align: 'center' });
+        doc.text(`SOHAG PHYSICS — PRO ASSESSMENT SERIES`, 105, 25, { align: 'center' });
 
         // Student Info
         doc.setTextColor(40);
@@ -250,7 +250,7 @@ const OmrHub = ({ exam, onClose, students }) => {
         });
 
         // Question Table
-        const tableData = res.breakdown.map(q => [q.qNum, q.detected || 'â€”', q.keyAnswer || '?', q.result.toUpperCase()]);
+        const tableData = res.breakdown.map(q => [q.qNum, q.detected || '—', q.keyAnswer || '?', q.result.toUpperCase()]);
         doc.autoTable({
             startY: 150,
             head: [['Q#', 'YOUR ANS', 'CORRECT KEY', 'RESULT']],
@@ -685,7 +685,7 @@ const OmrHub = ({ exam, onClose, students }) => {
                                             <div className="absolute -top-3 right-6 bg-white px-3 py-1 border rounded-full text-[10px] font-black uppercase text-sky-500">Live Smart Template</div>
                                             "Dear Guardian, result of <span className="text-sky-600 font-bold">[Student Name]</span> on <span className="font-bold">{exam.title}</span> is Score: <span className="text-emerald-500 font-black">[Score]/{exam.mcqTotal}</span>.
                                             <br /><br />
-                                            Keep up the progress! â€” <span className="font-bold">Sohag Physics</span>"
+                                            Keep up the progress! — <span className="font-bold">Sohag Physics</span>"
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4">

@@ -155,7 +155,7 @@ const PremiumOmrSheet = forwardRef(({ config, setLabel = 'A', questionOrder, ans
                                         borderRadius: 3,
                                         flexShrink: 0,
                                     }} />
-                                    {/* Number bubbles 0â€“9 */}
+                                    {/* Number bubbles 0–9 */}
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, flex: 1, justifyContent: 'space-between' }}>
                                         {Array.from({ length: 10 }).map((_, row) => (
                                             <div key={row} style={{

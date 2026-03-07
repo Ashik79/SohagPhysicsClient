@@ -6,7 +6,7 @@ import { saveAs } from 'file-saver';
 import Swal from 'sweetalert2';
 
 /**
- * ExamPDFExport â€” Generates Merit List PDF and Individual Result Slips
+ * ExamPDFExport — Generates Merit List PDF and Individual Result Slips
  * from an existing exam's data directly (no extra API calls).
  */
 const ExamPDFExport = ({ exam, results, onClose }) => {
@@ -136,7 +136,7 @@ const ExamPDFExport = ({ exam, results, onClose }) => {
         top3.forEach((r, i) => {
             const medals = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰'];
             const nickName = r.name ? r.name.split(' ')[0] : 'Student';
-            doc.text(`${medals[i]} ${nickName} â€” ${r.total}`, pageW - 57, 20 + i * 7);
+            doc.text(`${medals[i]} ${nickName} — ${r.total}`, pageW - 57, 20 + i * 7);
         });
 
         Swal.fire({

@@ -24,7 +24,7 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
 
     // Auto-fill from exam when launched from exam page
     const [config, setConfig] = useState({
-        examTitle: exam?.title || 'Sohag Physics â€” Exam',
+        examTitle: exam?.title || 'Sohag Physics — Exam',
         batch: exam?.batch || '',
         date: exam?.date || '',
         totalQuestions: exam?.mcqTotal || 30,
@@ -193,8 +193,8 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
                                 <label className='block text-sm font-semibold text-slate-600 mb-1'>Options per Q</label>
                                 <select name='optionsPerQuestion' value={config.optionsPerQuestion} onChange={handleConfigChange}
                                     className='select select-bordered select-sm w-full'>
-                                    <option value={4}>4 options (Aâ€“D)</option>
-                                    <option value={5}>5 options (Aâ€“E)</option>
+                                    <option value={4}>4 options (A–D)</option>
+                                    <option value={5}>5 options (A–E)</option>
                                 </select>
                             </div>
                         </div>
@@ -363,7 +363,7 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
                         {/* All 4 Sets */}
                         <button onClick={handleGenerateAllSets}
                             className='flex items-start gap-4 p-5 bg-indigo-50 hover:bg-indigo-100 border-2 border-indigo-200 rounded-2xl transition-all text-left group'>
-                            <div className='w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white text-xl group-hover:scale-110 transition-transform'>ðŸ”€</div>
+                            <div className='w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white text-xl group-hover:scale-110 transition-transform'>🔀</div>
                             <div>
                                 <p className='font-black text-slate-800'>All 4 Sets (A, B, C, D)</p>
                                 <p className='text-slate-500 text-xs mt-0.5'>Shuffled question orders + answer keys in one PDF</p>
@@ -380,7 +380,7 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
                                 <p className='text-slate-500 text-xs mt-0.5'>
                                     {answeredCount === 0
                                         ? 'âš ï¸ Set answers in the Answer Key tab first'
-                                        : `${answeredCount}/${config.totalQuestions} answers set â€” print for teachers`}
+                                        : `${answeredCount}/${config.totalQuestions} answers set — print for teachers`}
                                 </p>
                             </div>
                         </button>
@@ -388,7 +388,7 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
                         {/* Individual Set */}
                         <div className='p-5 bg-amber-50 border-2 border-amber-200 rounded-2xl'>
                             <div className='flex items-center gap-3 mb-3'>
-                                <div className='w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-white text-lg'>ðŸŽ¯</div>
+                                <div className='w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-white text-lg'>🎯</div>
                                 <p className='font-black text-slate-800'>Individual Set</p>
                             </div>
                             <div className='grid grid-cols-4 gap-2'>
@@ -408,12 +408,12 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
                     <div className='p-4 bg-slate-50 rounded-xl border border-slate-200'>
                         <p className='font-bold text-sm text-slate-600 mb-2'>ðŸ“Œ Set Shuffle Logic</p>
                         <div className='grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-slate-500'>
-                            <div className='bg-white p-2 rounded-lg border'><span className='font-bold text-sky-600'>SET A</span> â€” Original order</div>
-                            <div className='bg-white p-2 rounded-lg border'><span className='font-bold text-emerald-600'>SET B</span> â€” Reversed order</div>
-                            <div className='bg-white p-2 rounded-lg border'><span className='font-bold text-amber-600'>SET C</span> â€” Odd first, then Even</div>
-                            <div className='bg-white p-2 rounded-lg border'><span className='font-bold text-red-600'>SET D</span> â€” Fixed random shuffle</div>
+                            <div className='bg-white p-2 rounded-lg border'><span className='font-bold text-sky-600'>SET A</span> — Original order</div>
+                            <div className='bg-white p-2 rounded-lg border'><span className='font-bold text-emerald-600'>SET B</span> — Reversed order</div>
+                            <div className='bg-white p-2 rounded-lg border'><span className='font-bold text-amber-600'>SET C</span> — Odd first, then Even</div>
+                            <div className='bg-white p-2 rounded-lg border'><span className='font-bold text-red-600'>SET D</span> — Fixed random shuffle</div>
                         </div>
-                        <p className='text-xs text-slate-400 mt-2'>Answer Key auto-remapped for each set. Same questions â€” different order = anti-cheating.</p>
+                        <p className='text-xs text-slate-400 mt-2'>Answer Key auto-remapped for each set. Same questions — different order = anti-cheating.</p>
                     </div>
                 </div>
             )}
