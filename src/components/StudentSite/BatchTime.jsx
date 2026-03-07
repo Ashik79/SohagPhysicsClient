@@ -1,3 +1,4 @@
+import API_URL from '../../apiConfig';
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../Provider';
 import { FaClock, FaPlus, FaTrash, FaEdit } from 'react-icons/fa';
@@ -44,7 +45,7 @@ function BatchTime() {
   const fetchBatchTime = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/getbatchtime`);
+      const response = await fetch(`${API_URL}/getbatchtime`);
       
       if (!response.ok) {
         initializeEmptyBatchTime();
@@ -371,7 +372,7 @@ function BatchTime() {
       
       if (batchTime && batchTime._id) {
         // Update existing
-        response = await fetch(`${import.meta.env.VITE_API_URL}/updatebatchtime/${batchTime._id}`, {
+        response = await fetch(`${API_URL}/updatebatchtime/${batchTime._id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -382,7 +383,7 @@ function BatchTime() {
         });
       } else {
         // Insert new
-        response = await fetch(`${import.meta.env.VITE_API_URL}/insertbatchtime`, {
+        response = await fetch(`${API_URL}/insertbatchtime`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

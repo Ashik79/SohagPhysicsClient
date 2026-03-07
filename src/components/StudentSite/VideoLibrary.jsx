@@ -1,3 +1,4 @@
+import API_URL from '../../apiConfig';
 import React, { useEffect, useState } from 'react'
 import { IoMdArrowDropdown, IoMdArrowDropright } from "react-icons/io";
 import { MdPlayCircleFilled } from "react-icons/md";
@@ -19,7 +20,7 @@ function VideoLibrary() {
   const [filterType, setFilterType] = useState('all') // 'all', 'video', 'reel'
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/getVideocourses`)
+    fetch(`${API_URL}/getVideocourses`)
       .then(res => res.json())
       .then(data => {
         const sorted = data.sort((a, b) => a.priority - b.priority)
@@ -63,38 +64,35 @@ function VideoLibrary() {
           <MdPlayCircleFilled className='text-4xl' />
           Video Library
         </h1>
-        
+
         {/* Filter Tabs */}
         <div className='flex gap-2 flex-wrap'>
           <button
             onClick={() => setFilterType('all')}
-            className={`px-4 py-2 rounded-full font-semibold transition-all ${
-              filterType === 'all' 
-                ? 'bg-white text-purple-600 shadow-md' 
+            className={`px-4 py-2 rounded-full font-semibold transition-all ${filterType === 'all'
+                ? 'bg-white text-purple-600 shadow-md'
                 : 'bg-purple-500 bg-opacity-50 hover:bg-opacity-70'
-            }`}
+              }`}
           >
-            ðŸ“š All Content
+            📚 All Content
           </button>
           <button
             onClick={() => setFilterType('video')}
-            className={`px-4 py-2 rounded-full font-semibold transition-all ${
-              filterType === 'video' 
-                ? 'bg-white text-blue-600 shadow-md' 
+            className={`px-4 py-2 rounded-full font-semibold transition-all ${filterType === 'video'
+                ? 'bg-white text-blue-600 shadow-md'
                 : 'bg-blue-500 bg-opacity-50 hover:bg-opacity-70'
-            }`}
+              }`}
           >
-            ðŸŽ¥ Videos
+            🎥 Videos
           </button>
           <button
             onClick={() => setFilterType('reel')}
-            className={`px-4 py-2 rounded-full font-semibold transition-all ${
-              filterType === 'reel' 
-                ? 'bg-white text-pink-600 shadow-md' 
+            className={`px-4 py-2 rounded-full font-semibold transition-all ${filterType === 'reel'
+                ? 'bg-white text-pink-600 shadow-md'
                 : 'bg-pink-500 bg-opacity-50 hover:bg-opacity-70'
-            }`}
+              }`}
           >
-            ðŸŽ¬ Reels
+            🎬 Reels
           </button>
         </div>
       </div>
@@ -103,7 +101,7 @@ function VideoLibrary() {
       <div className='space-y-4'>
         {allCourses.map((course) => {
           const totalVideos = course.chapters?.reduce((sum, ch) => sum + (getFilteredVideos(ch.Videos)?.length || 0), 0) || 0
-          
+
           // Hide course if no videos match filter
           if (totalVideos === 0 && filterType !== 'all') return null
 
@@ -126,8 +124,8 @@ function VideoLibrary() {
                   <div className='flex-grow'>
                     <h2 className='text-xl lg:text-2xl font-bold text-purple-700'>{course.title}</h2>
                     <div className='flex gap-4 mt-1 text-sm text-gray-600'>
-                      <span>ðŸ“– {course.chapters?.length || 0} Chapters</span>
-                      <span>ðŸŽ¥ {totalVideos} {filterType === 'all' ? 'Items' : filterType === 'video' ? 'Videos' : 'Reels'}</span>
+                      <span>📖 {course.chapters?.length || 0} Chapters</span>
+                      <span>🎥 {totalVideos} {filterType === 'all' ? 'Items' : filterType === 'video' ? 'Videos' : 'Reels'}</span>
                     </div>
                   </div>
                 </div>
@@ -138,7 +136,7 @@ function VideoLibrary() {
                 <div className='p-4 space-y-3 bg-gray-50'>
                   {course.chapters?.sort((a, b) => a.priority - b.priority).map((chapter) => {
                     const filteredVideos = getFilteredVideos(chapter.Videos)?.sort((a, b) => a.priority - b.priority) || []
-                    
+
                     // Hide chapter if no videos match filter
                     if (filteredVideos.length === 0 && filterType !== 'all') return null
 
@@ -174,11 +172,10 @@ function VideoLibrary() {
                                 <div
                                   key={video.id}
                                   onClick={() => playVideo(video)}
-                                  className={`cursor-pointer group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all transform hover:scale-105 ${
-                                    video.type === 'reel' 
-                                      ? 'border-2 border-pink-300 bg-gradient-to-br from-pink-50 to-purple-50' 
+                                  className={`cursor-pointer group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all transform hover:scale-105 ${video.type === 'reel'
+                                      ? 'border-2 border-pink-300 bg-gradient-to-br from-pink-50 to-purple-50'
                                       : 'border-2 border-blue-300 bg-gradient-to-br from-blue-50 to-cyan-50'
-                                  }`}
+                                    }`}
                                 >
                                   {/* Thumbnail */}
                                   <div className='relative'>
@@ -192,12 +189,11 @@ function VideoLibrary() {
                                       <MdPlayCircleFilled className='text-white text-5xl opacity-0 group-hover:opacity-100 transition-opacity' />
                                     </div>
                                     {/* Type Badge */}
-                                    <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-bold text-white ${
-                                      video.type === 'reel' 
-                                        ? 'bg-pink-500' 
+                                    <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-bold text-white ${video.type === 'reel'
+                                        ? 'bg-pink-500'
                                         : 'bg-blue-500'
-                                    }`}>
-                                      {video.type === 'reel' ? 'ðŸŽ¬ Reel' : 'ðŸŽ¥ Video'}
+                                      }`}>
+                                      {video.type === 'reel' ? '🎬 Reel' : '🎥 Video'}
                                     </div>
                                   </div>
                                   {/* Title */}
@@ -227,43 +223,41 @@ function VideoLibrary() {
             </div>
           )
         })}
-        {allCourses.filter(course => 
+        {allCourses.filter(course =>
           course.chapters?.some(ch => getFilteredVideos(ch.Videos)?.length > 0)
         ).length === 0 && (
-          <div className='text-center py-16'>
-            <p className='text-gray-400 text-xl'>No {filterType === 'all' ? 'content' : filterType === 'video' ? 'videos' : 'reels'} available yet</p>
-          </div>
-        )}
+            <div className='text-center py-16'>
+              <p className='text-gray-400 text-xl'>No {filterType === 'all' ? 'content' : filterType === 'video' ? 'videos' : 'reels'} available yet</p>
+            </div>
+          )}
       </div>
 
       {/* Video Player Modal */}
       <dialog id="modal_player" className="modal">
         <div className="modal-box max-w-6xl w-full">
           <form method="dialog">
-            <button 
+            <button
               className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-2xl z-10"
               onClick={closeModal}
             >
-              âœ•
+              ✕
             </button>
           </form>
           {selectedVideo && (
             <div className='space-y-4'>
               <div className='flex items-center gap-3'>
-                <div className={`px-3 py-1 rounded-full text-sm font-bold text-white ${
-                  selectedVideo.type === 'reel' ? 'bg-pink-500' : 'bg-blue-500'
-                }`}>
-                  {selectedVideo.type === 'reel' ? 'ðŸŽ¬ Reel' : 'ðŸŽ¥ Video'}
+                <div className={`px-3 py-1 rounded-full text-sm font-bold text-white ${selectedVideo.type === 'reel' ? 'bg-pink-500' : 'bg-blue-500'
+                  }`}>
+                  {selectedVideo.type === 'reel' ? '🎬 Reel' : '🎥 Video'}
                 </div>
                 <h2 className='font-bold text-xl flex-grow'>{selectedVideo.title}</h2>
               </div>
-              
+
               {/* Video Player */}
-              <div className={`w-full rounded-lg overflow-hidden ${
-                selectedVideo.type === 'reel' 
-                  ? 'h-[600px] max-w-md mx-auto' 
+              <div className={`w-full rounded-lg overflow-hidden ${selectedVideo.type === 'reel'
+                  ? 'h-[600px] max-w-md mx-auto'
                   : 'h-[400px] md:h-[500px] lg:h-[600px]'
-              }`}>
+                }`}>
                 {getYouTubeVideoId(selectedVideo.url) ? (
                   <iframe
                     key={selectedVideo.id}

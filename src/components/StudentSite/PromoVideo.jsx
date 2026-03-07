@@ -1,3 +1,4 @@
+import API_URL from '../../apiConfig';
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../Provider';
 import { FaYoutube, FaPlay } from 'react-icons/fa';
@@ -26,7 +27,7 @@ function PromoVideo() {
   const fetchPromoVideo = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/getpromovideo`);
+      const response = await fetch(`${API_URL}/getpromovideo`);
       
       if (!response.ok) {
         setPromoVideo(null);
@@ -116,7 +117,7 @@ function PromoVideo() {
       
       if (promoVideo && promoVideo._id) {
         // Update existing promo video
-        response = await fetch(`${import.meta.env.VITE_API_URL}/updatepromovideo/${promoVideo._id}`, {
+        response = await fetch(`${API_URL}/updatepromovideo/${promoVideo._id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -125,7 +126,7 @@ function PromoVideo() {
         });
       } else {
         // Insert new promo video (only happens once)
-        response = await fetch(`${import.meta.env.VITE_API_URL}/insertpromovideo`, {
+        response = await fetch(`${API_URL}/insertpromovideo`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

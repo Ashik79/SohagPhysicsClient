@@ -1,3 +1,4 @@
+import API_URL from '../apiConfig';
 import React, { useContext, useState } from 'react';
 import { AuthContext } from '../Provider';
 import { TbCurrencyTaka } from "react-icons/tb";
@@ -27,7 +28,7 @@ const PaymentComponent = () => {
       month, day, year, taker
     }
 
-    fetch(`${import.meta.env.VITE_API_URL}/api/payments`, {
+    fetch(`${API_URL}/api/payments`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -67,7 +68,7 @@ const PaymentComponent = () => {
     }
 
     try {
-      const downloadResponse = await fetch(`${import.meta.env.VITE_API_URL}/download/overview`, {
+      const downloadResponse = await fetch(`${API_URL}/download/overview`, {
         method: 'POST',
         headers: {
           'content-type': 'application/json'

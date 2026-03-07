@@ -1,3 +1,4 @@
+import API_URL from '../apiConfig';
 import React, { useState, useEffect } from 'react';
 import { FiDownload, FiBarChart2, FiCalendar, FiBookOpen, FiAward, FiTarget } from "react-icons/fi";
 import jsPDF from 'jspdf';
@@ -18,7 +19,7 @@ const ExamsList = ({ student }) => {
       if (student && student.id) {
         setLoading(true);
         try {
-          const response = await fetch(`${import.meta.env.VITE_API_URL}/getexams/${student.id}`);
+          const response = await fetch(`${API_URL}/getexams/${student.id}`);
           const data = await response.json();
 
           const processedExams = data.map(exam => {

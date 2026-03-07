@@ -1,3 +1,4 @@
+import API_URL from '../apiConfig';
 import React, { useContext, useState } from 'react'
 import { AuthContext } from '../Provider';
 import { Navigate } from 'react-router-dom';
@@ -21,7 +22,7 @@ function AddUsers() {
         }
         // //console.log(user)
 
-        fetch(`${import.meta.env.VITE_API_URL}/adduser`, {
+        fetch(`${API_URL}/adduser`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

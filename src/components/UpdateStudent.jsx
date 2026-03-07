@@ -1,3 +1,4 @@
+import API_URL from '../apiConfig';
 import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../Provider';
 import { Navigate, useLoaderData } from 'react-router-dom';
@@ -48,7 +49,7 @@ function UpdateStudent() {
         }
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/student/update/${id}`, {
+            const response = await fetch(`${API_URL}/student/update/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'

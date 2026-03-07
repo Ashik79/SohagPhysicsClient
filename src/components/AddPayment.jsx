@@ -1,3 +1,4 @@
+import API_URL from '../apiConfig';
 import React, { useContext, useEffect, useState } from 'react'
 import { Link, Navigate, useLoaderData, useLocation } from 'react-router-dom'
 import { AuthContext } from '../Provider'
@@ -150,7 +151,7 @@ function AddPayment() {
 
         if (coupon) {
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/getcoupon/${coupon}`);
+                const response = await fetch(`${API_URL}/getcoupon/${coupon}`);
                 const data = await response.json();
                 if (!data.amount) {
                     notifyFailed("Invalid Coupon");
@@ -200,7 +201,7 @@ function AddPayment() {
         const newUser = { ...user, payments: tempPayments }
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/addpayment/${id}`, {
+            const response = await fetch(`${API_URL}/addpayment/${id}`, {
                 method: 'PUT',
                 headers: {
                     'content-type': 'application/json'

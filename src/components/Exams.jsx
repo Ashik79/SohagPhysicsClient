@@ -1,3 +1,4 @@
+import API_URL from '../apiConfig';
 import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../Provider'
 import { Link, Navigate } from 'react-router-dom'
@@ -14,7 +15,7 @@ function Exams() {
     const [displayExams, setDisplayExams] = useState([]);
 
     useEffect(() => {
-        fetch(`${import.meta.env.VITE_API_URL}/getexams`)
+        fetch(`${API_URL}/getexams`)
             .then(res => res.json())
             .then(data => {
                 setAllExams(data)
@@ -44,7 +45,7 @@ function Exams() {
             title, day, month: monthValue, year: yearValue, date: examDate, batch, program, session, results, mcqTotal, writenTotal, category
         }
 
-        fetch(`${import.meta.env.VITE_API_URL}/addexam`, {
+        fetch(`${API_URL}/addexam`, {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'
@@ -106,7 +107,7 @@ function Exams() {
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                fetch(`${import.meta.env.VITE_API_URL}/exam/delete/${id}`, {
+                fetch(`${API_URL}/exam/delete/${id}`, {
                     method: "DELETE"
                 })
                     .then(res => res.json())

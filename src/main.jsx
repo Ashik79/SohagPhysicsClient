@@ -1,3 +1,4 @@
+import API_URL from './apiConfig';
 import React, { Children } from 'react'
 import ReactDOM from 'react-dom/client'
 
@@ -56,7 +57,7 @@ import TakeAttendanceId from './components/TakeAttendanceId';
 
 
 const fetchStudent = async ({ params }) => {
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/student/${params.id}`);
+  const response = await fetch(`${API_URL}/student/${params.id}`);
 
   if (!response.ok) {
     throw new Response(JSON.stringify({ message: 'Student not found' }), {
@@ -68,7 +69,7 @@ const fetchStudent = async ({ params }) => {
   return student;
 };
 const fetchStaff = async ({ params }) => {
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/staff/${params.id}`);
+  const response = await fetch(`${API_URL}/staff/${params.id}`);
 
   if (!response.ok) {
     throw new Response(JSON.stringify({ message: 'Staff not found' }), {
@@ -82,7 +83,7 @@ const fetchStaff = async ({ params }) => {
 
 
 const fetchUsers = async () => {
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/getusers`);
+  const response = await fetch(`${API_URL}/getusers`);
 
   if (!response.ok) {
     throw new Response(JSON.stringify({ message: 'users not found' }), {
@@ -94,7 +95,7 @@ const fetchUsers = async () => {
   return users;
 };
 const fetchUsersFull = async () => {
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/getusersfull`);
+  const response = await fetch(`${API_URL}/getusersfull`);
 
   if (!response.ok) {
     throw new Response(JSON.stringify({ message: 'users not found' }), {
@@ -173,7 +174,7 @@ const router = createBrowserRouter([
       {
         path: '/batch',
         element: <PrivateRoute><Batch></Batch></PrivateRoute>,
-        loader: () => fetch(`${import.meta.env.VITE_API_URL}/students`)
+        loader: () => fetch(`${API_URL}/students`)
       }
       ,
       {
@@ -244,7 +245,7 @@ const router = createBrowserRouter([
       {
         path: '/coupons',
         element: <PrivateRoute><Coupons></Coupons></PrivateRoute>,
-        loader: () => fetch(`${import.meta.env.VITE_API_URL}/getcoupons`)
+        loader: () => fetch(`${API_URL}/getcoupons`)
 
       },
       {
@@ -288,7 +289,7 @@ const router = createBrowserRouter([
       {
         path: '/exam/:id',
         element: <PrivateRoute><Exam></Exam></PrivateRoute>,
-        loader: ({ params }) => fetch(`${import.meta.env.VITE_API_URL}/getexam/${params.id}`)
+        loader: ({ params }) => fetch(`${API_URL}/getexam/${params.id}`)
 
       },
       {

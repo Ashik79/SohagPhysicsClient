@@ -1,3 +1,4 @@
+import API_URL from '../../../apiConfig';
 import React, { useContext, useState } from 'react'
 import { IoMdClose } from "react-icons/io";
 import { AuthContext } from '../../../Provider';
@@ -25,7 +26,7 @@ function PasswordChangeModal({ email }) {
         }
 
         try {
-            const response = await axios.post(`${import.meta.env.VITE_API_URL}/change-user-password`, { email, newPassword: newPass }, {
+            const response = await axios.post(`${API_URL}/change-user-password`, { email, newPassword: newPass }, {
                 headers: {
                     "Content-Type": "application/json"
                 }

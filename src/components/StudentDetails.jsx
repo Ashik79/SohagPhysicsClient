@@ -1,3 +1,4 @@
+import API_URL from '../apiConfig';
 import React, { useContext, useState } from 'react';
 import { Link, Navigate, useLoaderData } from 'react-router-dom';
 import StudentDetailsPart from './StudentDetailsPart';
@@ -125,7 +126,7 @@ const StudentDetails = () => {
       }
     }).then((result) => {
       if (result.isConfirmed) {
-        fetch(`${import.meta.env.VITE_API_URL}/student/delete/${student.id}`, {
+        fetch(`${API_URL}/student/delete/${student.id}`, {
           method: "DELETE"
         })
           .then(res => res.json())

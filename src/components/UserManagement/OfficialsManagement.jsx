@@ -1,3 +1,4 @@
+import API_URL from '../../apiConfig';
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
@@ -13,7 +14,7 @@ const OfficialsManagement = () => {
         const fetchUsers = async () => {
             try {
                 // Replace with your server endpoint
-                const response = await axios.get(`${import.meta.env.VITE_API_URL}/getusersmanage`);
+                const response = await axios.get(`${API_URL}/getusersmanage`);
                 setUsers(response.data);
             } catch (error) {
                 console.error("Error fetching users:", error);

@@ -1,3 +1,4 @@
+import API_URL from '../../apiConfig';
 import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../../Provider'
 import { IoMdClose, IoMdArrowDropdown, IoMdArrowDropright } from "react-icons/io";
@@ -37,36 +38,36 @@ function VideoManager() {
   // All available batches from Admission page
   const allBatches = [
     { value: 'Hsc-27-Marketing', label: 'Hsc-27 (Marketing)' },
-    { value: 'Sat 1', label: 'শনি à§­à¦Ÿা (HSC 27)' },
-    { value: 'Sat 2', label: 'শনি à§®à¦Ÿা (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡ন SSC 27- HSC 29)' },
-    { value: 'Sat 3', label: 'শনি à§®à¦Ÿা (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡ন SSC 28 - HSC 30)' },
-    { value: 'Sat 4', label: 'শনি à§§à§¦à¦Ÿা (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡ন SSC 27 - HSC 29)' },
-    { value: 'Sat 5', label: 'শনি à§§à§§à¦Ÿা - SSC 26 (All Batch)' },
-    { value: 'Sat 12', label: 'শনি à§§à§¨à¦Ÿা - New Nine (SSC 28 Special Batch) ' },
-    { value: 'Sat 6', label: 'শনি à§¨à¦Ÿা (HSC 27)' },
-    { value: 'Sat 7', label: 'শনি à§©à¦Ÿা - HSC 27 (New Batch)' },
-    { value: 'Sat 8', label: 'শনি à§ªà¦Ÿা (SSC 27)' },
-    { value: 'Sat 9', label: 'শনি à§«à¦Ÿা - SSC 28 (New Nine)' },
-    { value: 'Sat 10', label: 'শনি à§¬à¦Ÿা (SSC 28)' },
-    { value: 'Sat 11', label: 'শনি ৭ à¦Ÿা ( SSC 27 - HSC 29)' },
-    { value: 'Sun 1', label: 'রবি à§­à¦Ÿা (HSC 27)' },
-    { value: 'Sun 2', label: 'রবি à§®à¦Ÿা (HSC 26)' },
-    { value: 'Sun 3', label: 'রবি à§¯à¦Ÿা - HSC 27 (New Batch)' },
-    { value: 'Sun 4', label: 'রবি à§§à§¦à¦Ÿা (HSC 28)' },
-    { value: 'Sun 5', label: 'রবি à§§à§§à¦Ÿা' },
-    { value: 'Sun 6', label: 'রবি à§¨à¦Ÿা (HSC 26)' },
-    { value: 'Sun 7', label: 'রবি à§©à¦Ÿা (HSC 27)' },
-    { value: 'Sun 8', label: 'রবি à§ªà¦Ÿা (HSC 26)' },
-    { value: 'Sun 9', label: 'রবি à§«à¦Ÿা (HSC 27)' },
-    { value: 'Sun 10', label: 'রবি à§¬à¦Ÿা (SSC 27 - HSC 29)' },
-    { value: 'Sun 11', label: 'রবি à§­à¦Ÿা - SSC 28 (New Nine)' },
+    { value: 'Sat 1', label: 'শনি ৭টা (HSC 27)' },
+    { value: 'Sat 2', label: 'শনি ৮টা (নিউ নাইন SSC 27- HSC 29)' },
+    { value: 'Sat 3', label: 'শনি ৮টা (নিউ নাইন SSC 28 - HSC 30)' },
+    { value: 'Sat 4', label: 'শনি ১০টা (নিউ নাইন SSC 27 - HSC 29)' },
+    { value: 'Sat 5', label: 'শনি ১১টা - SSC 26 (All Batch)' },
+    { value: 'Sat 12', label: 'শনি ১২টা - New Nine (SSC 28 Special Batch) ' },
+    { value: 'Sat 6', label: 'শনি ২টা (HSC 27)' },
+    { value: 'Sat 7', label: 'শনি ৩টা - HSC 27 (New Batch)' },
+    { value: 'Sat 8', label: 'শনি ৪টা (SSC 27)' },
+    { value: 'Sat 9', label: 'শনি ৫টা - SSC 28 (New Nine)' },
+    { value: 'Sat 10', label: 'শনি ৬টা (SSC 28)' },
+    { value: 'Sat 11', label: 'শনি ৭টা ( SSC 27 - HSC 29)' },
+    { value: 'Sun 1', label: 'রবি ৭টা (HSC 27)' },
+    { value: 'Sun 2', label: 'রবি ৮টা (HSC 26)' },
+    { value: 'Sun 3', label: 'রবি ৯টা - HSC 27 (New Batch)' },
+    { value: 'Sun 4', label: 'রবি ১০টা (HSC 28)' },
+    { value: 'Sun 5', label: 'রবি ১১টা' },
+    { value: 'Sun 6', label: 'রবি ২টা (HSC 26)' },
+    { value: 'Sun 7', label: 'রবি ৩টা (HSC 27)' },
+    { value: 'Sun 8', label: 'রবি ৪টা (HSC 26)' },
+    { value: 'Sun 9', label: 'রবি ৫টা (HSC 27)' },
+    { value: 'Sun 10', label: 'রবি ৬টা (SSC 27 - HSC 29)' },
+    { value: 'Sun 11', label: 'রবি ৭টা - SSC 28 (New Nine)' },
     { value: 'HSC 26 Admission cancel', label: 'HSC 26 Admission cancel' },
     { value: 'HSC 27 Admission cancel', label: 'HSC 27 Admission cancel' },
     { value: 'SSC 26 class 10 Admission cancel', label: 'SSC 26 class 10 Admission cancel' },
     { value: 'SSC 27 class 9 Admission cancel', label: 'SSC 27 class 9 Admission cancel' },
     { value: 'Exam Batch HSC 26', label: 'Exam Batch HSC 26' },
-    { value: 'Exam Batch (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡ন SSC 27 - HSC 29)', label: 'Exam Batch (à¦¨à¦¿à¦‰ à¦¨à¦¾à¦‡ন SSC 27 - HSC 29)' },
-    { value: 'Exam Batch (à¦¨à¦¿à¦‰ à¦Ÿà§‡ন SSC 26 - HSC 28)', label: 'Exam Batch (à¦¨à¦¿à¦‰ à¦Ÿà§‡ন SSC 26 - HSC 28)' },
+    { value: 'Exam Batch (নিউ নাইন SSC 27 - HSC 29)', label: 'Exam Batch (নিউ নাইন SSC 27 - HSC 29)' },
+    { value: 'Exam Batch (নিউ টেন SSC 26 - HSC 28)', label: 'Exam Batch (নিউ টেন SSC 26 - HSC 28)' },
     { value: 'SSC 25 (Physics Olympiad)', label: 'SSC 25 (Physics Olympiad)' },
     { value: 'Class 9 (SSC 27) Phy Champ', label: 'Class 9 (SSC 27) Phy Champ' },
     { value: 'Class 10 (SSC 26) Phy Champ', label: 'Class 10 (SSC 26) Phy Champ' }
@@ -77,7 +78,7 @@ function VideoManager() {
   }, [])
 
   const fetchCourses = () => {
-    fetch(`${import.meta.env.VITE_API_URL}/getVideocourses`)
+    fetch(`${API_URL}/getVideocourses`)
       .then(res => res.json())
       .then(data => {
         const sorted = data.sort((a, b) => a.priority - b.priority)
@@ -104,8 +105,8 @@ function VideoManager() {
 
   // Access control helper functions
   const handleBatchToggle = (batchValue) => {
-    setSelectedBatches(prev => 
-      prev.includes(batchValue) 
+    setSelectedBatches(prev =>
+      prev.includes(batchValue)
         ? prev.filter(b => b !== batchValue)
         : [...prev, batchValue]
     )
@@ -140,7 +141,7 @@ function VideoManager() {
     const id = crypto.randomUUID()
     const details = { title, chapters: [], priority, thumbnail, id }
 
-    fetch(`${import.meta.env.VITE_API_URL}/addVideocourse`, {
+    fetch(`${API_URL}/addVideocourse`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(details)
@@ -175,7 +176,7 @@ function VideoManager() {
       id: courseModal.data.id
     }
 
-    fetch(`${import.meta.env.VITE_API_URL}/Videocourseupdate/${courseModal.data.id}`, {
+    fetch(`${API_URL}/Videocourseupdate/${courseModal.data.id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(details)
@@ -210,7 +211,7 @@ function VideoManager() {
       cancelButtonText: 'Cancel',
     }).then((result) => {
       if (result.isConfirmed) {
-        fetch(`${import.meta.env.VITE_API_URL}/Videocourse/delete/${course.id}`, {
+        fetch(`${API_URL}/Videocourse/delete/${course.id}`, {
           method: "DELETE"
         })
           .then(res => res.json())
@@ -232,23 +233,23 @@ function VideoManager() {
     const priority = e.target.priority.value
     const thumbnail = uploadedImageUrl || '';
     const id = crypto.randomUUID()
-    
+
     // Build access object
-    const access = accessType === 'public' 
+    const access = accessType === 'public'
       ? { type: 'public' }
-      : { 
-          type: 'private',
-          batches: selectedBatches,
-          ids: customIds
-        }
-    
+      : {
+        type: 'private',
+        batches: selectedBatches,
+        ids: customIds
+      }
+
     const details = { title, Videos: [], priority, thumbnail, id, access }
 
     const course = allCourses.find(c => c.id === chapterModal.courseId)
     const updatedChapters = [...course.chapters, details]
     const updatedCourse = { ...course, chapters: updatedChapters }
 
-    fetch(`${import.meta.env.VITE_API_URL}/Videocourseupdate/${course.id}`, {
+    fetch(`${API_URL}/Videocourseupdate/${course.id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(updatedCourse)
@@ -279,16 +280,16 @@ function VideoManager() {
     const title = e.target.title.value
     const priority = e.target.priority.value
     const thumbnail = uploadedImageUrl || chapterModal.data.thumbnail;
-    
+
     // Build access object
-    const access = accessType === 'public' 
+    const access = accessType === 'public'
       ? { type: 'public' }
-      : { 
-          type: 'private',
-          batches: selectedBatches,
-          ids: customIds
-        }
-    
+      : {
+        type: 'private',
+        batches: selectedBatches,
+        ids: customIds
+      }
+
     const details = {
       title, priority, thumbnail,
       Videos: chapterModal.data.Videos,
@@ -300,10 +301,10 @@ function VideoManager() {
     const updatedChapters = course.chapters.map(ch =>
       ch.id === chapterModal.data.id ? details : ch
     ).sort((a, b) => a.priority - b.priority)
-    
+
     const updatedCourse = { ...course, chapters: updatedChapters }
 
-    fetch(`${import.meta.env.VITE_API_URL}/updateVideochapter/${chapterModal.data.id}`, {
+    fetch(`${API_URL}/updateVideochapter/${chapterModal.data.id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(details)
@@ -341,7 +342,7 @@ function VideoManager() {
         const updatedChapters = course.chapters.filter(ch => ch.id !== chapter.id)
         const updatedCourse = { ...course, chapters: updatedChapters }
 
-        fetch(`${import.meta.env.VITE_API_URL}/Videocourseupdate/${course.id}`, {
+        fetch(`${API_URL}/Videocourseupdate/${course.id}`, {
           method: 'PUT',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(updatedCourse)
@@ -380,7 +381,7 @@ function VideoManager() {
     )
     const updatedCourse = { ...course, chapters: updatedChapters }
 
-    fetch(`${import.meta.env.VITE_API_URL}/updateVideochapter/${chapter.id}`, {
+    fetch(`${API_URL}/updateVideochapter/${chapter.id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(updatedChapter)
@@ -426,7 +427,7 @@ function VideoManager() {
     )
     const updatedCourse = { ...course, chapters: updatedChapters }
 
-    fetch(`${import.meta.env.VITE_API_URL}/updateVideofile/${videoModal.data.id}`, {
+    fetch(`${API_URL}/updateVideofile/${videoModal.data.id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(details)
@@ -468,7 +469,7 @@ function VideoManager() {
         )
         const updatedCourse = { ...course, chapters: updatedChapters }
 
-        fetch(`${import.meta.env.VITE_API_URL}/updateVideochapter/${chapter.id}`, {
+        fetch(`${API_URL}/updateVideochapter/${chapter.id}`, {
           method: 'PUT',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(updatedChapter)
@@ -489,7 +490,7 @@ function VideoManager() {
   const closeModal = () => {
     // Stop video playback by removing the selected video
     setSelectedVideo(null)
-    
+
     setCourseModal({ type: '', data: {} })
     setChapterModal({ type: '', data: {}, courseId: '' })
     setVideoModal({ type: '', data: {}, chapterId: '', courseId: '' })
@@ -606,7 +607,7 @@ function VideoManager() {
                             <h3 className='font-semibold text-sm sm:text-base text-cyan-700 truncate'>{chapter.title}</h3>
                             {chapter.access?.type === 'private' && (
                               <span className='px-1.5 py-0.5 bg-orange-500 text-white text-xs font-semibold rounded whitespace-nowrap'>
-                                ðŸ”’ PRIVATE
+                                🔒 PRIVATE
                               </span>
                             )}
                           </div>
@@ -624,7 +625,7 @@ function VideoManager() {
                             onClick={() => {
                               const chapterData = chapter
                               setChapterModal({ type: 'edit', data: chapterData, courseId: course.id })
-                              
+
                               // Load existing access control data
                               if (chapterData.access) {
                                 setAccessType(chapterData.access.type || 'public')
@@ -635,7 +636,7 @@ function VideoManager() {
                                 setSelectedBatches([])
                                 setCustomIds([])
                               }
-                              
+
                               document.getElementById('modal_chapter').showModal()
                             }}
                             className='p-1 sm:p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors'
@@ -675,7 +676,7 @@ function VideoManager() {
                             <div className='flex-grow cursor-pointer min-w-0' onClick={() => playVideo(video)}>
                               <p className='font-medium text-xs sm:text-sm text-gray-800 truncate'>{video.title}</p>
                               <p className='text-xs text-gray-500'>
-                                {video.type === 'reel' ? 'ðŸŽ¬ Reel' : 'ðŸŽ¥ Video'}
+                                {video.type === 'reel' ? '🎬 Reel' : '🎥 Video'}
                               </p>
                             </div>
                             <div className='flex flex-col sm:flex-row gap-0.5 sm:gap-1 flex-shrink-0'>
@@ -739,7 +740,7 @@ function VideoManager() {
             <div className='space-y-3'>
               <div>
                 <p className='font-semibold'>Upload Thumbnail:</p>
-                <SmartImageUpload 
+                <SmartImageUpload
                   onImageUploaded={handleImageUpload}
                   initialImage={courseModal.type === 'edit' ? courseModal.data.thumbnail : null}
                 />
@@ -794,7 +795,7 @@ function VideoManager() {
             <div className='space-y-3'>
               <div>
                 <p className='font-semibold'>Upload Thumbnail:</p>
-                <SmartImageUpload 
+                <SmartImageUpload
                   onImageUploaded={handleImageUpload}
                   initialImage={chapterModal.type === 'edit' ? chapterModal.data.thumbnail : null}
                 />
@@ -958,7 +959,7 @@ function VideoManager() {
             <div className='space-y-3'>
               <div>
                 <p className='font-semibold'>Upload Cover Image:</p>
-                <SmartImageUpload 
+                <SmartImageUpload
                   onImageUploaded={handleImageUpload}
                   initialImage={videoModal.type === 'edit' ? videoModal.data.thumbnail : null}
                 />
@@ -993,8 +994,8 @@ function VideoManager() {
                   defaultValue={videoModal.type === 'edit' ? (videoModal.data.type || 'video') : 'video'}
                   className="select select-bordered select-info w-full"
                 >
-                  <option value="video">ðŸŽ¥ Regular Video</option>
-                  <option value="reel">ðŸŽ¬ Short Reel</option>
+                  <option value="video">🎥 Regular Video</option>
+                  <option value="reel">🎬 Short Reel</option>
                 </select>
                 <p className='text-xs text-gray-500 mt-1'>
                   Use 'Reel' for YouTube Shorts or quick videos (&lt;60s)
@@ -1030,8 +1031,8 @@ function VideoManager() {
         <div className="modal-box max-w-4xl w-11/12">
           <div className="modal-action mt-0">
             <form method="dialog">
-              <button 
-                className="text-red-600 text-xl sm:text-2xl" 
+              <button
+                className="text-red-600 text-xl sm:text-2xl"
                 onClick={() => {
                   setSelectedVideo(null)
                   document.getElementById('modal_player')?.close()

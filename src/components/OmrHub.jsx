@@ -1,3 +1,4 @@
+import API_URL from '../apiConfig';
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../Provider';
 import {
@@ -36,11 +37,26 @@ const OmrHub = ({ exam, onClose, students }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [negativeMarking, setNegativeMarking] = useState(0);
-    const [activeSet, setActiveSet] = useState('A');
+    // activeQuestions: how many of the 75 fixed bubbles to evaluate
+    // Valid options: 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75
+    const VALID_Q_OPTIONS = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75];
+    const snapToValidQ = (n) => VALID_Q_OPTIONS.reduce((prev, cur) => Math.abs(cur - n) < Math.abs(prev - n) ? cur : prev);
+    const [activeQuestions, setActiveQuestions] = useState(snapToValidQ(exam?.mcqTotal || 25));
 
-    // Idea 6: Offline Auto-Save to LocalStorage
+    // Editing states
+    const [editingRollId, setEditingRollId] = useState(null);
+    const [tempRollValue, setTempRollValue] = useState('');
+
+    // Auto-Save to LocalStorage — strip capturedImg to avoid QuotaExceededError
     useEffect(() => {
-        localStorage.setItem(`omr_results_draft_${exam._id}`, JSON.stringify(scannedResults));
+        try {
+            const toStore = scannedResults.map(({ capturedImg, ...rest }) => rest);
+            localStorage.setItem(`omr_results_draft_${exam._id}`, JSON.stringify(toStore));
+        } catch (e) {
+            if (e.name === 'QuotaExceededError') {
+                console.warn('LocalStorage full — draft not saved.');
+            }
+        }
     }, [scannedResults, exam._id]);
 
     const handleClearDraft = () => {
@@ -70,9 +86,49 @@ const OmrHub = ({ exam, onClose, students }) => {
             return;
         }
 
+        // ── Answer Key completeness check
+        const answeredCount = Object.keys(answerKey).length;
+        if (answeredCount < activeQuestions) {
+            const proceed = window.confirm(
+                `⚠️ Answer Key অসম্পূর্ণ!\n\n` +
+                `${answeredCount}/${activeQuestions} প্রশ্নের উত্তর দেয়া হয়েছে।\n` +
+                `বাকি ${activeQuestions - answeredCount} টি প্রশ্নের উত্তর নেই — ওগুলো "nokey" হিসেবে পাবে।\n\n` +
+                `তারপরো scan সাবমিট করতে চাইলে OK ভুলুন।`
+            );
+            if (!proceed) return;
+        }
+
+        // ── Duplicate roll detection
+        const existingIndex = scannedResults.findIndex(
+            r => r.roll.toString().trim() === data.roll.toString().trim()
+        );
+        if (existingIndex !== -1) {
+            const overwrite = window.confirm(
+                `⚠️ Duplicate Scan!\n\nRoll: ${data.roll} ইতিমধ্যে scan করা আছে।\n\n` +
+                `পুরনো result override করতে চাইলে OK ভুলুন।`
+            );
+            if (!overwrite) return;
+            // Override the existing entry
+            const student = identifyStudent(data.roll);
+            const finalScore = Math.max(0, data.score - (data.wrong * negativeMarking));
+            const updatedResult = {
+                ...data,
+                score: parseFloat(finalScore.toFixed(2)),
+                studentName: student.name,
+                studentBatch: student.batch,
+                studentPhone: student.phone,
+                writtenMarks: scannedResults[existingIndex].writtenMarks || 0,
+                id: scannedResults[existingIndex].id,
+                scanTimestamp: new Date().toISOString()
+            };
+            setScannedResults(prev => prev.map((r, i) => i === existingIndex ? updatedResult : r));
+            notifySuccess(`Re-scanned: ${student.name} (updated)`);
+            return;
+        }
+
+        // ── Normal new scan
         const student = identifyStudent(data.roll);
         const finalScore = Math.max(0, data.score - (data.wrong * negativeMarking));
-
         const result = {
             ...data,
             score: parseFloat(finalScore.toFixed(2)),
@@ -84,7 +140,7 @@ const OmrHub = ({ exam, onClose, students }) => {
             scanTimestamp: new Date().toISOString()
         };
         setScannedResults(prev => [result, ...prev]);
-        notifySuccess(`Scanned: ${student.name}`);
+        notifySuccess(`✓ Scanned: ${student.name}`);
     };
 
     const handleUpdateWritten = (id, marks) => {
@@ -93,12 +149,25 @@ const OmrHub = ({ exam, onClose, students }) => {
         ));
     };
 
+    const handleUpdateRoll = (id, newRoll) => {
+        const student = identifyStudent(newRoll);
+        setScannedResults(prev => prev.map(res =>
+            res.id === id ? {
+                ...res,
+                roll: newRoll,
+                studentName: student.name,
+                studentBatch: student.batch,
+                studentPhone: student.phone
+            } : res
+        ));
+    };
+
     const handleSaveAll = async () => {
         if (scannedResults.length === 0) return;
         setIsSaving(true);
 
         try {
-            const formattedResults = scannedResults.map(res => ({
+            const formattedBatch = scannedResults.map(res => ({
                 id: res.roll.toString(),
                 name: res.studentName,
                 mcqMarks: res.score,
@@ -109,17 +178,29 @@ const OmrHub = ({ exam, onClose, students }) => {
                 writenTotal: exam.writenTotal
             }));
 
+            // Merge Logic: Overwrite existing student result if ID matches, else append
+            const existingResults = [...(exam.results || [])];
+            const finalResultsMap = new Map();
+
+            // First, load existing results into a map
+            existingResults.forEach(r => finalResultsMap.set(r.id, r));
+
+            // Then, overwrite with new batch (this handles updates/merges)
+            formattedBatch.forEach(r => finalResultsMap.set(r.id, r));
+
+            const finalResultsArray = Array.from(finalResultsMap.values());
+
             // 1. Update Exam Collection
-            const examRes = await fetch(`${import.meta.env.VITE_API_URL}/exam/update/${exam._id}`, {
+            const examRes = await fetch(`${API_URL}/exam/update/${exam._id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ results: [...(exam.results || []), ...formattedResults] })
+                body: JSON.stringify({ results: finalResultsArray })
             });
 
             if (!examRes.ok) throw new Error("Failed to update exam");
 
             // 2. Update Student Profiles (Bulk)
-            const studentTempResults = formattedResults.map(res => ({
+            const studentTempResults = formattedBatch.map(res => ({
                 id: res.id,
                 exams: [{
                     title: exam.title,
@@ -136,7 +217,7 @@ const OmrHub = ({ exam, onClose, students }) => {
                 }]
             }));
 
-            const bulkRes = await fetch(`${import.meta.env.VITE_API_URL}/addbulkresults`, {
+            const bulkRes = await fetch(`${API_URL}/addbulkresults`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(studentTempResults)
@@ -154,6 +235,36 @@ const OmrHub = ({ exam, onClose, students }) => {
             notifyFailed("Error saving results");
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    // ── Bulk SMS ─────────────────────────────────────────────────────────
+    const [isSendingSms, setIsSendingSms] = useState(false);
+    const handleSendBulkSms = async () => {
+        if (scannedResults.length === 0) return;
+        setIsSendingSms(true);
+        try {
+            const messages = scannedResults
+                .filter(r => r.studentPhone)
+                .map(r => ({
+                    phone: r.studentPhone,
+                    message: `Dear Guardian, ${r.studentName} scored ${r.score}/${exam.mcqTotal} in "${exam.title}". Keep it up! -Sohag Physics`
+                }));
+            if (messages.length === 0) {
+                notifyFailed('No phone numbers found for scanned students.');
+                return;
+            }
+            const res = await fetch(`${API_URL}/send-bulk-sms`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages })
+            });
+            if (res.ok) notifySuccess(`SMS sent to ${messages.length} guardians!`);
+            else notifyFailed('SMS sending failed. Check API config.');
+        } catch {
+            notifyFailed('SMS gateway error.');
+        } finally {
+            setIsSendingSms(false);
         }
     };
 
@@ -176,7 +287,7 @@ const OmrHub = ({ exam, onClose, students }) => {
             "Correct Answers": res.correct,
             "Wrong Answers": res.wrong,
             "Unattempted": res.unattempted,
-            "Scan Time": res.time
+            "Scan Time": res.scanTimestamp ? new Date(res.scanTimestamp).toLocaleString() : '-'
         }));
 
         const worksheet = XLSX.utils.json_to_sheet(exportData);
@@ -334,9 +445,9 @@ const OmrHub = ({ exam, onClose, students }) => {
                             <h3 className="font-black text-slate-800 text-lg uppercase">{exam.title}</h3>
                             <div className="flex gap-4 mt-1">
                                 <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">Batch: {exam.batch}</span>
-                                <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">Target: {exam.mcqTotal} MCQ</span>
-                                <span className={`text-xs font-bold px-2 py-0.5 rounded ${Object.keys(answerKey).length === exam.mcqTotal ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
-                                    Key: {Object.keys(answerKey).length} / {exam.mcqTotal} set
+                                <span className="text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded">Active: {activeQuestions} Q</span>
+                                <span className={`text-xs font-bold px-2 py-0.5 rounded ${Object.keys(answerKey).length >= activeQuestions ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
+                                    Key: {Object.keys(answerKey).length} / {activeQuestions}
                                 </span>
                             </div>
                         </div>
@@ -364,40 +475,56 @@ const OmrHub = ({ exam, onClose, students }) => {
                                     embedded={true}
                                     answerKey={answerKey}
                                     setAnswerKey={setAnswerKey}
+                                    activeQuestions={activeQuestions}
+                                    setActiveQuestions={setActiveQuestions}
                                 />
 
-                                {/* Pro Feature: Advanced Config */}
+                                {/* ── Premium Exam Config Panel ── */}
                                 <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
                                     <h4 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
-                                        <MdSettings className="text-sky-500" /> Advanced Exam Configuration
+                                        <MdSettings className="text-sky-500" /> Exam Scoring Configuration
                                     </h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                                    {/* Live Exam Summary */}
+                                    <div className="grid grid-cols-3 gap-4 mb-6">
+                                        <div className="bg-gradient-to-br from-sky-50 to-blue-50 border border-sky-200 rounded-2xl p-4 text-center">
+                                            <p className="text-3xl font-black text-sky-600">{activeQuestions}</p>
+                                            <p className="text-[10px] font-black text-sky-400 uppercase tracking-wider mt-1">Active Questions</p>
+                                        </div>
+                                        <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-4 text-center">
+                                            <p className="text-3xl font-black text-emerald-600">{75 - activeQuestions}</p>
+                                            <p className="text-[10px] font-black text-emerald-400 uppercase tracking-wider mt-1">Ignored Bubbles</p>
+                                        </div>
+                                        <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4 text-center">
+                                            <p className="text-3xl font-black text-amber-600">{Object.keys(answerKey).length}</p>
+                                            <p className="text-[10px] font-black text-amber-400 uppercase tracking-wider mt-1">Key Answers Set</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
-                                            <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">Negative Marking</label>
-                                            <div className="flex items-center gap-4">
-                                                <input
-                                                    type="number"
-                                                    step="0.25"
-                                                    value={negativeMarking}
-                                                    onChange={(e) => setNegativeMarking(parseFloat(e.target.value) || 0)}
-                                                    className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-sky-500 outline-none font-bold transition-all"
-                                                    placeholder="0.25"
-                                                />
-                                                <p className="text-xs text-slate-400 font-medium w-48">Deduction per wrong MCQ answer</p>
+                                            <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">Negative Marking (per wrong)</label>
+                                            <div className="flex items-center gap-3">
+                                                {[0, 0.25, 0.5, 1].map(v => (
+                                                    <button
+                                                        key={v}
+                                                        onClick={() => setNegativeMarking(v)}
+                                                        className={`flex-1 py-3 rounded-2xl font-black text-sm transition-all ${negativeMarking === v
+                                                            ? 'bg-rose-500 text-white shadow-lg shadow-rose-200'
+                                                            : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                                                    >
+                                                        {v === 0 ? 'OFF' : `-${v}`}
+                                                    </button>
+                                                ))}
                                             </div>
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">Active Question Set</label>
-                                            <div className="flex gap-2">
-                                                {['A', 'B', 'C', 'D'].map(set => (
-                                                    <button
-                                                        key={set}
-                                                        onClick={() => setActiveSet(set)}
-                                                        className={`flex-1 py-4 rounded-2xl font-black transition-all ${activeSet === set ? 'bg-sky-600 text-white shadow-lg shadow-sky-200' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
-                                                    >
-                                                        Set {set}
-                                                    </button>
-                                                ))}
+                                            <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">Scoring Formula</label>
+                                            <div className="bg-slate-50 rounded-2xl p-4 border font-mono text-xs text-slate-600">
+                                                <span className="text-emerald-600 font-black">Score</span> = Correct × 1
+                                                {negativeMarking > 0 && <span className="text-rose-500"> − Wrong × {negativeMarking}</span>}
+                                                <br />
+                                                <span className="text-sky-500">Max</span> = {activeQuestions} marks
                                             </div>
                                         </div>
                                     </div>
@@ -411,6 +538,7 @@ const OmrHub = ({ exam, onClose, students }) => {
                                     exam={{ ...exam, mcqTotal: exam.mcqTotal || 0 }}
                                     onSave={(data) => handleScanComplete(data)}
                                     externalKey={answerKey}
+                                    activeQuestions={activeQuestions}
                                     embedded={true}
                                 />
                             </div>
@@ -541,13 +669,39 @@ const OmrHub = ({ exam, onClose, students }) => {
                                                     <tr key={res.id} className="hover:bg-slate-50 transition-colors">
                                                         <td className="py-4 px-6">
                                                             <div className="flex items-center gap-3">
-                                                                <div className="w-10 h-10 bg-sky-100 rounded-xl flex items-center justify-center font-black text-sky-600 text-xs shadow-sm">
-                                                                    {res.roll}
+                                                                <div
+                                                                    className="w-12 h-10 bg-sky-100 rounded-xl flex items-center justify-center font-black text-sky-600 text-xs shadow-sm cursor-pointer hover:bg-sky-200 transition-colors"
+                                                                    onClick={() => {
+                                                                        setEditingRollId(res.id);
+                                                                        setTempRollValue(res.roll);
+                                                                    }}
+                                                                >
+                                                                    {editingRollId === res.id ? (
+                                                                        <input
+                                                                            autoFocus
+                                                                            className="w-full h-full bg-transparent text-center outline-none"
+                                                                            value={tempRollValue}
+                                                                            onChange={(e) => setTempRollValue(e.target.value)}
+                                                                            onBlur={() => {
+                                                                                handleUpdateRoll(res.id, tempRollValue);
+                                                                                setEditingRollId(null);
+                                                                            }}
+                                                                            onKeyDown={(e) => {
+                                                                                if (e.key === 'Enter') {
+                                                                                    handleUpdateRoll(res.id, tempRollValue);
+                                                                                    setEditingRollId(null);
+                                                                                }
+                                                                            }}
+                                                                        />
+                                                                    ) : (
+                                                                        res.roll
+                                                                    )}
                                                                 </div>
                                                                 <div>
                                                                     <p className="font-black text-slate-800 text-sm">{res.studentName}</p>
                                                                     <p className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
-                                                                        <MdCheckCircle size={12} className="text-emerald-500" /> Identity Verified
+                                                                        <MdCheckCircle size={12} className={res.studentName === 'Unknown Student' ? 'text-amber-500' : 'text-emerald-500'} />
+                                                                        {res.studentName === 'Unknown Student' ? 'Unknown' : 'Identity Verified'}
                                                                     </p>
                                                                 </div>
                                                             </div>
@@ -576,8 +730,8 @@ const OmrHub = ({ exam, onClose, students }) => {
                                                         </td>
                                                         <td>
                                                             <div className="flex gap-2">
-                                                                <span className="text-emerald-500 font-bold text-xs bg-emerald-50 px-1.5 py-0.5 rounded">âœ“{res.correct}</span>
-                                                                <span className="text-red-400 font-bold text-xs bg-red-50 px-1.5 py-0.5 rounded">âœ—{res.wrong}</span>
+                                                                <span className="text-emerald-500 font-bold text-xs bg-emerald-50 px-1.5 py-0.5 rounded">✓{res.correct}</span>
+                                                                <span className="text-red-400 font-bold text-xs bg-red-50 px-1.5 py-0.5 rounded">✗{res.wrong}</span>
                                                             </div>
                                                         </td>
                                                         <td className="flex gap-2">

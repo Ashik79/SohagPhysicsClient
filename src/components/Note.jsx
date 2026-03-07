@@ -1,3 +1,4 @@
+import API_URL from '../apiConfig';
 import React, { useContext, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../Provider';
@@ -11,7 +12,7 @@ const {notifyFailed}=useContext(AuthContext)
     setLoading(true)
     const id = event.target.id.value;
 
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/student/${id}`)
+    const res = await fetch(`${API_URL}/student/${id}`)
     const student = await res.json()
     if (student.id) {
       setId(id)

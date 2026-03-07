@@ -1,3 +1,4 @@
+import API_URL from '../apiConfig';
 import React, { useContext, useEffect, useState } from 'react'
 import { Link, Navigate, useLoaderData } from 'react-router-dom'
 import { AuthContext } from '../Provider'
@@ -123,7 +124,7 @@ function ProgramEntry() {
                 const temp = { ...user, waver, waverReason, monthlyAmount }
                 setUser(temp)
 
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/addpayment/${id}`, {
+                const res = await fetch(`${API_URL}/addpayment/${id}`, {
                     method: 'PUT',
                     headers: {
                         'content-type': 'application/json'
@@ -180,7 +181,7 @@ function ProgramEntry() {
                 const temp = { ...user, waver, waverReason }
                 setUser(temp)
 
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/addpayment/${id}`, {
+                const res = await fetch(`${API_URL}/addpayment/${id}`, {
                     method: 'PUT',
                     headers: {
                         'content-type': 'application/json'
@@ -237,7 +238,7 @@ function ProgramEntry() {
                 const temp = { ...user, waver, waverReason }
                 setUser(temp)
 
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/addpayment/${id}`, {
+                const res = await fetch(`${API_URL}/addpayment/${id}`, {
                     method: 'PUT',
                     headers: {
                         'content-type': 'application/json'
@@ -292,7 +293,7 @@ function ProgramEntry() {
 
                 user.programs.push(programData)
 
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/addpayment/${id}`, {
+                const res = await fetch(`${API_URL}/addpayment/${id}`, {
                     method: 'PUT',
                     headers: {
                         'content-type': 'application/json'

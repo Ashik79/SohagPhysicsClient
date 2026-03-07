@@ -1,28 +1,33 @@
 import React, { forwardRef } from 'react';
 
-const OPTION_LABELS = ['A', 'B', 'C', 'D', 'E'];
+// ── CONSTANTS FOR PERFECT AI ALIGNMENT ─────────────────────────
+// ALL percentages match exactly with the WebWorker & Python Engine
+export const ENGINE = {
+    qStartY: 36.5,
+    qRowSpace: 2.25,
+    gapHeight: 0.65,
 
-const PremiumOmrSheet = forwardRef(({ config, setLabel = 'A', questionOrder, answerKey, isAnswerKeyMode = false, copyNum = 1 }, ref) => {
-    const numOpts = config?.optionsPerQuestion || 4;
-    const totalQ = config?.totalQuestions || 75;
+    colBaseX: [2, 35, 68],
+    bubbleOffsetX: 8,
+    bubbleSpacingX: 5.5,
 
-    // â”€â”€ Layout constants (percentages over the inner bounding box) â”€â”€
-    const questionsPerCol = Math.ceil(totalQ / 3);
-    const numCols = 3;
+    rollStartX: 8,
+    rollStartY: 16.5,
+    rollColSpace: 6,
+    rollRowSpace: 1.6,
 
-    // Bubble grid starts at 44% from top of inner box, ends ~97%
-    const qStartY = 44.5;
-    const availH = 52.5; // percent height for question rows
-    const qRowSpace = availH / questionsPerCol;
-    const gapHeight = 0.6; // extra gap every 5 questions
+    setStartX: 56,
+    setStartY: 16.5,
+    setRowSpace: 3.5,
+};
 
+const OPTION_LABELS = ['A', 'B', 'C', 'D'];
+const TOTAL_Q = 75;
+const Q_PER_COL = 25;
+const NUM_COLS = 3;
+
+const PremiumOmrSheet = forwardRef(({ setLabel = 'A', answerKey, isAnswerKeyMode = false, copyNum = 1 }, ref) => {
     const dropOutColor = isAnswerKeyMode ? '#cbd5e1' : '#000000';
-
-    // Bubble X calculation: 3 columns, each column has numOpts bubbles + Q number
-    // Inner box width divided into 3 equal cols, each col has fixed pattern
-    const colWidth = 97 / numCols; // % of container
-    const colBaseX = (colIdx) => 1.5 + colIdx * colWidth;
-    const bubbleX = (colIdx, optIdx) => colBaseX(colIdx) + 7 + optIdx * (numOpts === 5 ? 4.6 : 5.5);
 
     return (
         <div
@@ -34,456 +39,301 @@ const PremiumOmrSheet = forwardRef(({ config, setLabel = 'A', questionOrder, ans
                 pageBreakAfter: 'always',
                 overflow: 'hidden',
                 fontFamily: '"Arial Narrow", Arial, Helvetica, sans-serif',
-                border: '2px solid #000',
             }}
         >
-            {/* â”€â”€ CORNER REGISTRATION MARKS (CV2 targets) â”€â”€ */}
-            {/* Top-left */}
-            <div style={{ position: 'absolute', top: 10, left: 10, width: 20, height: 20, background: '#000', zIndex: 20 }} />
-            {/* Top-right */}
-            <div style={{ position: 'absolute', top: 10, right: 10, width: 20, height: 20, background: '#000', zIndex: 20 }} />
-            {/* Bottom-left */}
-            <div style={{ position: 'absolute', bottom: 10, left: 10, width: 20, height: 20, background: '#000', zIndex: 20 }} />
-            {/* Bottom-right */}
-            <div style={{ position: 'absolute', bottom: 10, right: 10, width: 20, height: 20, background: '#000', zIndex: 20 }} />
+            {/* ── CORNER REGISTRATION MARKS (CV2 alignment targets) ── */}
+            {/* These define the EXACT bounds of the warped rectangle (Inner Content Box) */}
+            <div style={{ position: 'absolute', top: 20, left: 20, width: 24, height: 24, background: '#000', borderRadius: 2 }} className="marker" />
+            <div style={{ position: 'absolute', top: 20, right: 20, width: 24, height: 24, background: '#000', borderRadius: 2 }} className="marker" />
+            <div style={{ position: 'absolute', bottom: 20, left: 20, width: 24, height: 24, background: '#000', borderRadius: 2 }} className="marker" />
+            <div style={{ position: 'absolute', bottom: 20, right: 20, width: 24, height: 24, background: '#000', borderRadius: 2 }} className="marker" />
 
-            {/* â”€â”€ TIMING TRACKS â”€â”€ */}
-            <div style={{ position: 'absolute', top: 38, left: 4, bottom: 38, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', zIndex: 0 }}>
-                {Array.from({ length: 40 }).map((_, i) => (
-                    <div key={`L${i}`} style={{ width: 10, height: 3, background: '#000' }} />
-                ))}
-            </div>
-            <div style={{ position: 'absolute', top: 38, right: 4, bottom: 38, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', zIndex: 0 }}>
-                {Array.from({ length: 40 }).map((_, i) => (
-                    <div key={`R${i}`} style={{ width: 10, height: 3, background: '#000' }} />
-                ))}
-            </div>
-
-            {/* â”€â”€ INNER CONTENT BOX (matches Python bounding box) â”€â”€ */}
+            {/* ── INNER CONTENT BOX (Exactly maps to 0-100% in Edge AI) ── */}
             <div style={{
                 position: 'absolute',
-                top: 34,
-                left: 28,
-                right: 28,
-                bottom: 28,
+                top: 32, left: 32, right: 32, bottom: 32,
                 zIndex: 10,
             }}>
-
-                {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-                    HEADER BANNER
-                â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+                {/* 1. HEADER (0% - 7.5%) */}
                 <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: 62,
-                    border: '3.5px solid #000',
-                    background: '#fff',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 2,
+                    position: 'absolute', top: '0%', left: '0%', right: '0%', height: '7.5%',
+                    border: '3px solid #000', borderRadius: 8,
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px',
+                    background: '#f8fafc'
                 }}>
-                    <div style={{ fontSize: 30, fontWeight: 900, letterSpacing: '0.25em', lineHeight: 1, textTransform: 'uppercase', fontFamily: 'Arial Black, Arial, sans-serif' }}>
-                        SOHAG PHYSICS
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
+                        {/* Logo Placeholder */}
+                        <div style={{ width: 45, height: 45, background: '#000', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 24, fontWeight: 900 }}>S</div>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: '0.1em', lineHeight: 1, color: '#000' }}>SOHAG PHYSICS</div>
+                            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.3em', marginTop: 2, color: '#64748b' }}>ADVANCED LEARNING CENTER</div>
+                        </div>
                     </div>
-                    <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '0.5em', textTransform: 'uppercase', color: '#222' }}>
-                        UNIVERSAL OMR ANSWER SHEET
+                    <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: 14, fontWeight: 900, color: '#000' }}>{exam?.category || 'UNIVERSAL'}</div>
+                        <div style={{ fontSize: 9, fontWeight: 700, color: '#64748b', letterSpacing: '0.1em' }}>OMR ANSWER SHEET</div>
                     </div>
                 </div>
 
-                {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-                    INSTRUCTION BAR
-                â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+                {/* 2. INSTRUCTIONS & GUIDELINES (8% - 10%) */}
                 <div style={{
-                    position: 'absolute',
-                    top: 66,
-                    left: 0,
-                    right: 0,
-                    height: 20,
-                    borderBottom: '3px solid #000',
-                    background: '#fff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 7.5,
-                    fontWeight: 800,
-                    letterSpacing: '0.07em',
-                    textTransform: 'uppercase',
-                    gap: 0,
+                    position: 'absolute', top: '8.5%', left: '0%', right: '0%', height: '5%',
+                    display: 'flex', border: '2px solid #e2e8f0', borderRadius: 8, overflow: 'hidden'
                 }}>
-                    FILL ALL REQUIRED DETAILS CAREFULLY
-                    <span style={{ margin: '0 10px', fontSize: 11 }}>•</span>
-                    DARKEN BUBBLES COMPLETELY
-                    <span style={{ margin: '0 10px', fontSize: 11 }}>•</span>
-                    USE BLACK BALLPOINT PEN ONLY
-                </div>
-
-                {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-                    INFO SECTION: ROLL | SET | NAME+BATCH
-                    Top: 90px â†’ Bottom: ~220px (height ~130px)
-                â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
-
-                {/* â”€â”€ ROLL NUMBER BOX â”€â”€ */}
-                {config?.showRollBox && (
-                    <div style={{
-                        position: 'absolute',
-                        top: 90,
-                        left: 0,
-                        width: '35%',
-                        height: 158,
-                        border: '3px solid #000',
-                        background: '#fff',
-                        padding: '8px 10px 6px 10px',
-                        boxSizing: 'border-box',
-                    }}>
-                        <div style={{ fontSize: 11.5, fontWeight: 900, textAlign: 'center', letterSpacing: '0.18em', marginBottom: 7, textTransform: 'uppercase' }}>
-                            ROLL NUMBER
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', height: 'calc(100% - 26px)' }}>
-                            {Array.from({ length: 6 }).map((_, col) => (
-                                <div key={col} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
-                                    {/* Digit write box */}
-                                    <div style={{
-                                        width: 28,
-                                        height: 28,
-                                        border: '3px solid #000',
-                                        background: '#fff',
-                                        marginBottom: 5,
-                                        borderRadius: 3,
-                                        flexShrink: 0,
-                                    }} />
-                                    {/* Number bubbles 0–9 */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, flex: 1, justifyContent: 'space-between' }}>
-                                        {Array.from({ length: 10 }).map((_, row) => (
-                                            <div key={row} style={{
-                                                width: 18,
-                                                height: 18,
-                                                borderRadius: '50%',
-                                                border: '2px solid #000',
-                                                background: '#fff',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                fontSize: 9,
-                                                fontWeight: 800,
-                                                lineHeight: 1,
-                                                flexShrink: 0,
-                                            }}>
-                                                {row}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                    <div style={{ flex: 1, background: '#f1f5f9', display: 'flex', alignItems: 'center', px: 15, fontSize: 10, fontWeight: 800, paddingLeft: 15 }}>
+                        FILL INSTRUCTIONS:
                     </div>
-                )}
-
-                {/* â”€â”€ SET BOX â”€â”€ */}
-                <div style={{
-                    position: 'absolute',
-                    top: 90,
-                    left: 'calc(35% + 6px)',
-                    width: 70,
-                    height: 158,
-                    border: '3px solid #000',
-                    background: '#fff',
-                    padding: '8px 8px 6px 8px',
-                    boxSizing: 'border-box',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                }}>
-                    <div style={{ fontSize: 11.5, fontWeight: 900, letterSpacing: '0.2em', marginBottom: 8, textTransform: 'uppercase' }}>
-                        SET
-                    </div>
-                    {/* Write box */}
-                    <div style={{
-                        width: 32,
-                        height: 32,
-                        border: '3px solid #000',
-                        background: '#fff',
-                        marginBottom: 10,
-                        borderRadius: 3,
-                    }} />
-                    {/* A B C D bubbles */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flex: 1, justifyContent: 'flex-start' }}>
-                        {['A', 'B', 'C', 'D'].map((lbl) => {
-                            const isCorrect = isAnswerKeyMode && setLabel === lbl;
-                            return (
-                                <div key={lbl} style={{
-                                    width: 22,
-                                    height: 22,
-                                    borderRadius: '50%',
-                                    border: `2.5px solid ${isCorrect ? '#000' : '#000'}`,
-                                    background: isCorrect ? '#000' : '#fff',
-                                    color: isCorrect ? '#fff' : '#000',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: 11,
-                                    fontWeight: 900,
-                                    lineHeight: 1,
-                                    flexShrink: 0,
-                                }}>
-                                    {isCorrect ? 'âœ“' : lbl}
-                                </div>
-                            );
-                        })}
+                    <div style={{ flex: 4, display: 'flex', alignItems: 'center', gap: 20, paddingLeft: 15 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <div style={{ width: 14, height: 14, borderRadius: '50%', background: '#000' }} />
+                            <span style={{ fontSize: 9, fontWeight: 700 }}>CORRECT</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <div style={{ width: 14, height: 14, borderRadius: '50%', border: '1.5px solid #000', position: 'relative' }}>
+                                <div style={{ position: 'absolute', top: '50%', left: '50%', width: '100%', height: 1.5, background: '#000', transform: 'translate(-50%, -50%) rotate(45deg)' }} />
+                            </div>
+                            <span style={{ fontSize: 9, fontWeight: 700 }}>WRONG</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <div style={{ width: 14, height: 14, borderRadius: '50%', border: '1.5px solid #000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#000' }} />
+                            </div>
+                            <span style={{ fontSize: 9, fontWeight: 700 }}>WRONG</span>
+                        </div>
+                        <span style={{ fontSize: 8, fontWeight: 600, color: '#94a3b8', fontStyle: 'italic' }}>* Use black ballpoint pen only. Do not fold or smudge the sheet.</span>
                     </div>
                 </div>
 
-                {/* â”€â”€ NAME & BATCH BOX â”€â”€ */}
-                {config?.showNameBox && (
-                    <div style={{
-                        position: 'absolute',
-                        top: 90,
-                        left: 'calc(35% + 84px)',
-                        right: 0,
-                        height: 158,
-                        border: '3px solid #000',
-                        background: '#fff',
-                        padding: '10px 14px',
-                        boxSizing: 'border-box',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-around',
-                    }}>
-                        {/* Name row */}
-                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
-                            <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap', minWidth: 52 }}>NAME:</span>
-                            <div style={{ flex: 1, borderBottom: '2px dotted #000', height: 20 }} />
-                        </div>
-                        {/* Batch row */}
-                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
-                            <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap', minWidth: 52 }}>BATCH:</span>
-                            <div style={{ flex: 1, borderBottom: '2px dotted #000', height: 20 }} />
-                        </div>
-                        {/* Date row */}
-                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
-                            <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap', minWidth: 52 }}>DATE:</span>
-                            <div style={{ flex: 1, borderBottom: '2px dotted #000', height: 20 }} />
-                        </div>
-                        {/* Signature row */}
-                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
-                            <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap', minWidth: 52 }}>SIGN:</span>
-                            <div style={{ flex: 1, borderBottom: '2px dotted #000', height: 20 }} />
-                        </div>
-                    </div>
-                )}
-
-                {/* â”€â”€ SET LABEL BADGE (top-right corner overlay) â”€â”€ */}
+                {/* 5. QUESTION GRID (35% - 98%) */}
                 <div style={{
-                    position: 'absolute',
-                    top: 90,
-                    right: 0,
-                    width: 38,
-                    height: 38,
-                    background: isAnswerKeyMode ? '#000' : '#000',
-                    color: '#fff',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 8,
-                    fontWeight: 900,
-                    letterSpacing: '0.05em',
-                    textTransform: 'uppercase',
-                    zIndex: 15,
-                    borderLeft: '3px solid #000',
-                    borderBottom: '3px solid #000',
+                    position: 'absolute', top: '34%', left: '0%', right: '0%', height: '64%',
+                    border: '2px solid #e2e8f0', borderRadius: 12, background: '#fff'
                 }}>
-                    <div style={{ fontSize: 18, lineHeight: 1, fontWeight: 900 }}>{setLabel}</div>
-                    <div style={{ fontSize: 6.5, lineHeight: 1.2 }}>SET</div>
+                    {/* Column Headers */}
+                    {Array.from({ length: NUM_COLS }).map((_, i) => (
+                        <div key={`col-head-${i}`} style={{
+                            position: 'absolute', top: 5,
+                            left: `${ENGINE.colBaseX[i] + 7.5}%`,
+                            fontSize: 9, fontWeight: 900, color: '#94a3b8', letterSpacing: '0.1em'
+                        }}>
+                            Q.NO | OPTIONS (A-D)
+                        </div>
+                    ))}
                 </div>
 
-                {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-                    DIVIDER + COLUMN HEADERS before bubble grid
-                â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
-                <div style={{
-                    position: 'absolute',
-                    top: 252,
-                    left: 0,
-                    right: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 0,
-                }}>
-                    {/* â”€â”€ Column header labels: Q# + option labels â”€â”€ */}
-                    {Array.from({ length: numCols }).map((_, ci) => {
-                        const cBase = colBaseX(ci);
-                        return (
-                            <React.Fragment key={ci}>
-                                {/* Q# label */}
-                                <div style={{
-                                    position: 'absolute',
-                                    left: `${cBase}%`,
-                                    width: '22px',
-                                    textAlign: 'right',
-                                    fontSize: 7,
-                                    fontWeight: 900,
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '0.03em',
-                                    color: '#555',
-                                }}>No.</div>
-                                {/* Option header bubbles */}
-                                {Array.from({ length: numOpts }).map((_, oi) => (
-                                    <div key={oi} style={{
-                                        position: 'absolute',
-                                        left: `${bubbleX(ci, oi)}%`,
-                                        transform: 'translateX(-50%)',
-                                        fontSize: 7.5,
-                                        fontWeight: 900,
-                                        color: '#444',
-                                    }}>
-                                        {OPTION_LABELS[oi]}
-                                    </div>
-                                ))}
-                            </React.Fragment>
-                        );
-                    })}
+                {/* 6. TIMING TRACKS (AI LINE ALIGNMENT) */}
+                <div style={{ position: 'absolute', top: '36.5%', right: '-3%', height: '61%', width: 8, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    {Array.from({ length: 25 }).map((_, i) => (
+                        <div key={`track-${i}`} style={{ width: 8, height: 8, background: '#000' }} />
+                    ))}
                 </div>
 
-                {/* Thick separator line before bubble grid */}
-                <div style={{
-                    position: 'absolute',
-                    top: 262,
-                    left: 0,
-                    right: 0,
-                    height: 2.5,
-                    background: '#000',
-                }} />
+                {Array.from({ length: NUM_COLS }).map((_, ci) => (
+                    <React.Fragment key={`col-${ci}`}>
+                        {/* Section Divider Lines */}
+                        {ci < NUM_COLS - 1 && (
+                            <div style={{
+                                position: 'absolute', top: '35%', bottom: '2%',
+                                left: `${ENGINE.colBaseX[ci] + 32}%`,
+                                borderLeft: '1px dashed #cbd5e1'
+                            }} />
+                        )}
+                    </React.Fragment>
+                ))}
 
-                {/* Vertical column dividers */}
+                {/* 3. ROLL BOX (15% - 32%) */}
+                <div style={{
+                    position: 'absolute', top: '15%', left: '2%', width: '44%', height: '17%',
+                    border: '3px solid #000', borderRadius: 8, background: '#fff'
+                }}>
+                    <div style={{ textAlign: 'center', fontSize: 10, fontWeight: 900, marginTop: 4, letterSpacing: '0.1em', color: '#000' }}>ROLL NUMBER</div>
+                </div>
+
+                {/* Drawn independently, absolute positioned based on ENGINE */}
+                {Array.from({ length: 6 }).map((_, c) => (
+                    <React.Fragment key={`roll-c-${c}`}>
+                        {/* Write box */}
+                        <div style={{
+                            position: 'absolute',
+                            left: `${ENGINE.rollStartX + c * ENGINE.rollColSpace}%`,
+                            top: `${ENGINE.rollStartY - 2.5}%`,
+                            width: 22, height: 22, border: '2px solid #000', borderRadius: 3,
+                            transform: 'translate(-50%, -100%)', background: '#fff'
+                        }} />
+                        {/* Bubbles 0-9 */}
+                        {Array.from({ length: 10 }).map((_, r) => (
+                            <div key={`roll-r-${r}`} style={{
+                                position: 'absolute',
+                                left: `${ENGINE.rollStartX + c * ENGINE.rollColSpace}%`,
+                                top: `${ENGINE.rollStartY + r * ENGINE.rollRowSpace}%`,
+                                width: 15, height: 15, borderRadius: '50%', border: '1.5px solid #000',
+                                transform: 'translate(-50%, -50%)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: 8, fontWeight: 800, background: '#fff'
+                            }}>
+                                {r}
+                            </div>
+                        ))}
+                    </React.Fragment>
+                ))}
+
+                {/* 4. SET BOX (15% - 32%) */}
+                <div style={{
+                    position: 'absolute', top: '15%', left: '52%', width: '42%', height: '17%',
+                    border: '3px solid #000', borderRadius: 8, background: '#fff'
+                }}>
+                    <div style={{ textAlign: 'center', fontSize: 10, fontWeight: 900, marginTop: 4, letterSpacing: '0.1em', color: '#000' }}>QUESTION SET</div>
+                    <div style={{ position: 'absolute', top: '25%', left: '55%', transform: 'translateX(-50%)', border: '2px solid #000', width: 22, height: 22, borderRadius: 3, background: '#fff' }}></div>
+                </div>
+                {/* Write box */}
+                <div style={{
+                    position: 'absolute', left: `${ENGINE.setStartX}%`, top: `${ENGINE.setStartY - 3}%`,
+                    width: 26, height: 26, border: '2px solid #000', borderRadius: 3,
+                    transform: 'translate(-50%, -100%)', background: '#fff'
+                }}>
+                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 900 }}>{setLabel}</div>
+                </div>
+                {/* SET Bubbles A B C D */}
+                {['A', 'B', 'C', 'D'].map((lbl, r) => {
+                    const isSet = isAnswerKeyMode && setLabel === lbl;
+                    return (
+                        <div key={`set-${lbl}`} style={{
+                            position: 'absolute',
+                            left: `${ENGINE.setStartX}%`,
+                            top: `${ENGINE.setStartY + r * ENGINE.setRowSpace}%`,
+                            width: 18, height: 18, borderRadius: '50%', border: '2px solid #000',
+                            transform: 'translate(-50%, -50%)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 10, fontWeight: 900, background: isSet ? '#000' : '#fff', color: isSet ? '#fff' : '#000'
+                        }}>
+                            {isSet ? '✓' : lbl}
+                        </div>
+                    );
+                })}
+
+                {/* 4. NAME & INFO BOX */}
+                <div style={{
+                    position: 'absolute', top: '10%', left: '66%', right: '2%', height: '22%',
+                    border: '3px solid #000', borderRadius: 8, padding: '14px 14px',
+                    display: 'flex', flexDirection: 'column', justifyContent: 'space-around'
+                }}>
+                    {['NAME', 'BATCH', 'DATE', 'SIGN'].map(lbl => (
+                        <div key={lbl} style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
+                            <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.1em' }}>{lbl}:</span>
+                            <div style={{ flex: 1, borderBottom: '2px dashed #000' }} />
+                        </div>
+                    ))}
+                </div>
+
+                {/* 5. SET LABEL BADGE (top-right corner) */}
+                <div style={{
+                    position: 'absolute', top: '0%', right: '0%', width: 44, height: 44,
+                    background: '#000', color: '#fff', borderBottomLeftRadius: 16, borderTopRightRadius: 4,
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    zIndex: 15
+                }}>
+                    <div style={{ fontSize: 20, lineHeight: 1, fontWeight: 900 }}>{setLabel}</div>
+                    <div style={{ fontSize: 7, lineHeight: 1.2, fontWeight: 800 }}>SET</div>
+                </div>
+
+                {/* 6. GRID HEADERS */}
+                <div style={{ position: 'absolute', top: '34.5%', left: 0, right: 0, height: 2.5, background: '#000' }} />
+
+                {Array.from({ length: NUM_COLS ?? 3 }).map((_, ci) => (
+                    <React.Fragment key={`head-${ci}`}>
+                        <div style={{
+                            position: 'absolute', top: '33.5%', left: `${ENGINE.colBaseX[ci] + 2}%`,
+                            transform: 'translateY(-50%)', fontSize: 8, fontWeight: 900, color: '#444'
+                        }}>Q.NO</div>
+                        {OPTION_LABELS.map((lbl, oi) => (
+                            <div key={lbl} style={{
+                                position: 'absolute', top: '33.5%',
+                                left: `${ENGINE.colBaseX[ci] + ENGINE.bubbleOffsetX + oi * ENGINE.bubbleSpacingX}%`,
+                                transform: 'translate(-50%, -50%)', fontSize: 9, fontWeight: 900, color: '#222'
+                            }}>
+                                {lbl}
+                            </div>
+                        ))}
+                    </React.Fragment>
+                ))}
+
+                {/* 7. COLUMNS & QUESTIONS DIVIDERS */}
                 {[1, 2].map(i => (
-                    <div key={i} style={{
-                        position: 'absolute',
-                        top: 264,
-                        bottom: 14,
-                        left: `${colBaseX(i) - 1.5}%`,
-                        width: 1.5,
-                        background: '#ccc',
+                    <div key={`col-${i}`} style={{
+                        position: 'absolute', top: '34.5%', bottom: '2%',
+                        left: `${ENGINE.colBaseX[i] - 1.5}%`, width: 1.5, background: '#000'
                     }} />
                 ))}
 
-                {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-                    BUBBLE GRID
-                â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
-                {Array.from({ length: totalQ }).map((_, i) => {
-                    const ci = Math.floor(i / questionsPerCol);
-                    const ri = i % questionsPerCol;
-
-                    // Y position within inner box (percentage of inner box height)
-                    const innerH = 297 - 34 - 28; // inner box pixel height approx (mm*3.78)
-                    const gridStartPx = 266; // px from top of inner box
-                    const gridEndPx = (297 - 28 - 34) * (96 / 297) * 3.7796; // rough
-
-                    // Use percentage for Y
-                    const gapEvery5 = Math.floor(ri / 5) * gapHeight;
-                    const yPct = qStartY + ri * qRowSpace + gapEvery5;
-
-                    const trueQ = questionOrder ? questionOrder[i] + 1 : i + 1;
-                    const keyAns = answerKey ? answerKey[trueQ] : null;
-
-                    const cBase = colBaseX(ci);
-                    const groupBorder = ri % 5 === 0 && ri > 0;
+                {/* 8. BUBBLES GRID */}
+                {Array.from({ length: TOTAL_Q }).map((_, i) => {
+                    const ci = Math.floor(i / Q_PER_COL);
+                    const ri = i % Q_PER_COL;
+                    const y = ENGINE.qStartY + ri * ENGINE.qRowSpace + Math.floor(ri / 5) * ENGINE.gapHeight;
+                    const qNum = i + 1;
+                    const keyAns = answerKey ? answerKey[qNum] : null;
 
                     return (
-                        <React.Fragment key={i}>
-                            {/* Question number */}
+                        <React.Fragment key={`q-${qNum}`}>
+                            {/* Question Number */}
                             <div style={{
-                                position: 'absolute',
-                                left: `${cBase}%`,
-                                top: `${yPct}%`,
-                                width: '22px',
-                                textAlign: 'right',
-                                transform: 'translateY(-50%)',
-                                fontSize: 9.5,
-                                fontWeight: 900,
-                                color: '#000',
-                                lineHeight: 1,
+                                position: 'absolute', left: `${ENGINE.colBaseX[ci] + 4}%`, top: `${y}%`,
+                                transform: 'translate(-100%, -50%)', fontSize: 10, fontWeight: 900, letterSpacing: '-0.05em'
                             }}>
-                                {i + 1}.
+                                {qNum}.
                             </div>
-
-                            {/* Option bubbles */}
-                            {Array.from({ length: numOpts }).map((_, oi) => {
-                                const bx = bubbleX(ci, oi);
-                                const label = OPTION_LABELS[oi];
-                                const isCorrect = isAnswerKeyMode && keyAns === label;
-
+                            {/* Options */}
+                            {OPTION_LABELS.map((lbl, oi) => {
+                                const isCorrect = isAnswerKeyMode && keyAns === lbl;
                                 return (
-                                    <div key={oi} style={{
+                                    <div key={lbl} style={{
                                         position: 'absolute',
-                                        left: `${bx}%`,
-                                        top: `${yPct}%`,
-                                        width: 19,
-                                        height: 19,
-                                        transform: 'translate(-50%, -50%)',
-                                        borderRadius: '50%',
-                                        border: `2px solid ${isAnswerKeyMode ? (isCorrect ? '#000' : dropOutColor) : '#000'}`,
-                                        background: isAnswerKeyMode && isCorrect ? '#000' : '#fff',
-                                        color: isAnswerKeyMode && isCorrect ? '#fff' : (isAnswerKeyMode ? 'transparent' : '#000'),
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: 8.5,
-                                        fontWeight: 900,
-                                        lineHeight: 1,
+                                        left: `${ENGINE.colBaseX[ci] + ENGINE.bubbleOffsetX + oi * ENGINE.bubbleSpacingX}%`,
+                                        top: `${y}%`,
+                                        width: 17, height: 17, borderRadius: '50%',
+                                        border: `2px solid ${isCorrect ? '#000' : dropOutColor}`,
+                                        background: isCorrect ? '#000' : '#fff',
+                                        color: isCorrect ? '#fff' : (isAnswerKeyMode ? 'transparent' : '#000'),
+                                        transform: 'translate(-50%, -50%)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontSize: 8, fontWeight: 800
                                     }}>
-                                        {isAnswerKeyMode && isCorrect ? 'âœ“' : label}
+                                        {isCorrect ? '✓' : lbl}
                                     </div>
                                 );
                             })}
 
-                            {/* Group separator line every 5 questions */}
-                            {groupBorder && (
+                            {/* Horizontal Group Line every 5 rows */}
+                            {ri % 5 === 0 && ri > 0 && (
                                 <div style={{
                                     position: 'absolute',
-                                    left: `${cBase - 0.5}%`,
-                                    right: ci === numCols - 1 ? '0%' : undefined,
-                                    width: ci === numCols - 1 ? undefined : `${colWidth}%`,
-                                    top: `${yPct - qRowSpace * 0.55}%`,
-                                    height: 1,
-                                    background: '#bbb',
+                                    left: `${ENGINE.colBaseX[ci]}%`, width: '31%',
+                                    top: `${y - (ENGINE.qRowSpace * 0.55)}%`, height: 1, background: '#bbb'
                                 }} />
                             )}
                         </React.Fragment>
                     );
                 })}
 
-                {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-                    FOOTER
-                â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+                {/* 9. FOOTER */}
                 <div style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
+                    position: 'absolute', bottom: '0%', left: '0%', right: '0%', height: '1.5%',
                     borderTop: '3px solid #000',
-                    paddingTop: 3,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    fontSize: 7,
-                    fontWeight: 800,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                    color: '#111',
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
+                    fontSize: 7.5, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#111',
                 }}>
                     <span>P-{copyNum} • SET {setLabel}</span>
                     <span>DO NOT WRITE BELOW THIS LINE • OPTICAL MARK RECOGNITION REGION</span>
-                    <span>{totalQ} QUESTIONS • {numOpts} OPTIONS</span>
+                    <span>75 QUESTIONS • 4 OPTIONS</span>
                 </div>
 
+            </div>
+            <div style={{
+                position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)',
+                fontSize: 7, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.2em'
+            }}>
+                SOHAG PHYSICS UNIVERSAL OMR ENGINE v4.0 • SYSTEM-0012-75Q
             </div>
         </div>
     );
 });
 
 PremiumOmrSheet.displayName = 'PremiumOmrSheet';
-
 export default PremiumOmrSheet;

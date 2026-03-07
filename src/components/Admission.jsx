@@ -1,3 +1,4 @@
+import API_URL from '../apiConfig';
 import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../Provider';
 import { Navigate } from 'react-router-dom';
@@ -73,7 +74,7 @@ function Admission() {
         // //console.log(formData)
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/admit`, {
+            const response = await fetch(`${API_URL}/admit`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

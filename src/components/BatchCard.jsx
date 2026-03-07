@@ -1,3 +1,4 @@
+import API_URL from '../apiConfig';
 import React, { useState } from 'react';
 import { FaEllipsisV } from 'react-icons/fa';
 
@@ -13,7 +14,7 @@ const BatchCard = ({ batch }) => {
         // //console.log('d')
         try {
 
-            const downloadResponse = await fetch(`${import.meta.env.VITE_API_URL}/download/students`, {
+            const downloadResponse = await fetch(`${API_URL}/download/students`, {
                 method: 'POST',
                 headers: {
                     'content-type': 'application/json'
@@ -44,7 +45,7 @@ const BatchCard = ({ batch }) => {
         // //console.log('d')
         try {
 
-            const downloadResponse = await fetch(`${import.meta.env.VITE_API_URL}/download/students`, {
+            const downloadResponse = await fetch(`${API_URL}/download/students`, {
                 method: 'POST',
                 headers: {
                     'content-type': 'application/json'

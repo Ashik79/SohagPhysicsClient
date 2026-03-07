@@ -1,3 +1,4 @@
+import API_URL from '../apiConfig';
 import React, { useContext, useEffect, useState } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import { AuthContext } from '../Provider';
@@ -73,7 +74,7 @@ const EditNote = () => {
         setLoading(true)
         student.notes = selectedValues;
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/addpayment/${student.id}`, {
+            const response = await fetch(`${API_URL}/addpayment/${student.id}`, {
                 method: 'PUT',
                 headers: {
                     'content-type': 'application/json'

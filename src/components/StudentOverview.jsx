@@ -1,3 +1,4 @@
+import API_URL from '../apiConfig';
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../Provider';
 import { motion } from 'framer-motion';
@@ -13,7 +14,7 @@ function StudentOverview() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/studentoverview`, {
+                const response = await fetch(`${API_URL}/studentoverview`, {
                     method: 'POST',
                     headers: {
                         'content-type': 'application/json'

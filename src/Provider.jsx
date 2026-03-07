@@ -1,3 +1,4 @@
+import API_URL from './apiConfig';
 import React, { useEffect, useState, createContext } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -72,7 +73,7 @@ function Provider({ children }) {
 
   useEffect(() => {
     if (loggedEmail) {
-      fetch(`${import.meta.env.VITE_API_URL}/getuser/${loggedEmail}`)
+      fetch(`${API_URL}/getuser/${loggedEmail}`)
         .then(res => res.json())
         .then(data => {
 

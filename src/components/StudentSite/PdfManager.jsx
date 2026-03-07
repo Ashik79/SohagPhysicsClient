@@ -1,3 +1,4 @@
+import API_URL from '../../apiConfig';
 import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../../Provider'
 import { IoMdClose, IoMdArrowDropdown, IoMdArrowDropright } from "react-icons/io";
@@ -28,7 +29,7 @@ function PdfManager() {
   }, [])
 
   const fetchCourses = () => {
-    fetch(`${import.meta.env.VITE_API_URL}/getpdfcourses`)
+    fetch(`${API_URL}/getpdfcourses`)
       .then(res => res.json())
       .then(data => {
         const sorted = data.sort((a, b) => a.priority - b.priority)
@@ -63,7 +64,7 @@ function PdfManager() {
     const id = crypto.randomUUID()
     const details = { title, chapters: [], priority, thumbnail, id }
 
-    fetch(`${import.meta.env.VITE_API_URL}/addpdfcourse`, {
+    fetch(`${API_URL}/addpdfcourse`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(details)
@@ -98,7 +99,7 @@ function PdfManager() {
       id: courseModal.data.id
     }
 
-    fetch(`${import.meta.env.VITE_API_URL}/pdfcourseupdate/${courseModal.data.id}`, {
+    fetch(`${API_URL}/pdfcourseupdate/${courseModal.data.id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(details)
@@ -133,7 +134,7 @@ function PdfManager() {
       cancelButtonText: 'Cancel',
     }).then((result) => {
       if (result.isConfirmed) {
-        fetch(`${import.meta.env.VITE_API_URL}/pdfcourse/delete/${course.id}`, {
+        fetch(`${API_URL}/pdfcourse/delete/${course.id}`, {
           method: "DELETE"
         })
           .then(res => res.json())
@@ -161,7 +162,7 @@ function PdfManager() {
     const updatedChapters = [...course.chapters, details]
     const updatedCourse = { ...course, chapters: updatedChapters }
 
-    fetch(`${import.meta.env.VITE_API_URL}/pdfcourseupdate/${course.id}`, {
+    fetch(`${API_URL}/pdfcourseupdate/${course.id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(updatedCourse)
@@ -205,7 +206,7 @@ function PdfManager() {
     
     const updatedCourse = { ...course, chapters: updatedChapters }
 
-    fetch(`${import.meta.env.VITE_API_URL}/updatepdfchapter/${chapterModal.data.id}`, {
+    fetch(`${API_URL}/updatepdfchapter/${chapterModal.data.id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(details)
@@ -243,7 +244,7 @@ function PdfManager() {
         const updatedChapters = course.chapters.filter(ch => ch.id !== chapter.id)
         const updatedCourse = { ...course, chapters: updatedChapters }
 
-        fetch(`${import.meta.env.VITE_API_URL}/pdfcourseupdate/${course.id}`, {
+        fetch(`${API_URL}/pdfcourseupdate/${course.id}`, {
           method: 'PUT',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(updatedCourse)
@@ -281,7 +282,7 @@ function PdfManager() {
     )
     const updatedCourse = { ...course, chapters: updatedChapters }
 
-    fetch(`${import.meta.env.VITE_API_URL}/updatepdfchapter/${chapter.id}`, {
+    fetch(`${API_URL}/updatepdfchapter/${chapter.id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(updatedChapter)
@@ -326,7 +327,7 @@ function PdfManager() {
     )
     const updatedCourse = { ...course, chapters: updatedChapters }
 
-    fetch(`${import.meta.env.VITE_API_URL}/updatepdffile/${pdfModal.data.id}`, {
+    fetch(`${API_URL}/updatepdffile/${pdfModal.data.id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(details)
@@ -368,7 +369,7 @@ function PdfManager() {
         )
         const updatedCourse = { ...course, chapters: updatedChapters }
 
-        fetch(`${import.meta.env.VITE_API_URL}/updatepdfchapter/${chapter.id}`, {
+        fetch(`${API_URL}/updatepdfchapter/${chapter.id}`, {
           method: 'PUT',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(updatedChapter)

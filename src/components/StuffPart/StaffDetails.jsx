@@ -1,3 +1,4 @@
+import API_URL from '../../apiConfig';
 import React, { useContext, useEffect, useState } from 'react';
 import { Link, Navigate, useLoaderData } from 'react-router-dom';
 import { FaSpinner } from 'react-icons/fa';
@@ -108,7 +109,7 @@ const StaffDetails = () => {
     //console.log(staff)
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/updatestaff/${staff._id}`, {
+      const response = await fetch(`${API_URL}/updatestaff/${staff._id}`, {
         method: 'PUT',
         headers: {
           'content-type': 'application/json'
@@ -164,7 +165,7 @@ const StaffDetails = () => {
         try {
           // Update the server with the modified staff object
           const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/updatestaff/${staff._id}`,
+            `${API_URL}/updatestaff/${staff._id}`,
             {
               method: "PUT",
               headers: {

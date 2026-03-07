@@ -15,15 +15,14 @@ import {
     MdDownload as Download,
     MdWarning as Warning,
 } from 'react-icons/md';
-import { Html5Qrcode } from 'html5-qrcode';
-import * as XLSX from 'xlsx';
+// Html5Qrcode and XLSX removed — not used in universal OMR workflow
 
-const OPTION_LABELS = ['A', 'B', 'C', 'D', 'E'];
+const OPTION_LABELS = ['A', 'B', 'C', 'D'];
 const OPTION_COLORS = {
-    A: '#3b82f6', B: '#10b981', C: '#f59e0b', D: '#ef4444', E: '#8b5cf6'
+    A: '#3b82f6', B: '#10b981', C: '#f59e0b', D: '#ef4444'
 };
 
-const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded }) => {
+const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuestions }) => {
     const { notifySuccess, notifyFailed } = useContext(AuthContext);
     const [status, setStatus] = useState('initializing');
     const [scannedData, setScannedData] = useState(null);
@@ -34,19 +33,27 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded }) => {
     const [selectedSet, setSelectedSet] = useState('A');
     const [identifiedStudent, setIdentifiedStudent] = useState(null);
     const [isMasterKeyMode, setIsMasterKeyMode] = useState(false);
+    const [editRoll, setEditRoll] = useState(''); // for manual roll entry when unreadable
 
     // --- Device Management ---
     const [sourceType, setSourceType] = useState('camera'); // 'camera' or 'scanner'
     const [devices, setDevices] = useState([]);
     const [selectedDeviceId, setSelectedDeviceId] = useState('');
     const [usePythonServer, setUsePythonServer] = useState(false);
+
+    // AI Auto-Capture States
+    const [autoCapture, setAutoCapture] = useState(true);
+    const [isAligned, setIsAligned] = useState(false);
+    const [alignmentScore, setAlignmentScore] = useState(0); // 0 to 5 frames
+    const [markerPoints, setMarkerPoints] = useState([]);
     // -------------------------
 
     const [answerKey, setAnswerKey] = useState(externalKey || {});
-    const [marksPerCorrect, setMarksPerCorrect] = useState(exam.mcqTotal ? (exam.mcqTotal / (exam.mcqTotal || 30)) : 1);
+    const [marksPerCorrect, setMarksPerCorrect] = useState(1);
     const [negativeMarking, setNegativeMarking] = useState(false);
     const [negativeValue, setNegativeValue] = useState(0.25);
-    const [totalQuestionsInKey, setTotalQuestionsInKey] = useState(exam.mcqTotal || 30);
+    // activeQ: provided from OmrHub (how many of the 75 bubbles to evaluate)
+    const totalQToEvaluate = activeQuestions || exam.mcqTotal || 25;
 
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
@@ -60,74 +67,31 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded }) => {
     }, [externalKey]);
 
     const calculateScore = useCallback((detectedAnswers) => {
+        const activeAnswers = detectedAnswers.filter(a => a.errorType !== 'SKIPPED_INACTIVE');
+        const skippedCount = detectedAnswers.length - activeAnswers.length;
+
         if (!hasKey) {
-            const total = detectedAnswers.reduce((s, a) => s + (a.detected !== null ? 1 : 0), 0);
-            return { score: total, correct: total, wrong: 0, unattempted: 0, breakdown: detectedAnswers };
+            const total = activeAnswers.reduce((s, a) => s + (a.detected !== null ? 1 : 0), 0);
+            return { score: total, correct: total, wrong: 0, unattempted: 0, skipped: skippedCount, breakdown: detectedAnswers };
         }
 
         let correct = 0, wrong = 0, unattempted = 0;
         const breakdown = detectedAnswers.map(item => {
+            if (item.errorType === 'SKIPPED_INACTIVE') return { ...item, result: 'inactive', keyAnswer: null };
             const keyAnswer = answerKey[item.qNum];
-            if (item.detected === null) {
-                unattempted++;
-                return { ...item, result: 'skip', keyAnswer };
-            }
+            if (item.detected === null) { unattempted++; return { ...item, result: 'skip', keyAnswer }; }
             if (!keyAnswer) return { ...item, result: 'nokey', keyAnswer: '?' };
-            if (item.detected === keyAnswer) {
-                correct++;
-                return { ...item, result: 'correct', keyAnswer };
-            } else {
-                wrong++;
-                return { ...item, result: 'wrong', keyAnswer };
-            }
+            if (item.detected === keyAnswer) { correct++; return { ...item, result: 'correct', keyAnswer }; }
+            else { wrong++; return { ...item, result: 'wrong', keyAnswer }; }
         });
 
         const score = (correct * marksPerCorrect) - (negativeMarking ? wrong * negativeValue : 0);
-        return { score: Math.max(0, score), correct, wrong, unattempted, breakdown };
+        return { score: Math.max(0, score), correct, wrong, unattempted, skipped: skippedCount, breakdown };
     }, [answerKey, hasKey, marksPerCorrect, negativeMarking, negativeValue]);
-
-    const workerRef = useRef(null);
-    const messageHandlerRef = useRef(null);
-
-    useEffect(() => {
-        messageHandlerRef.current = (e) => {
-            if (e.data.type === 'ready') {
-                setIsCvLoaded(true);
-                setStatus('ready');
-                startCamera();
-            } else if (e.data.type === 'scan_result') {
-                handleScanResult(e.data.data, e.data.detectedSet);
-            } else if (e.data.type === 'error') {
-                console.error("Worker Error:", e.data.message);
-                notifyFailed("Processing error. Align the markers and hold steady.");
-                setStatus('ready'); // Reset status so we can try again
-            }
-        };
-    });
-
-    useEffect(() => {
-        workerRef.current = new Worker('/omrWorker.js');
-        workerRef.current.onmessage = (e) => {
-            if (messageHandlerRef.current) messageHandlerRef.current(e);
-        };
-        return () => {
-            if (workerRef.current) workerRef.current.terminate();
-            stopCamera();
-            if (qrScannerRef.current) qrScannerRef.current.stop().catch(() => { });
-        };
-    }, []);
 
     const handleScanResult = useCallback((data, detectedSet) => {
         const { detectedAnswers, finalRoll, imageData, isMasterKeyMode: _isMasterKey, selectedSet: _set } = data;
-
-        // Auto-detect SET from Bubbled SET Code
-        let finalSet = _set;
-        if (detectedSet) {
-            console.log(`[OmrScanner] Auto-detected SET ${detectedSet} from OMR bubbles.`);
-            finalSet = detectedSet;
-        } else if (!_isMasterKey) {
-            console.log(`[OmrScanner] Warning: Could not detect SET bubble for roll ${finalRoll}. Falling back to default: ${_set}`);
-        }
+        let finalSet = detectedSet || _set;
         const { score, correct, wrong, unattempted, breakdown } = calculateScore(detectedAnswers);
 
         if (_isMasterKey) {
@@ -144,18 +108,57 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded }) => {
             const ctx = canvas.getContext('2d');
             ctx.putImageData(imageData, 0, 0);
 
+            const rollUnreadable = finalRoll.includes('?');
+            setEditRoll(rollUnreadable ? '' : finalRoll);
             setScannedData({
-                roll: finalRoll.includes("?") ? (Math.floor(100000 + Math.random() * 900000).toString()) : finalRoll,
-                score, correct, wrong, unattempted,
-                set: finalSet,
-                breakdown,
+                roll: finalRoll,            // keep raw result including '?' markers
+                score, correct, wrong, unattempted, set: finalSet, breakdown,
                 capturedImg: canvas.toDataURL('image/jpeg', 0.5),
                 isEdgeAiProcessed: true,
-                icrVerified: !finalRoll.includes("?")
+                icrVerified: !rollUnreadable,
+                scanTimestamp: new Date().toISOString()
             });
             setStatus('scanned');
         }
     }, [calculateScore, onSave, notifySuccess]);
+
+    const workerRef = useRef(null);
+    useEffect(() => {
+        workerRef.current = new Worker('/omrWorker.js');
+        workerRef.current.onmessage = (e) => {
+            if (e.data.type === 'ready') {
+                setIsCvLoaded(true);
+                setStatus('ready');
+                startCamera();
+            } else if (e.data.type === 'detecting') {
+                setIsAligned(false);
+                setAlignmentScore(0);
+            } else if (e.data.type === 'scan_result') {
+                setIsAligned(true);
+                if (autoCapture && status === 'ready') {
+                    setAlignmentScore(prev => {
+                        const next = prev + 1;
+                        if (next >= 5) {
+                            handleScanResult(e.data.data, e.data.detectedSet);
+                            notifySuccess('AI Auto-Captured Sheet!');
+                            return 0;
+                        }
+                        return next;
+                    });
+                } else if (!autoCapture) {
+                    handleScanResult(e.data.data, e.data.detectedSet);
+                }
+            } else if (e.data.type === 'error') {
+                setIsAligned(false);
+                setAlignmentScore(0);
+                setStatus('ready');
+            }
+        };
+        return () => {
+            if (workerRef.current) workerRef.current.terminate();
+            stopCamera();
+        };
+    }, [autoCapture, status, handleScanResult]);
 
     const startCamera = async (deviceId = null) => {
         if (sourceType === 'scanner') return;
@@ -164,278 +167,191 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded }) => {
             const constraints = deviceId
                 ? { video: { deviceId: { exact: deviceId }, width: { ideal: 1920 }, height: { ideal: 1080 } } }
                 : { video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } };
-
             const stream = await navigator.mediaDevices.getUserMedia(constraints);
             if (videoRef.current) { videoRef.current.srcObject = stream; streamRef.current = stream; }
-
-            // Fetch list of all active cameras (after permission granted above)
             const allDevices = await navigator.mediaDevices.enumerateDevices();
-            const videoDevs = allDevices.filter(d => d.kind === 'videoinput');
-            setDevices(videoDevs);
-            if (!deviceId && videoDevs.length > 0) {
-                setSelectedDeviceId(videoDevs[0].deviceId);
-            }
+            setDevices(allDevices.filter(d => d.kind === 'videoinput'));
+            if (!deviceId && allDevices.length > 0) setSelectedDeviceId(allDevices[0].deviceId);
         } catch { setStatus('error'); }
     };
 
-    const stopCamera = () => {
-        if (streamRef.current) {
-            streamRef.current.getTracks().forEach(t => t.stop());
-            streamRef.current = null;
-        }
-    };
+    const stopCamera = () => { if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null; } };
 
-    const processFrame = useCallback(async (imageSource) => {
+    const processFrame = useCallback((imageSource) => {
         if (!isCvLoaded || !imageSource || status !== 'ready' || !workerRef.current) return;
-
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        let width = imageSource.videoWidth || imageSource.width;
-        let height = imageSource.videoHeight || imageSource.height;
-        if (!width || !height) return;
-
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(imageSource, 0, 0, width, height);
-
-        const imageData = ctx.getImageData(0, 0, width, height);
-
-        // Prevent multiple simultaneous scan triggers
-        setStatus('processing');
+        let w = imageSource.videoWidth || imageSource.width, h = imageSource.videoHeight || imageSource.height;
+        if (!w || !h) return;
+        canvas.width = w; canvas.height = h;
+        ctx.drawImage(imageSource, 0, 0, w, h);
+        const imageData = ctx.getImageData(0, 0, w, h);
 
         if (usePythonServer) {
-            const base64Image = canvas.toDataURL('image/jpeg', 0.8);
-            fetch('http://localhost:5050/scan', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ image: base64Image })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        console.log("Python Cloud Result:", data.result);
-                        notifySuccess(`Python Engine Scanned Roll: ${data.result.roll}`);
-                        setStatus('ready');
-                    } else {
-                        notifyFailed("Python Engine Error: " + data.error);
-                        setStatus('ready');
-                    }
-                })
-                .catch(e => {
-                    console.error(e);
-                    notifyFailed("Python server is down. Ensure python_server.py is running.");
-                    setStatus('ready');
-                });
+            // Python Server Logic...
             return;
         }
 
         workerRef.current.postMessage({
-            imageData,
-            width,
-            height,
-            numQ: totalQuestionsInKey,
-            numOpts: exam.optionsPerQuestion || 4,
-            isMasterKeyMode,
-            selectedSet
+            imageData, width: w, height: h, numQ: totalQToEvaluate,
+            numOpts: exam.optionsPerQuestion || 4, isMasterKeyMode, selectedSet
         }, [imageData.data.buffer]);
+    }, [isCvLoaded, status, totalQToEvaluate, exam, isMasterKeyMode, selectedSet, usePythonServer]);
 
-    }, [isCvLoaded, status, totalQuestionsInKey, exam, isMasterKeyMode, selectedSet, usePythonServer, notifyFailed, notifySuccess]);
+    // Fast-Loop for camera
+    useEffect(() => {
+        let timer;
+        const loop = () => {
+            if (status === 'ready' && sourceType === 'camera' && videoRef.current) processFrame(videoRef.current);
+            timer = requestAnimationFrame(loop);
+        };
+        loop();
+        return () => cancelAnimationFrame(timer);
+    }, [status, sourceType, processFrame]);
 
     const handleConfirm = () => {
         if (!scannedData) return;
-        setBatchHistory(prev => [scannedData, ...prev]);
+        // Use manually edited roll if the original was unreadable
+        const finalConfirmedRoll = scannedData.roll.includes('?')
+            ? (editRoll.trim() || scannedData.roll)
+            : scannedData.roll;
+        const confirmedData = { ...scannedData, roll: finalConfirmedRoll };
+        onSave(confirmedData);                   // ✅ send result to OmrHub
+        setBatchHistory(p => [confirmedData, ...p]);
+        setEditRoll('');
         setScannedData(null);
         setStatus('ready');
-        setIdentifiedStudent(null);
     };
-
     const handleFileUpload = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const img = new Image();
-        img.onload = () => {
-            processFrame(img);
-        };
-        img.src = URL.createObjectURL(file);
+        const file = e.target.files[0]; if (!file) return;
+        const img = new Image(); img.onload = () => processFrame(img); img.src = URL.createObjectURL(file);
     };
 
     return (
         <div className={embedded ? 'h-full bg-slate-900 rounded-[2rem] overflow-hidden' : 'fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/95 backdrop-blur-xl'}>
             <div className={`relative bg-white w-full h-full flex flex-col overflow-hidden ${!embedded && 'sm:h-[96vh] sm:max-w-5xl sm:rounded-3xl shadow-2xl'}`}>
 
-                {/* â”€â”€ HEADER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+                {/* HEADER */}
                 {!embedded && (
                     <div className="px-5 py-3.5 bg-white border-b border-slate-100 flex items-center justify-between flex-shrink-0">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-sky-600 rounded-xl flex items-center justify-center text-white shadow-md">
-                                <Target size={22} />
-                            </div>
+                            <div className="w-10 h-10 bg-sky-600 rounded-xl flex items-center justify-center text-white shadow-md"><Target size={22} /></div>
                             <div>
                                 <h2 className="text-base font-black text-slate-900">OMR PRO Scanner</h2>
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{exam.title || 'Exam'}</p>
-                                {scannedData.isEdgeAiProcessed && (
-                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-indigo-500 rounded-full text-white text-[10px] font-black self-start mt-2 border border-white/20">
-                                        <Zap size={12} className="animate-pulse" /> EDGE AI ACTIVE
-                                    </div>
-                                )}
-                                {scannedData.icrVerified && (
-                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500 rounded-full text-white text-[10px] font-black self-start mt-1 border border-white/20">
-                                        <UserCheck size={12} /> ICR VERIFIED ROLL
-                                    </div>
-                                )}
                             </div>
                         </div>
-
                         <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setIsMasterKeyMode(!isMasterKeyMode)}
-                                className={`px-3 py-1.5 rounded-xl text-[10px] font-black border-2 transition-all flex items-center gap-2 ${isMasterKeyMode ? 'bg-orange-500 border-orange-600 text-white animate-pulse' : 'bg-white border-slate-200 text-slate-500 hover:border-orange-500 hover:text-orange-500'}`}
-                            >
+                            <button onClick={() => setIsMasterKeyMode(!isMasterKeyMode)} className={`px-3 py-1.5 rounded-xl text-[10px] font-black border-2 transition-all ${isMasterKeyMode ? 'bg-orange-500 border-orange-600 text-white animate-pulse' : 'bg-white border-slate-200 text-slate-500'}`}>
                                 <Zap size={14} /> {isMasterKeyMode ? 'SCANNING KEY...' : 'SET MASTER KEY'}
                             </button>
-                            <button
-                                onClick={() => setUsePythonServer(!usePythonServer)}
-                                className={`px-2 py-1.5 rounded-xl text-[10px] font-black border-2 transition-all flex items-center gap-1 ${usePythonServer ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'bg-white border-slate-200 text-slate-400 hover:border-indigo-100 hover:text-indigo-400'}`}
-                                title="Use Python Edge Server"
-                            >
-                                Py
-                            </button>
-                            <div className="hidden sm:flex bg-slate-100 rounded-lg p-0.5 gap-0.5">
-                                {['A', 'B', 'C', 'D'].map(s => (
-                                    <button key={s} onClick={() => setSelectedSet(s)}
-                                        className={`px-2.5 py-1 rounded-md text-[10px] font-black transition-all ${selectedSet === s ? 'bg-white shadow-sm text-sky-600' : 'text-slate-400 hover:text-slate-600'}`}>
-                                        {s}
-                                    </button>
-                                ))}
-                            </div>
                             <button onClick={onClose} className="p-2 text-slate-400 hover:text-red-500 rounded-xl"><X size={18} /></button>
                         </div>
                     </div>
                 )}
 
-                {/* Hub Header Overlay (Device Selection) */}
-                <div className={`absolute ${embedded ? 'top-4' : 'top-20'} left-4 right-4 z-50 flex items-center justify-between pointer-events-none`}>
-                    <div className="flex gap-2 pointer-events-auto items-center">
-                        {embedded && (
-                            <div className="flex gap-1 bg-black/40 backdrop-blur-md p-1.5 rounded-2xl border border-white/10">
-                                {['A', 'B', 'C', 'D'].map(set => (
-                                    <button key={set} onClick={() => setSelectedSet(set)}
-                                        className={`w-9 h-9 rounded-xl text-sm font-black transition-all ${selectedSet === set ? 'bg-sky-500 text-white shadow-lg' : 'text-white/30 hover:text-white/50'}`}>
-                                        {set}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-
-                        {/* Device Source Selector */}
-                        <select
-                            value={sourceType === 'scanner' ? 'hardware_scanner' : selectedDeviceId}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                if (val === 'hardware_scanner') {
-                                    setSourceType('scanner');
-                                    stopCamera();
-                                } else {
-                                    setSourceType('camera');
-                                    setSelectedDeviceId(val);
-                                    startCamera(val);
-                                }
-                            }}
-                            className="bg-black/60 backdrop-blur-md text-white border border-white/20 rounded-xl px-4 py-2 text-xs font-bold outline-none cursor-pointer max-w-[200px] truncate"
-                        >
-                            <optgroup label="Mobile & Webcams">
-                                {devices.map((d, i) => (
-                                    <option key={d.deviceId} value={d.deviceId}>
-                                        {d.label || `Camera ${i + 1}`}
-                                    </option>
-                                ))}
-                            </optgroup>
-                            <optgroup label="External Devices">
-                                <option value="hardware_scanner">ðŸ–¨ï¸ Hardware Scanner</option>
-                            </optgroup>
-                        </select>
-                    </div>
-
-                    {embedded && (
-                        <button onClick={() => setShowHistory(!showHistory)} className="pointer-events-auto p-3 rounded-2xl bg-black/40 backdrop-blur-md text-white/50 border border-white/10"><History size={20} /></button>
-                    )}
-                </div>
-
-                {/* â”€â”€ MAIN CONTENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+                {/* MAIN CONTENT */}
                 <div className="flex-1 flex overflow-hidden">
                     <div className="flex-1 relative bg-slate-950 flex items-center justify-center">
                         {sourceType === 'camera' ? (
                             <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
                         ) : (
                             <div className="flex flex-col items-center justify-center text-slate-500">
-                                <div className="w-24 h-24 bg-slate-800 rounded-3xl flex items-center justify-center mb-6 border-2 border-slate-700 border-dashed">
-                                    <ImageIcon size={40} className="text-slate-600" />
-                                </div>
                                 <h3 className="text-white font-bold text-lg">Hardware Scanner Mode Active</h3>
-                                <p className="text-xs text-slate-400 mt-2 text-center max-w-xs">Use the upload button below to import scanned sheets from your flatbed/ADF scanner or local drive.</p>
-                                <button onClick={() => fileInputRef.current?.click()} className="mt-8 px-8 py-3 bg-white text-slate-900 font-bold rounded-xl shadow-lg hover:bg-sky-50 transition-colors">
-                                    Choose Scanned File
-                                </button>
+                                <button onClick={() => fileInputRef.current?.click()} className="mt-8 px-8 py-3 bg-white text-slate-900 font-bold rounded-xl">Choose Scanned File</button>
                             </div>
                         )}
 
                         <canvas ref={canvasRef} className="hidden" />
-                        <div id="qr-detect-sink" className="hidden" />
 
                         {status === 'ready' && sourceType === 'camera' && (
                             <div className="absolute inset-0 z-10 pointer-events-none">
-                                {/* Cyber Frame */}
-                                <div className="absolute inset-0 border-[40px] border-slate-950/40 backdrop-blur-[1px]"></div>
-                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm aspect-[3/4] border-2 border-sky-500/30 rounded-[3rem] shadow-[0_0_100px_rgba(14,165,233,0.1)]">
-                                    <div className="absolute -top-2 -left-2 w-12 h-12 border-t-4 border-l-4 border-sky-500 rounded-tl-3xl" />
-                                    <div className="absolute -top-2 -right-2 w-12 h-12 border-t-4 border-r-4 border-sky-500 rounded-tr-3xl" />
-                                    <div className="absolute -bottom-2 -left-2 w-12 h-12 border-b-4 border-l-4 border-sky-500 rounded-bl-3xl" />
-                                    <div className="absolute -bottom-2 -right-2 w-12 h-12 border-b-4 border-r-4 border-sky-500 rounded-br-3xl" />
-
-                                    {/* Scanning Beam */}
-                                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-sky-400 to-transparent shadow-[0_0_15px_rgba(56,189,248,0.8)] animate-[scan_3s_ease-in-out_infinite]"></div>
-                                </div>
-
-                                <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4">
-                                    <div className="px-6 py-2 bg-slate-900/80 backdrop-blur-md border border-white/20 rounded-full flex items-center gap-3">
-                                        <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
-                                        <p className="text-white text-[10px] font-black uppercase tracking-[0.2em]">Neural Engine Processing</p>
+                                {isAligned && (
+                                    <div className="absolute inset-x-0 bottom-40 flex flex-col items-center gap-4 z-50">
+                                        <div className="w-16 h-16 relative">
+                                            <svg className="w-full h-full transform -rotate-90">
+                                                <circle cx="32" cy="32" r="28" stroke="white" strokeWidth="4" fill="transparent" className="opacity-20" />
+                                                <circle cx="32" cy="32" r="28" stroke="#0ea5e9" strokeWidth="4" fill="transparent"
+                                                    strokeDasharray={176} strokeDashoffset={176 - (176 * alignmentScore) / 5} />
+                                            </svg>
+                                            <div className="absolute inset-0 flex items-center justify-center text-white text-[10px] font-black">{Math.round((alignmentScore / 5) * 100)}%</div>
+                                        </div>
+                                        <div className="px-5 py-2 bg-sky-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl animate-pulse">HOLD STEADY... LOCKING</div>
                                     </div>
-                                    <p className="text-white/40 text-[9px] font-bold uppercase tracking-widest">Hold steady for auto-capture</p>
+                                )}
+                                <div className={`absolute inset-0 border-[40px] transition-all duration-300 ${isAligned ? 'border-sky-500/20' : 'border-slate-950/40'} backdrop-blur-[1px]`}></div>
+                                <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm aspect-[3/4] border-2 transition-all duration-300 ${isAligned ? 'border-sky-400 scale-105 shadow-[0_0_80px_rgba(14,165,233,0.3)]' : 'border-sky-500/30'} rounded-[3rem]`}>
+                                    <div className={`absolute -top-2 -left-2 w-12 h-12 border-t-4 border-l-4 rounded-tl-3xl ${isAligned ? 'border-sky-400' : 'border-sky-500'}`} />
+                                    <div className={`absolute -top-2 -right-2 w-12 h-12 border-t-4 border-r-4 rounded-tr-3xl ${isAligned ? 'border-sky-400' : 'border-sky-500'}`} />
+                                    <div className={`absolute -bottom-2 -left-2 w-12 h-12 border-b-4 border-l-4 rounded-bl-3xl ${isAligned ? 'border-sky-400' : 'border-sky-500'}`} />
+                                    <div className={`absolute -bottom-2 -right-2 w-12 h-12 border-b-4 border-r-4 rounded-br-3xl ${isAligned ? 'border-sky-400' : 'border-sky-500'}`} />
                                 </div>
                             </div>
                         )}
 
                         {status === 'scanned' && scannedData && (
                             <div className="absolute inset-0 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm z-[60]">
-                                <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-sm overflow-hidden border border-white/20">
-                                    <div className={`px-8 py-10 flex flex-col items-center text-center relative overflow-hidden`}>
-                                        <div className={`absolute top-0 inset-x-0 h-24 ${scannedData.correct > scannedData.wrong ? 'bg-emerald-500' : 'bg-sky-600'} opacity-10 blur-3xl`}></div>
+                                <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-sm overflow-hidden p-8 text-center">
 
-                                        <div className="w-20 h-20 rounded-3xl bg-slate-100 flex items-center justify-center mb-4 border-4 border-white shadow-xl">
-                                            <p className="text-2xl font-black text-slate-800">#{scannedData.roll.toString().slice(-3)}</p>
+                                    {/* Roll Badge */}
+                                    <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mb-3 mx-auto border-4 border-white shadow-xl ${scannedData.icrVerified ? 'bg-emerald-50' : 'bg-amber-50'
+                                        }`}>
+                                        <p className={`text-xl font-black ${scannedData.icrVerified ? 'text-emerald-700' : 'text-amber-600'
+                                            }`}>
+                                            {scannedData.icrVerified ? scannedData.roll.slice(-3) : '???'}
+                                        </p>
+                                    </div>
+
+                                    <h3 className="text-xl font-black text-slate-900 mb-1">
+                                        {scannedData.icrVerified ? 'Sheet Scanned ✓' : 'Roll Unreadable ⚠️'}
+                                    </h3>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">
+                                        SET: <span className="text-sky-600">{scannedData.set}</span>
+                                    </p>
+
+                                    {/* Editable Roll — show when unreadable */}
+                                    {!scannedData.icrVerified ? (
+                                        <div className="mb-4">
+                                            <p className="text-xs text-amber-600 font-bold mb-2">Roll বুঝা যায়নি। নিচে লিখুন:</p>
+                                            <input
+                                                type="text"
+                                                value={editRoll}
+                                                onChange={e => setEditRoll(e.target.value)}
+                                                placeholder="Roll Number লিখুন"
+                                                maxLength={10}
+                                                className="w-full px-4 py-3 border-2 border-amber-300 rounded-2xl text-center font-black text-slate-800 text-lg focus:outline-none focus:border-sky-500 bg-amber-50"
+                                                autoFocus
+                                            />
                                         </div>
+                                    ) : (
+                                        <p className="text-xs font-bold text-slate-400 mb-4">Roll: <span className="text-slate-700">{scannedData.roll}</span></p>
+                                    )}
 
-                                        <h3 className="text-2xl font-black text-slate-900 mb-1">Sheet Identified</h3>
-                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">Roll Number: {scannedData.roll}</p>
-
-                                        <div className="grid grid-cols-2 gap-4 w-full mb-8">
-                                            <div className="bg-slate-50 rounded-[2rem] p-5 border border-slate-100">
-                                                <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Score</p>
-                                                <p className="text-3xl font-black text-sky-600">{scannedData.score}</p>
-                                                <p className="text-[10px] font-bold text-slate-300">Out of {scannedData.maxScore}</p>
-                                            </div>
-                                            <div className="bg-slate-50 rounded-[2rem] p-5 border border-slate-100">
-                                                <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Accuracy</p>
-                                                <p className="text-3xl font-black text-emerald-500">{Math.round((scannedData.correct / exam.mcqTotal) * 100)}%</p>
-                                                <p className="text-[10px] font-bold text-slate-300">Set {scannedData.set}</p>
-                                            </div>
+                                    {/* Score Grid */}
+                                    <div className="grid grid-cols-3 gap-2 mb-6">
+                                        <div className="bg-emerald-50 rounded-2xl p-3 border border-emerald-100">
+                                            <p className="text-[9px] font-black text-emerald-400 uppercase">Correct</p>
+                                            <p className="text-2xl font-black text-emerald-600">{scannedData.correct}</p>
                                         </div>
-
-                                        <div className="flex gap-3 w-full">
-                                            <button onClick={() => setStatus('ready')} className="flex-1 py-4 bg-slate-100 font-black rounded-2xl text-[10px] uppercase tracking-[0.2em] text-slate-500 hover:bg-slate-200 transition-all">Reject</button>
-                                            <button onClick={handleConfirm} className="flex-[2] py-4 bg-slate-900 text-white font-black rounded-2xl text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-slate-200 hover:bg-black transition-all">Confirm Match</button>
+                                        <div className="bg-sky-50 rounded-2xl p-3 border border-sky-100">
+                                            <p className="text-[9px] font-black text-sky-400 uppercase">Score</p>
+                                            <p className="text-2xl font-black text-sky-600">{scannedData.score}</p>
                                         </div>
+                                        <div className="bg-red-50 rounded-2xl p-3 border border-red-100">
+                                            <p className="text-[9px] font-black text-red-400 uppercase">Wrong</p>
+                                            <p className="text-2xl font-black text-red-500">{scannedData.wrong}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <button onClick={() => { setScannedData(null); setEditRoll(''); setStatus('ready'); }} className="flex-1 py-3.5 bg-slate-100 font-black rounded-2xl text-xs uppercase text-slate-500 hover:bg-slate-200 transition-colors">Reject</button>
+                                        <button
+                                            onClick={handleConfirm}
+                                            disabled={!scannedData.icrVerified && !editRoll.trim()}
+                                            className="flex-[2] py-3.5 bg-slate-900 text-white font-black rounded-2xl text-xs uppercase shadow-xl hover:bg-black transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                        >
+                                            ✓ Confirm & Save
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -446,23 +362,20 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded }) => {
                 {/* FOOTER */}
                 <div className="px-6 py-4 bg-white border-t flex items-center justify-between">
                     <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase">Engine Status</p>
-                        <p className="text-xs font-bold text-slate-600 lowercase">{status} • {isCvLoaded ? 'cv loaded' : 'loading cv'}</p>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Neural Status</p>
+                        <p className="text-xs font-bold text-slate-600">{status} {isAligned ? '• Locked' : ''}</p>
                     </div>
-
                     <div className="flex gap-4">
+                        <button onClick={() => setAutoCapture(!autoCapture)} className={`px-4 py-2 rounded-xl border-2 font-black text-[10px] uppercase ${autoCapture ? 'bg-sky-50 border-sky-200 text-sky-600' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>
+                            AI Auto: {autoCapture ? 'ON' : 'OFF'}
+                        </button>
                         <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
-                        <button onClick={() => fileInputRef.current?.click()} disabled={status !== 'ready'} className="w-16 h-16 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center text-slate-600 active:scale-90 transition-all hover:bg-slate-200 hover:border-slate-300 disabled:opacity-40">
-                            <ImageIcon size={28} />
-                        </button>
-                        <button onClick={() => processFrame(videoRef.current)} disabled={status !== 'ready'} className="w-16 h-16 rounded-full bg-sky-600 shadow-xl shadow-sky-200 flex items-center justify-center text-white active:scale-90 transition-all disabled:opacity-40 hover:bg-sky-700">
-                            <Camera size={28} />
-                        </button>
+                        <button onClick={() => fileInputRef.current?.click()} className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center text-slate-600"><ImageIcon size={24} /></button>
+                        <button onClick={() => processFrame(videoRef.current)} disabled={status !== 'ready'} className="w-14 h-14 rounded-full bg-sky-600 text-white flex items-center justify-center"><Camera size={24} /></button>
                     </div>
-
                     <div className="text-right">
-                        <p className="text-[10px] font-black text-slate-400 uppercase">Session</p>
-                        <p className="text-xs font-bold text-slate-600">{batchHistory.length} scanned</p>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">History</p>
+                        <p className="text-xs font-bold text-slate-600">{batchHistory.length} Scanned</p>
                     </div>
                 </div>
             </div>

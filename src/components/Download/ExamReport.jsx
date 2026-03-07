@@ -1,3 +1,4 @@
+import API_URL from '../../apiConfig';
 import React, { useContext, useState } from 'react'
 import { AuthContext } from '../../Provider';
 import { IoCloudDownloadOutline } from "react-icons/io5";
@@ -76,7 +77,7 @@ function ExamReport() {
 
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/students`, {
+            const res = await fetch(`${API_URL}/students`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(query),
@@ -88,7 +89,7 @@ function ExamReport() {
 
             const data = await res.json();
             //exam find kore ana
-            const res2 = await fetch(`${import.meta.env.VITE_API_URL}/exams`, {
+            const res2 = await fetch(`${API_URL}/exams`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(examQuery),

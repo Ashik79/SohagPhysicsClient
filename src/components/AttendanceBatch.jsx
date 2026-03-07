@@ -1,3 +1,4 @@
+import API_URL from '../apiConfig';
 import React, { useContext, useState } from 'react'
 import StudentsList from './StudentList';
 import { AuthContext } from '../Provider';
@@ -20,7 +21,7 @@ function AttendanceBatch() {
         if (batch) query.batch = batch;
         if (session) query.session = session;
 
-        fetch(`${import.meta.env.VITE_API_URL}/students`, {
+        fetch(`${API_URL}/students`, {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'

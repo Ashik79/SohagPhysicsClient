@@ -1,3 +1,4 @@
+import API_URL from '../apiConfig';
 import React, { useContext, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../Provider';
@@ -16,7 +17,7 @@ const Payment = () => {
     const id = event.target.id.value;
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/student/${id}`)
+      const res = await fetch(`${API_URL}/student/${id}`)
       const studentData = await res.json()
       if (studentData.id) {
         setId(id)

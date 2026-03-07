@@ -1,3 +1,4 @@
+import API_URL from '../apiConfig';
 import React, { useState, useEffect, useContext } from 'react';
 import { FiLayers, FiTrash2, FiCalendar, FiUser, FiFileText, FiAlertCircle } from "react-icons/fi";
 import { AuthContext } from '../Provider';
@@ -33,7 +34,7 @@ const ProgramList = ({ student }) => {
             if (result.isConfirmed) {
                 const remaining = student.programs.filter(program => program.program != programname)
                 student.programs = remaining
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/addpayment/${student.id}`, {
+                const res = await fetch(`${API_URL}/addpayment/${student.id}`, {
                     method: 'PUT',
                     headers: { 'content-type': 'application/json' },
                     body: JSON.stringify(student)

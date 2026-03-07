@@ -1,3 +1,4 @@
+import API_URL from '../apiConfig';
 import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../Provider'
 import { Link, Navigate, useLoaderData } from 'react-router-dom'
@@ -32,7 +33,7 @@ const loaded =useLoaderData()
             title,  month, year ,code,amount
         }
 
-        fetch(`${import.meta.env.VITE_API_URL}/addcoupon`, {
+        fetch(`${API_URL}/addcoupon`, {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'
@@ -70,7 +71,7 @@ const loaded =useLoaderData()
         }).then((result) => {
             if (result.isConfirmed) {
                 //console.log(id)
-                fetch(`${import.meta.env.VITE_API_URL}/coupon/delete/${id}`, {
+                fetch(`${API_URL}/coupon/delete/${id}`, {
                     method: "DELETE"
                 })
                     .then(res => res.json())

@@ -1,3 +1,4 @@
+import API_URL from '../apiConfig';
 import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../Provider';
@@ -53,7 +54,7 @@ function TakeAttendance({ student, today }) {
     };
 
     const updateStudent = (updatedStudent) => {
-        fetch(`${import.meta.env.VITE_API_URL}/addpayment/${updatedStudent.id}`, {
+        fetch(`${API_URL}/addpayment/${updatedStudent.id}`, {
             method: 'PUT',
             headers: {
                 'content-type': 'application/json'

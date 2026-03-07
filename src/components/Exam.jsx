@@ -1,3 +1,4 @@
+import API_URL from '../apiConfig';
 import React, { useContext, useEffect, useState } from 'react';
 import { useLoaderData, Link } from 'react-router-dom';
 import { FiX, FiPlus, FiCamera, FiDownload, FiFileText, FiTrash2, FiSend, FiUser, FiCalendar, FiBookOpen, FiActivity, FiAward, FiBarChart2, FiArrowLeft, FiChevronLeft, FiChevronRight, FiCheckCircle } from "react-icons/fi";
@@ -54,7 +55,7 @@ function Exam() {
     }, [displayResults]);
 
     useEffect(() => {
-        fetch(`${import.meta.env.VITE_API_URL}/students`)
+        fetch(`${API_URL}/students`)
             .then(res => res.json())
             .then(data => setStudents(data))
             .catch(err => console.error("Error fetching students:", err));
@@ -76,7 +77,7 @@ function Exam() {
         const total = mcqMarks + writenMarks;
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/student/${id}`);
+            const res = await fetch(`${API_URL}/student/${id}`);
             const data = await res.json();
 
             if (!data.id) {
@@ -88,7 +89,7 @@ function Exam() {
             const name = data.name;
             const result = { id, mcqMarks, writenMarks, total, name, date, mcqTotal, writenTotal };
 
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/exam/addresult/${exam._id}`, {
+            const response = await fetch(`${API_URL}/exam/addresult/${exam._id}`, {
                 method: 'POST',
                 headers: { 'content-type': 'application/json' },
                 body: JSON.stringify(result),
@@ -109,7 +110,7 @@ function Exam() {
 
             const resultForStudent = { title, examId, mcqMarks, writenMarks, total, date, mcqTotal, writenTotal, day, month, year }
             data.exams.push(resultForStudent)
-            await fetch(`${import.meta.env.VITE_API_URL}/addresult/${id}`, {
+            await fetch(`${API_URL}/addresult/${id}`, {
                 method: 'PUT',
                 headers: { 'content-type': 'application/json' },
                 body: JSON.stringify(data)
@@ -123,7 +124,7 @@ function Exam() {
     const handleDownload = async () => {
         setLoading(true);
         try {
-            const downloadResponse = await fetch(`${import.meta.env.VITE_API_URL}/download/examresults`, {
+            const downloadResponse = await fetch(`${API_URL}/download/examresults`, {
                 method: 'POST',
                 headers: { 'content-type': 'application/json' },
                 body: JSON.stringify(rankedResults)
@@ -148,7 +149,7 @@ function Exam() {
         setLoading(true)
         const ids = displayResults.map(result => result.id)
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/getnumbers`, {
+            const res = await fetch(`${API_URL}/getnumbers`, {
                 method: 'POST',
                 headers: { 'content-type': 'application/json' },
                 body: JSON.stringify(ids)
@@ -176,7 +177,7 @@ function Exam() {
 
             if (result2.response_code == 202) {
                 const pubData = { published: { status: true, date: today, publishedBy: loggedUser } }
-                await fetch(`${import.meta.env.VITE_API_URL}/exam/update/${exam._id}`, {
+                await fetch(`${API_URL}/exam/update/${exam._id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(pubData)
@@ -204,14 +205,14 @@ function Exam() {
             confirmButtonText: 'Yes, Delete'
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/student/${id}`)
+                const response = await fetch(`${API_URL}/student/${id}`)
                 let student = await response.json()
 
                 const filteredResults = exam.results.filter(result => parseInt(result.id) != parseInt(id))
                 const updateData = { ...exam, results: filteredResults }
                 student.exams = student.exams.filter(res => res.examId != exam._id)
 
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/deleteresult/${exam._id}`, {
+                const res = await fetch(`${API_URL}/deleteresult/${exam._id}`, {
                     method: 'PUT',
                     headers: { 'content-type': 'application/json' },
                     body: JSON.stringify(updateData)
@@ -221,7 +222,7 @@ function Exam() {
                     setDisplayResults(filteredResults)
                     notifySuccess("Result removed")
                 }
-                await fetch(`${import.meta.env.VITE_API_URL}/addresult/${id}`, {
+                await fetch(`${API_URL}/addresult/${id}`, {
                     method: 'PUT',
                     headers: { 'content-type': 'application/json' },
                     body: JSON.stringify(student)

@@ -131,10 +131,10 @@ const ExamPDFExport = ({ exam, results, onClose }) => {
         doc.roundedRect(pageW - 60, 8, 46, top3.length * 7 + 10, 3, 3, 'F');
         doc.setFontSize(7.5);
         doc.setFont('helvetica', 'bold');
-        doc.text('ðŸ† Top Performers', pageW - 37, 14, { align: 'center' });
+        doc.text('🏆 Top Performers', pageW - 37, 14, { align: 'center' });
         doc.setFont('helvetica', 'normal');
         top3.forEach((r, i) => {
-            const medals = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰'];
+            const medals = ['🥇', '🥈', '🥉'];
             const nickName = r.name ? r.name.split(' ')[0] : 'Student';
             doc.text(`${medals[i]} ${nickName} — ${r.total}`, pageW - 57, 20 + i * 7);
         });

@@ -1,3 +1,4 @@
+import API_URL from '../../apiConfig';
 import React, { useContext, useState } from 'react'
 
 import { IoCloudDownloadOutline } from "react-icons/io5";
@@ -71,7 +72,7 @@ function NumberSheet() {
         if (session) query.session = session;
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/students`, {
+            const res = await fetch(`${API_URL}/students`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(query),
@@ -149,7 +150,7 @@ function NumberSheet() {
         const sortedStudents = sortArray(students)
         try {
 
-            const downloadResponse = await fetch(`${import.meta.env.VITE_API_URL}/download/students`, {
+            const downloadResponse = await fetch(`${API_URL}/download/students`, {
                 method: 'POST',
                 headers: {
                     'content-type': 'application/json'

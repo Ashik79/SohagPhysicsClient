@@ -1,3 +1,4 @@
+import API_URL from '../../apiConfig';
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../Provider';
 
@@ -24,7 +25,7 @@ function NoticeBoard() {
   const fetchNotice = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/getnotice`);
+      const response = await fetch(`${API_URL}/getnotice`);
       
       if (!response.ok) {
         // Handle server errors
@@ -118,7 +119,7 @@ function NoticeBoard() {
       
       if (notice && notice._id) {
         // Update existing notice
-        response = await fetch(`${import.meta.env.VITE_API_URL}/updatenotice/${notice._id}`, {
+        response = await fetch(`${API_URL}/updatenotice/${notice._id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -127,7 +128,7 @@ function NoticeBoard() {
         });
       } else {
         // Insert new notice (only happens once)
-        response = await fetch(`${import.meta.env.VITE_API_URL}/insertnotice`, {
+        response = await fetch(`${API_URL}/insertnotice`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

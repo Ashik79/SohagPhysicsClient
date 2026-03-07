@@ -1,3 +1,4 @@
+import API_URL from '../../apiConfig';
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../Provider';
 import SmartImageUpload from '../SmartImageUpload';
@@ -26,7 +27,7 @@ function BannerPics() {
   const fetchBanners = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/getbanners`);
+      const response = await fetch(`${API_URL}/getbanners`);
       const data = await response.json();
       
       // Sort by priority (lower number = higher priority)
@@ -101,7 +102,7 @@ function BannerPics() {
 
       if (editingBanner) {
         // Update existing banner
-        response = await fetch(`${import.meta.env.VITE_API_URL}/updatebanner/${editingBanner._id}`, {
+        response = await fetch(`${API_URL}/updatebanner/${editingBanner._id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -110,7 +111,7 @@ function BannerPics() {
         });
       } else {
         // Insert new banner
-        response = await fetch(`${import.meta.env.VITE_API_URL}/insertbanner`, {
+        response = await fetch(`${API_URL}/insertbanner`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -149,7 +150,7 @@ function BannerPics() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const response = await fetch(`${import.meta.env.VITE_API_URL}/deletebanner/${banner._id}`, {
+          const response = await fetch(`${API_URL}/deletebanner/${banner._id}`, {
             method: 'DELETE'
           });
 
