@@ -38,11 +38,10 @@ const OmrHub = ({ exam, onClose, students }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [negativeMarking, setNegativeMarking] = useState(0);
-    // activeQuestions: how many of the 60 fixed bubbles to evaluate
-    // Valid options: 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60
-    const VALID_Q_OPTIONS = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60];
+    // Valid options: Support up to 100
+    const VALID_Q_OPTIONS = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
     const snapToValidQ = (n) => VALID_Q_OPTIONS.reduce((prev, cur) => Math.abs(cur - n) < Math.abs(prev - n) ? cur : prev);
-    const [activeQuestions, setActiveQuestions] = useState(snapToValidQ(exam?.mcqTotal || 25));
+    const [activeQuestions, setActiveQuestions] = useState(snapToValidQ(exam?.mcqTotal || 100));
 
     // Editing states
     const [editingRollId, setEditingRollId] = useState(null);
@@ -394,91 +393,91 @@ const OmrHub = ({ exam, onClose, students }) => {
 
         // Header Section - Shrunk
         if (logoData) {
-            doc.addImage(logoData, 'PNG', pageW / 2 - 12, 10, 24, 24);
+            doc.addImage(logoData, 'PNG', pageW / 2 - 11, 8, 22, 22);
         }
-
-        doc.setFontSize(26);
+        doc.setFontSize(24);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(2, 132, 199);
-        doc.text('SOHAG PHYSICS', pageW / 2, 40, { align: 'center' });
+        doc.text('SOHAG PHYSICS', pageW / 2, 36, { align: 'center' });
 
-        doc.setFontSize(9);
+        doc.setFontSize(8);
         doc.setTextColor(148, 163, 184); // Slate 400
         doc.setFont('helvetica', 'bold');
-        doc.text('OFFICIAL DIGITAL SCORECARD • ACADEMIC SESSION 2026', pageW / 2, 46, { align: 'center', charSpace: 1 });
+        doc.text('OFFICIAL DIGITAL SCORECARD • ACADEMIC SESSION 2026', pageW / 2, 41, { align: 'center', charSpace: 0.8 });
 
-        doc.setDrawColor(230);
-        doc.line(20, 52, pageW - 20, 52);
+        doc.setDrawColor(240);
+        doc.line(20, 46, pageW - 20, 46);
 
-        doc.setFontSize(12);
+        doc.setFontSize(11);
         doc.setTextColor(0);
         doc.setFont('helvetica', 'bold');
-        doc.text('STUDENT PERFORMANCE REPORT', pageW / 2, 60, { align: 'center' });
+        doc.text('STUDENT PERFORMANCE REPORT', pageW / 2, 53, { align: 'center' });
 
         // Info Box - Compact
         doc.setFillColor(248, 250, 252);
-        doc.roundedRect(20, 65, pageW - 40, 32, 2, 2, 'F');
+        doc.roundedRect(20, 57, pageW - 40, 28, 2, 2, 'F');
         doc.setFillColor(...accentColor);
-        doc.rect(20, 65, 1.5, 32, 'F'); // Left accent bar
+        doc.rect(20, 57, 1.5, 28, 'F'); // Left accent bar
 
-        doc.setFontSize(9);
+        doc.setFontSize(8.5);
         doc.setTextColor(...accentColor);
-        doc.text('STUDENT INFORMATION', 25, 71);
+        doc.text('STUDENT INFORMATION', 25, 63);
 
-        doc.setFontSize(9);
+        doc.setFontSize(8.5);
         doc.setTextColor(51, 65, 85); // Slate 700
         doc.setFont('helvetica', 'bold');
-        doc.text(`Name:`, 25, 79); doc.setTextColor(2, 132, 199); doc.text(res.studentName || 'N/A', 55, 79);
-        doc.setTextColor(51, 65, 85); doc.text(`Roll:`, 25, 86); doc.setTextColor(2, 132, 199); doc.text(res.roll || 'N/A', 55, 86);
-        doc.setTextColor(51, 65, 85); doc.text(`Exam:`, 110, 79); doc.setTextColor(2, 132, 199); doc.text(exam.title || 'N/A', 135, 79);
-        doc.setTextColor(51, 65, 85); doc.text(`Date:`, 110, 86); doc.setTextColor(2, 132, 199); doc.text(exam.date || 'N/A', 135, 86);
-        doc.setTextColor(51, 65, 85); doc.text(`Batch:`, 25, 93); doc.setTextColor(2, 132, 199); doc.text(res.studentBatch || 'N/A', 55, 93);
+        doc.text(`Name:`, 25, 70); doc.setTextColor(2, 132, 199); doc.text(res.studentName || 'N/A', 50, 70);
+        doc.setTextColor(51, 65, 85); doc.text(`Roll:`, 25, 76); doc.setTextColor(2, 132, 199); doc.text(res.roll || 'N/A', 50, 76);
+        doc.setTextColor(51, 65, 85); doc.text(`Exam:`, 110, 70); doc.setTextColor(2, 132, 199); doc.text(exam.title || 'N/A', 130, 70);
+        doc.setTextColor(51, 65, 85); doc.text(`Date:`, 110, 76); doc.setTextColor(2, 132, 199); doc.text(exam.date || 'N/A', 130, 76);
+        doc.setTextColor(51, 65, 85); doc.text(`Batch:`, 25, 82); doc.setTextColor(2, 132, 199); doc.text(res.studentBatch || 'N/A', 50, 82);
 
         // Score Table - Tighter
         doc.autoTable({
-            startY: 102,
+            startY: 90,
             head: [['COMPONENT', 'FULL MARKS', 'OBTAINED', 'PERCENTAGE']],
             body: [
                 ['MCQ Assessment', activeQuestions, res.correct, `${((res.correct / activeQuestions) * 100).toFixed(1)}%`],
                 ['Grand Total', activeQuestions, res.score, `${((res.score / (activeQuestions || 1)) * 100).toFixed(1)}%`],
             ],
             theme: 'grid',
-            headStyles: { fillColor: accentColor, textColor: 255, halign: 'center', cellPadding: 2 },
-            bodyStyles: { halign: 'center', fontSize: 9, cellPadding: 2 },
-            columnStyles: { 0: { halign: 'left', cellWidth: 60 } },
+            headStyles: { fillColor: accentColor, textColor: 255, halign: 'center', cellPadding: 1.5, fontSize: 8.5 },
+            bodyStyles: { halign: 'center', fontSize: 8.5, cellPadding: 1.5 },
+            columnStyles: { 0: { halign: 'left', cellWidth: 55 } },
             margin: { left: 20, right: 20 }
         });
 
         // Stats Summary - 4 Boxes for Pro Look
-        const scoreY = doc.lastAutoTable.finalY + 8;
+        const scoreY = doc.lastAutoTable.finalY + 5;
         const boxW = 38;
         const gap = 6;
+        const boxH = 15;
 
         // 1. CORRECT
         doc.setFillColor(34, 197, 94); // Green
-        doc.roundedRect(20, scoreY, boxW, 18, 2, 2, 'F');
-        doc.setFontSize(7); doc.setTextColor(255); doc.text('CORRECT', 20 + boxW / 2, scoreY + 6, { align: 'center' });
-        doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.text(res.correct.toString(), 20 + boxW / 2, scoreY + 14, { align: 'center' });
+        doc.roundedRect(20, scoreY, boxW, boxH, 2, 2, 'F');
+        doc.setFontSize(6.5); doc.setTextColor(255); doc.text('CORRECT', 20 + boxW / 2, scoreY + 5, { align: 'center' });
+        doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.text(res.correct.toString(), 20 + boxW / 2, scoreY + 12, { align: 'center' });
 
         // 2. WRONG
         doc.setFillColor(239, 68, 68); // Red
-        doc.roundedRect(20 + boxW + gap, scoreY, boxW, 18, 2, 2, 'F');
-        doc.setFontSize(7); doc.setTextColor(255); doc.text('WRONG', 20 + boxW + gap + boxW / 2, scoreY + 6, { align: 'center' });
-        doc.setFontSize(11); doc.text(res.wrong.toString(), 20 + boxW + gap + boxW / 2, scoreY + 14, { align: 'center' });
+        doc.roundedRect(20 + boxW + gap, scoreY, boxW, boxH, 2, 2, 'F');
+        doc.setFontSize(6.5); doc.setTextColor(255); doc.text('WRONG', 20 + boxW + gap + boxW / 2, scoreY + 5, { align: 'center' });
+        doc.setFontSize(10); doc.text(res.wrong.toString(), 20 + boxW + gap + boxW / 2, scoreY + 12, { align: 'center' });
 
         // 3. SKIP
         doc.setFillColor(255, 255, 255); // White
         doc.setDrawColor(203, 213, 225); // Slate 200
-        doc.setLineWidth(0.5);
-        doc.roundedRect(20 + (boxW + gap) * 2, scoreY, boxW, 18, 2, 2, 'FD'); // FD = Fill + Draw
-        doc.setFontSize(7); doc.setTextColor(71, 85, 105); doc.text('SKIP', 20 + (boxW + gap) * 2 + boxW / 2, scoreY + 6, { align: 'center' });
-        doc.setFontSize(11); doc.text((res.unattempted || 0).toString(), 20 + (boxW + gap) * 2 + boxW / 2, scoreY + 14, { align: 'center' });
+        doc.setLineWidth(0.4);
+        doc.roundedRect(20 + (boxW + gap) * 2, scoreY, boxW, boxH, 2, 2, 'FD'); // FD = Fill + Draw
+        doc.setFontSize(6.5); doc.setTextColor(71, 85, 105); doc.text('SKIP', 20 + (boxW + gap) * 2 + boxW / 2, scoreY + 5, { align: 'center' });
+        doc.setFontSize(10); doc.text((res.unattempted || 0).toString(), 20 + (boxW + gap) * 2 + boxW / 2, scoreY + 12, { align: 'center' });
 
         // 4. SCORE
         doc.setFillColor(2, 132, 199); // Blue
-        doc.roundedRect(20 + (boxW + gap) * 3, scoreY, boxW, 18, 2, 2, 'F');
-        doc.setFontSize(7); doc.setTextColor(255); doc.text('SCORE', 20 + (boxW + gap) * 3 + boxW / 2, scoreY + 6, { align: 'center' });
-        doc.setFontSize(11); doc.text(res.score.toString(), 20 + (boxW + gap) * 3 + boxW / 2, scoreY + 14, { align: 'center' });
+        doc.roundedRect(20 + (boxW + gap) * 3, scoreY, boxW, boxH, 2, 2, 'F');
+        doc.setFontSize(6.5); doc.setTextColor(255); doc.text('SCORE', 20 + (boxW + gap) * 3 + boxW / 2, scoreY + 5, { align: 'center' });
+        doc.setFontSize(10); doc.text(res.score.toString(), 20 + (boxW + gap) * 3 + boxW / 2, scoreY + 12, { align: 'center' });
 
         // Answers Detail - MULTI COLUMN to fit in one page
         if (res.breakdown) {
@@ -515,7 +514,7 @@ const OmrHub = ({ exam, onClose, students }) => {
             }
 
             doc.autoTable({
-                startY: scoreY + 25,
+                startY: scoreY + 19,
                 head: [headRow],
                 body: multiColData,
                 theme: 'grid',
@@ -523,14 +522,14 @@ const OmrHub = ({ exam, onClose, students }) => {
                     fillColor: [51, 65, 85],
                     textColor: 255,
                     halign: 'center',
-                    fontSize: 7,
-                    cellPadding: 1,
+                    fontSize: 6.5,
+                    cellPadding: 0.8,
                     fontStyle: 'bold'
                 },
                 styles: {
-                    fontSize: 8.5,
+                    fontSize: 7.5,
                     halign: 'center',
-                    cellPadding: 2,
+                    cellPadding: 1.2,
                     lineColor: [240, 240, 240],
                     font: 'helvetica',
                     textColor: [51, 65, 85]
@@ -583,21 +582,21 @@ const OmrHub = ({ exam, onClose, students }) => {
             });
 
             // Signature Section - Bottom PRO
-            const finalY = doc.lastAutoTable.finalY + 15;
-            if (finalY < pageH - 45) {
+            const finalY = doc.lastAutoTable.finalY + 8;
+            if (finalY < pageH - 40) {
                 doc.setDrawColor(2, 132, 199);
-                doc.setLineWidth(0.8);
-                doc.line(25, finalY + 18, 80, finalY + 18); // Left line
-                doc.line(pageW - 80, finalY + 18, pageW - 25, finalY + 18); // Right line
+                doc.setLineWidth(0.6);
+                doc.line(25, finalY + 12, 80, finalY + 12); // Left line
+                doc.line(pageW - 80, finalY + 12, pageW - 25, finalY + 12); // Right line
 
-                doc.setFontSize(9);
+                doc.setFontSize(8.5);
                 doc.setTextColor(30, 41, 59); // Slate 800
                 doc.setFont('helvetica', 'bold');
-                doc.text("GUARDIAN'S SIGNATURE", 52.5, finalY + 24, { align: 'center' });
-                doc.text("PRINCIPAL'S SIGNATURE", pageW - 52.5, finalY + 24, { align: 'center' });
+                doc.text("GUARDIAN'S SIGNATURE", 52.5, finalY + 17, { align: 'center' });
+                doc.text("PRINCIPAL'S SIGNATURE", pageW - 52.5, finalY + 17, { align: 'center' });
 
                 doc.setTextColor(148, 163, 184);
-                doc.setFontSize(6.5);
+                doc.setFontSize(6);
                 doc.text("SYSTEM GENERATED REPORT • NO PHYSICAL SIGNATURE REQUIRED UNLESS REQUESTED", pageW / 2, finalY + 32, { align: 'center' });
             }
         }
@@ -786,7 +785,7 @@ const OmrHub = ({ exam, onClose, students }) => {
                                             <p className="text-[10px] font-black text-sky-400 uppercase tracking-wider mt-1">Active Questions</p>
                                         </div>
                                         <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-4 text-center">
-                                            <p className="text-3xl font-black text-emerald-600">{60 - activeQuestions}</p>
+                                            <p className="text-3xl font-black text-emerald-600">{100 - activeQuestions}</p>
                                             <p className="text-[10px] font-black text-emerald-400 uppercase tracking-wider mt-1">Ignored Bubbles</p>
                                         </div>
                                         <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4 text-center">

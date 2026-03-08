@@ -27,12 +27,24 @@
  */
 
 self.importScripts('https://docs.opencv.org/4.5.4/opencv.js');
+self.importScripts('https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js');
+
+let ortSession = null;
+async function initAi() {
+    try {
+        ortSession = await ort.InferenceSession.create('/omr_markers.onnx', { executionProviders: ['wasm'] });
+        console.log("[+] AI Worker: ONNX Session Ready");
+    } catch (e) {
+        console.log("[-] AI Worker: ONNX Load Failed (will use Legacy)", e);
+    }
+}
+initAi();
 
 const OPTION_LABELS = ['A', 'B', 'C', 'D'];
 const WARPED_W = 800;
 const WARPED_H = 1000;
-const TOTAL_SHEET_Q = 60;
-const Q_PER_COL = 20;
+const TOTAL_SHEET_Q = 100;
+const Q_PER_COL = 25;
 
 cv['onRuntimeInitialized'] = () => {
     self.postMessage({ type: 'ready' });
@@ -40,13 +52,14 @@ cv['onRuntimeInitialized'] = () => {
 
 // ── Bubble column X position (matches ENGINE.colBaseX + bubbleOffsetX + oi * bubbleSpacingX)
 function bubbleX(ci, oi) {
-    const colBaseX = ci === 0 ? 0.02 : (ci === 1 ? 0.35 : 0.68);
-    return Math.round(WARPED_W * (colBaseX + 0.08 + oi * 0.055));
+    // 4 columns: 0, 1, 2, 3
+    const colBaseX = ci === 0 ? 0.05 : (ci === 1 ? 0.285 : (ci === 2 ? 0.52 : 0.755));
+    return Math.round(WARPED_W * (colBaseX + 0.08 + oi * 0.038)); // Adjusted spacing for 4 cols
 }
 
 function bubbleY(i) {
-    const ri = i % Q_PER_COL;
-    return Math.round(WARPED_H * (0.365 + ri * 0.0305 + Math.floor(ri / 5) * 0.0085));
+    const ri = i % Q_PER_COL; // 0 to 24
+    return Math.round(WARPED_H * (0.33 + ri * 0.0255 + Math.floor(ri / 5) * 0.007)); // Adjusted for 25 rows
 }
 
 // ── Count filled pixels in a circle region
@@ -80,57 +93,74 @@ self.onmessage = function (e) {
         clahe.apply(gray, gray);
         clahe.delete();
         cv.GaussianBlur(gray, blurMat, new cv.Size(5, 5), 0);
-        // Adaptive threshold (good for shadows)
-        cv.adaptiveThreshold(blurMat, thresh, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 11, 2);
+        // Adaptive threshold (good for shadows) - slightly larger block size for robustness
+        cv.adaptiveThreshold(blurMat, thresh, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 15, 3);
 
-        // ── Find 4 corner registration markers
-        const contours = new cv.MatVector();
-        const hierarchy = new cv.Mat();
-        cv.findContours(thresh, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+        // ── Find 4 corner registration markers (AI vs Legacy)
+        let markers = [];
+        const isAiEnabled = e.data.useAiMode;
 
-        const imgW = src.cols, imgH = src.rows;
-        // Corner zone: each marker must be within 30% of image from its respective corner
-        const CORNER_ZONE = 0.30;
+        if (isAiEnabled && ortSession) {
+            // AI Detection Logic - Placeholder for now
+            // 1. Preprocess: resize to 640x640, normalize
+            // 2. ortSession.run()
+            // 3. Postprocess: filter boxes, find 4 corners
+            // (Mapping back to original image size)
+            console.log("[*] AI Marker Detection logic would run here");
+        }
 
-        const markers = [];
-        for (let i = 0; i < contours.size(); i++) {
-            const cnt = contours.get(i);
-            const area = cv.contourArea(cnt);
-            // Tighter area range: OMR corner squares are medium-sized black squares
-            if (area > 150 && area < 8000) {
-                const approx = new cv.Mat();
-                cv.approxPolyDP(cnt, approx, 0.04 * cv.arcLength(cnt, true), true);
-                if (approx.rows === 4) {
-                    const r = cv.boundingRect(approx);
-                    const aspectRatio = r.width / r.height;
-                    // Must be roughly square
-                    if (aspectRatio >= 0.6 && aspectRatio <= 1.6) {
-                        const mom = cv.moments(cnt);
-                        if (mom.m00 !== 0) {
-                            const cx = mom.m10 / mom.m00;
-                            const cy = mom.m01 / mom.m00;
-                            // ─ Corner proximity check ─
-                            // Only accept if the centroid is in one of the 4 corner zones
-                            const inTopZone = cy < imgH * CORNER_ZONE;
-                            const inBottomZone = cy > imgH * (1 - CORNER_ZONE);
-                            const inLeftZone = cx < imgW * CORNER_ZONE;
-                            const inRightZone = cx > imgW * (1 - CORNER_ZONE);
-                            const isCorner = (inTopZone || inBottomZone) && (inLeftZone || inRightZone);
-                            if (isCorner) {
-                                markers.push({ x: cx, y: cy });
+        // ── MULTI-THRESHOLD LOOP: Try different adaptive settings if markers not found
+        if (markers.length < 4) {
+            const configs = [
+                { block: 15, C: 3 },
+                { block: 11, C: 2 },
+                { block: 21, C: 4 },
+                { block: 25, C: 5 }
+            ];
+
+            const imgW = src.cols, imgH = src.rows;
+            const CORNER_ZONE = 0.45;
+
+            for (let cfg of configs) {
+                markers = []; // Reset markers for each attempt
+                cv.adaptiveThreshold(blurMat, thresh, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, cfg.block, cfg.C);
+
+                const contours = new cv.MatVector();
+                const hierarchy = new cv.Mat();
+                cv.findContours(thresh, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+
+                for (let i = 0; i < contours.size(); i++) {
+                    const cnt = contours.get(i);
+                    const area = cv.contourArea(cnt);
+                    // More inclusive area range for different image sizes
+                    if (area > 80 && area < 25000) {
+                        const approx = new cv.Mat();
+                        cv.approxPolyDP(cnt, approx, 0.05 * cv.arcLength(cnt, true), true);
+                        if (approx.rows === 4) {
+                            const r = cv.boundingRect(approx);
+                            if (r.width / r.height >= 0.5 && r.width / r.height <= 2.0) { // Relaxed ratio
+                                const mom = cv.moments(cnt);
+                                if (mom.m00 !== 0) {
+                                    const cx = mom.m10 / mom.m00, cy = mom.m01 / mom.m00;
+                                    if ((cy < imgH * CORNER_ZONE || cy > imgH * (1 - CORNER_ZONE)) &&
+                                        (cx < imgW * CORNER_ZONE || cx > imgW * (1 - CORNER_ZONE))) {
+                                        markers.push({ x: cx, y: cy });
+                                    }
+                                }
                             }
                         }
+                        approx.delete();
                     }
                 }
-                approx.delete();
+                contours.delete(); hierarchy.delete();
+
+                if (markers.length >= 4) break; // Found enough!
             }
         }
 
         // ── Not enough markers: report and exit
         if (markers.length < 4) {
-            self.postMessage({ type: 'detecting', markersFound: markers.length });
-            contours.delete(); hierarchy.delete();
-            return;
+            throw new Error(`৪টি রেজিস্ট্রেশন মার্কার পাওয়া যায়নি। ${markers.length}টি পাওয়া গেছে।`);
         }
 
         // ── Sort markers: top-left, top-right, bottom-right, bottom-left
@@ -180,14 +210,13 @@ self.onmessage = function (e) {
         cv.morphologyEx(warpedGray, warpedGray, cv.MORPH_OPEN, kernel);
         kernel.delete(); warpedBlur.delete(); threshOtsu.delete();
 
-        // ── SET Detection removed
-        const finalSet = selectedSet || 'A';
+        // SET Detection removed as requested
+        let finalSet = '';
 
-        // ── Roll Number Detection (matches ENGINE: rollStartX=7.2%, rollColSpace=7%, rollStartY=16.5%, rollRowSpace=1.65%)
-        //    Roll bubbles are 20px circles → scan radius 10px
+        // ── Roll Number Detection (matches ENGINE: rollStartX=7.0%, rollColSpace=4.8%, rollStartY=13.5%, rollRowSpace=1.82%)
         let finalRoll = '';
-        const rSX = 0.072, rCG = 0.07, rSY = 0.165, rRG = 0.0165;
-        const rollR = 8;  // Maximized to 8px for better coverage without crosstalk (spacing is ~16.5px)
+        const rSX = 0.070, rCG = 0.048, rSY = 0.135, rRG = 0.0182;
+        const rollR = 7; // Smaller radius for smaller bubbles (17px diam -> ~8.5px radius)
         for (let c = 0; c < 6; c++) {
             let best = null, mD = 0, sD = 0;
             const allD = [];
@@ -260,7 +289,6 @@ self.onmessage = function (e) {
             }
         });
 
-        contours.delete(); hierarchy.delete();
     } catch (err) {
         self.postMessage({ type: 'error', message: err.toString() });
     } finally {

@@ -23,7 +23,6 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
     const [scannedData, setScannedData] = useState(null);
     const [batchHistory, setBatchHistory] = useState([]);
     const [isCvLoaded, setIsCvLoaded] = useState(false);
-    const [selectedSet, setSelectedSet] = useState('A');
     const [isMasterKeyMode, setIsMasterKeyMode] = useState(false);
     const [editRoll, setEditRoll] = useState('');
 
@@ -32,6 +31,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
     const [devices, setDevices] = useState([]);
     const [selectedDeviceId, setSelectedDeviceId] = useState('');
     const [usePythonServer, setUsePythonServer] = useState(true);
+    const [useAiMode, setUseAiMode] = useState(false);
     const [facingMode, setFacingMode] = useState('environment'); // 'environment'=back, 'user'=front
 
     // Capture states
@@ -44,6 +44,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
     const [pdfPages, setPdfPages] = useState([]);   // array of {pageNum, dataUrl}
     const [pdfFile, setPdfFile] = useState(null);    // pending PDF file
     const [showPdfPicker, setShowPdfPicker] = useState(false);
+    const [showFlash, setShowFlash] = useState(false);
 
     const capturingRef = useRef(false); // instant double-click guard (sync with isCapturing state)
 
@@ -91,15 +92,14 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
         return { score: Math.max(0, score), correct, wrong, unattempted, skipped: skippedCount, breakdown };
     }, [answerKey, hasKey, marksPerCorrect, negativeMarking, negativeValue]);
 
-    const handleScanResult = useCallback((data, detectedSet) => {
-        const { detectedAnswers, finalRoll, imageData, isMasterKeyMode: _isMasterKey, selectedSet: _set, roll_crop_base64 } = data;
-        const finalSet = detectedSet || _set;
+    const handleScanResult = useCallback((data) => {
+        const { detectedAnswers, finalRoll, imageData, isMasterKeyMode: _isMasterKey, roll_crop_base64 } = data;
         const { score, correct, wrong, unattempted, skipped, breakdown } = calculateScore(detectedAnswers);
 
         if (_isMasterKey) {
             const newKey = {};
             breakdown.forEach(q => { if (q.detected) newKey[q.qNum] = q.detected; });
-            onSave({ type: 'MASTER_KEY', set: finalSet, key: newKey });
+            onSave({ type: 'MASTER_KEY', key: newKey });
             notifySuccess('AI Engine: Master Key Set!');
             setIsMasterKeyMode(false);
             setStatus('ready');
@@ -116,7 +116,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
 
             const newData = {
                 roll: finalRoll || '??????',
-                score, correct, wrong, unattempted, skipped, set: finalSet, breakdown,
+                score, correct, wrong, unattempted, skipped, breakdown,
                 capturedImg: roll_crop_base64 || (imageData ? imageDataToDataURL(imageData) : null),
                 rollCrop: roll_crop_base64,
                 isEdgeAiProcessed: true,
@@ -245,41 +245,48 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
         const warmingTimer = setTimeout(() => setServerWarming(true), 4000);
 
         try {
-            const resp = await fetch('https://omrenginepython.onrender.com/scan', {
+            const apiBase = process.env.REACT_APP_API_URL || 'https://omrenginepython.onrender.com';
+            const response = await fetch(`${apiBase}/scan`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ image: base64Image, active_q: totalQToEvaluate }),
+                body: JSON.stringify({ image: base64Image, active_q: totalQToEvaluate, use_ai: useAiMode }),
                 signal: controller.signal
             });
             clearTimeout(warmingTimer);
             setServerWarming(false);
-            const data = await resp.json();
+            const data = await response.json();
             if (data.success) {
                 const result = data.result;
                 handleScanResult({
                     detectedAnswers: result.questions,
                     finalRoll: result.roll,
-                    roll_crop_base64: result.roll_crop_base64,
-                    selectedSet: result.set
-                }, result.set);
+                    roll_crop_base64: result.roll_crop_base64
+                });
             } else {
-                notifyFailed('স্ক্যান ব্যর্থ হয়েছে। আবার চেষ্টা করুন।');
+                notifyFailed(data.error || 'স্ক্যান ব্যর্থ হয়েছে। আবার চেষ্টা করুন।');
             }
         } catch (err) {
             clearTimeout(warmingTimer);
             setServerWarming(false);
+            console.error("Python Fetch Error:", err);
+
+            let errMsg = 'Python Server Error';
             if (err.name === 'AbortError') {
-                notifyFailed('Server timeout (22s) — Edge AI তে switch করা হচ্ছে।');
+                errMsg = 'Server Timeout (22s)';
+            } else if (err.message.includes('Failed to fetch')) {
+                errMsg = 'Server Connection Refused (Is it running?)';
             } else {
-                notifyFailed('Python Server Error — Edge AI তে switch করা হচ্ছে।');
+                errMsg = `Server Error: ${err.message}`;
             }
+
+            notifyFailed(`${errMsg} — Edge AI তে switch করা হচ্ছে।`);
             setUsePythonServer(false);
         } finally {
             clearTimeout(timeoutId);
             setIsCapturing(false);
             capturingRef.current = false;
         }
-    }, [totalQToEvaluate, handleScanResult, notifyFailed]);
+    }, [totalQToEvaluate, handleScanResult, notifyFailed, useAiMode]);
 
     // ── Detection-only frame loop (pauses during capture to avoid race conditions)
     useEffect(() => {
@@ -297,7 +304,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                     const imageData = ctx.getImageData(0, 0, w, h);
                     workerRef.current.postMessage({
                         imageData, width: w, height: h, numQ: totalQToEvaluate,
-                        numOpts: exam.optionsPerQuestion || 4, isMasterKeyMode, selectedSet
+                        numOpts: exam.optionsPerQuestion || 4, isMasterKeyMode
                     }, [imageData.data.buffer]);
                 }
             }
@@ -305,7 +312,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
         };
         loop();
         return () => cancelAnimationFrame(timer);
-    }, [status, sourceType, isCvLoaded, totalQToEvaluate, exam, isMasterKeyMode, selectedSet]);
+    }, [status, sourceType, isCvLoaded, totalQToEvaluate, exam, isMasterKeyMode]);
 
     // ── Manual capture — called when user presses big Capture button
     const handleManualCapture = useCallback(async () => {
@@ -319,6 +326,12 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
 
         capturingRef.current = true;
         setIsCapturing(true);
+
+        // Feedback effects
+        setShowFlash(true);
+        setTimeout(() => setShowFlash(false), 200);
+        if ('vibrate' in navigator) navigator.vibrate(50);
+
         canvas.width = w; canvas.height = h;
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         ctx.drawImage(video, 0, 0, w, h);
@@ -333,7 +346,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
             const originalHandler = workerRef.current.onmessage;
             const handleOnce = (e) => {
                 if (e.data.type === 'scan_result') {
-                    handleScanResult(e.data.data, e.data.detectedSet);
+                    handleScanResult(e.data.data);
                     workerRef.current.onmessage = originalHandler;
                     setIsCapturing(false);
                     capturingRef.current = false;
@@ -347,10 +360,11 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
             workerRef.current.onmessage = handleOnce;
             workerRef.current.postMessage({
                 imageData, width: w, height: h, numQ: totalQToEvaluate,
-                numOpts: exam.optionsPerQuestion || 4, isMasterKeyMode, selectedSet
+                numOpts: exam.optionsPerQuestion || 4, isMasterKeyMode,
+                useAiMode
             }, [imageData.data.buffer]);
         }
-    }, [status, usePythonServer, totalQToEvaluate, exam, isMasterKeyMode, selectedSet, handleScanResult, processFramePython, notifyFailed]);
+    }, [status, usePythonServer, totalQToEvaluate, exam, isMasterKeyMode, handleScanResult, processFramePython, notifyFailed, useAiMode]);
 
     const handleConfirm = () => {
         if (!scannedData) return;
@@ -460,11 +474,11 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
 
         const handleOnce = (ev) => {
             if (ev.data.type === 'scan_result') {
-                handleScanResult(ev.data.data, ev.data.detectedSet);
+                handleScanResult(ev.data.data);
                 workerRef.current.onmessage = originalHandler;
                 setIsCapturing(false); capturingRef.current = false;
             } else if (ev.data.type === 'error') {
-                notifyFailed('ফাইল থেকে OMR detect হয়নি।');
+                notifyFailed(ev.data.message || 'ফাইল থেকে OMR detect হয়নি।');
                 workerRef.current.onmessage = originalHandler;
                 setIsCapturing(false); capturingRef.current = false;
             }
@@ -473,7 +487,8 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
         workerRef.current.onmessage = handleOnce;
         workerRef.current.postMessage({
             imageData, width: targetCanvas.width, height: targetCanvas.height, numQ: totalQToEvaluate,
-            numOpts: exam.optionsPerQuestion || 4, isMasterKeyMode, selectedSet
+            numOpts: exam.optionsPerQuestion || 4, isMasterKeyMode,
+            useAiMode
         }, [imageData.data.buffer]);
     };
 
@@ -578,6 +593,13 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                             </button>
 
                             <button
+                                onClick={() => setUseAiMode(!useAiMode)}
+                                className={`px-3 py-1.5 rounded-xl text-[10px] font-black border-2 transition-all flex items-center gap-1.5 ${useAiMode ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-300'}`}
+                            >
+                                <div className={`w-2 h-2 rounded-full ${useAiMode ? 'bg-white animate-pulse' : 'bg-slate-300'}`}></div>
+                                {useAiMode ? 'AI MODE ON' : 'AI MODE OFF'}
+                            </button>
+                            <button
                                 onClick={() => setIsMasterKeyMode(!isMasterKeyMode)}
                                 className={`px-3 py-1.5 rounded-xl text-[10px] font-black border-2 transition-all ${isMasterKeyMode ? 'bg-orange-500 border-orange-600 text-white animate-pulse' : 'bg-white border-slate-200 text-slate-500'}`}
                             >
@@ -593,6 +615,9 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                     <div className="flex-1 relative bg-slate-950 flex items-center justify-center">
                         <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
                         <canvas ref={canvasRef} className="hidden" />
+
+                        {/* Flash Overlay */}
+                        <div className={`absolute inset-0 bg-white z-[100] transition-opacity duration-200 pointer-events-none ${showFlash ? 'opacity-100' : 'opacity-0'}`} />
 
                         {/* Alignment frame overlay */}
                         {status === 'ready' && sourceType === 'camera' && isCameraOn && (
@@ -770,10 +795,9 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                                 className="h-11 px-4 rounded-2xl bg-slate-800 hover:bg-black disabled:opacity-40 flex items-center gap-2 text-white text-xs font-black transition-colors shadow-md"
                                 title="Upload image, PDF, or scan from USB scanner"
                             >
-                                <ImageIcon size={16} />
-                                <span>Upload / Scanner</span>
+                                <ImageIcon size={18} />
+                                <span>UPLOAD FILE</span>
                             </button>
-                            <p className="text-[9px] text-slate-400 font-bold">Image · PDF · USB Scanner</p>
                         </div>
 
                         {/* CENTER: Big Capture button */}
@@ -781,7 +805,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                             onClick={handleManualCapture}
                             disabled={isCapturing || status !== 'ready'}
                             className={`relative w-20 h-20 rounded-full flex flex-col items-center justify-center font-black text-[10px] uppercase tracking-widest transition-all duration-300 shadow-xl flex-shrink-0
-                                ${isCapturing
+                                    ${isCapturing
                                     ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
                                     : isMasterKeyMode
                                         ? 'bg-orange-500 hover:bg-orange-600 text-white animate-pulse'
