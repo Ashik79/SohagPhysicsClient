@@ -94,7 +94,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
     const handleScanResult = useCallback((data, detectedSet) => {
         const { detectedAnswers, finalRoll, imageData, isMasterKeyMode: _isMasterKey, selectedSet: _set, roll_crop_base64 } = data;
         const finalSet = detectedSet || _set;
-        const { score, correct, wrong, unattempted, breakdown } = calculateScore(detectedAnswers);
+        const { score, correct, wrong, unattempted, skipped, breakdown } = calculateScore(detectedAnswers);
 
         if (_isMasterKey) {
             const newKey = {};
@@ -116,7 +116,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
 
             const newData = {
                 roll: finalRoll || '??????',
-                score, correct, wrong, unattempted, set: finalSet, breakdown,
+                score, correct, wrong, unattempted, skipped, set: finalSet, breakdown,
                 capturedImg: roll_crop_base64 || (imageData ? imageDataToDataURL(imageData) : null),
                 rollCrop: roll_crop_base64,
                 isEdgeAiProcessed: true,
@@ -421,29 +421,60 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
     // ── Process a canvas through the existing pipeline (Python or Edge AI)
     const processCanvas = async (canvas) => {
         if (usePythonServer) {
-            const base64 = resizeForUpload(canvas);
-            await processFramePython(base64);
+            try {
+                const base64 = resizeForUpload(canvas);
+                await processFramePython(base64);
+            } catch (err) {
+                console.warn("Python failed, trying Edge AI fallback...");
+                setUsePythonServer(false);
+                await processWithWorker(canvas);
+            }
         } else {
-            const ctx = canvas.getContext('2d', { willReadFrequently: true });
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const originalHandler = workerRef.current.onmessage;
-            const handleOnce = (ev) => {
-                if (ev.data.type === 'scan_result') {
-                    handleScanResult(ev.data.data, ev.data.detectedSet);
-                    workerRef.current.onmessage = originalHandler;
-                    setIsCapturing(false); capturingRef.current = false;
-                } else if (ev.data.type === 'error') {
-                    notifyFailed('ফাইল থেকে OMR detect হয়নি।');
-                    workerRef.current.onmessage = originalHandler;
-                    setIsCapturing(false); capturingRef.current = false;
-                }
-            };
-            workerRef.current.onmessage = handleOnce;
-            workerRef.current.postMessage({
-                imageData, width: canvas.width, height: canvas.height, numQ: totalQToEvaluate,
-                numOpts: exam.optionsPerQuestion || 4, isMasterKeyMode, selectedSet
-            }, [imageData.data.buffer]);
+            await processWithWorker(canvas);
         }
+    };
+
+    const processWithWorker = async (canvas) => {
+        if (!workerRef.current || !isCvLoaded) {
+            notifyFailed('Edge AI প্রস্তুত হয়নি। কিছুক্ষণ অপেক্ষা করুন।');
+            setIsCapturing(false); capturingRef.current = false;
+            return;
+        }
+
+        // Logic: Resize if too large for local worker to handle efficiently
+        let targetCanvas = canvas;
+        const MAX_DIM = 1200;
+        if (canvas.width > MAX_DIM || canvas.height > MAX_DIM) {
+            const scale = Math.min(MAX_DIM / canvas.width, MAX_DIM / canvas.height);
+            const temp = document.createElement('canvas');
+            temp.width = canvas.width * scale;
+            temp.height = canvas.height * scale;
+            const tCtx = temp.getContext('2d');
+            tCtx.drawImage(canvas, 0, 0, temp.width, temp.height);
+            targetCanvas = temp;
+        }
+
+        const ctx = targetCanvas.getContext('2d', { willReadFrequently: true });
+        const imageData = ctx.getImageData(0, 0, targetCanvas.width, targetCanvas.height);
+        const originalHandler = workerRef.current.onmessage;
+
+        const handleOnce = (ev) => {
+            if (ev.data.type === 'scan_result') {
+                handleScanResult(ev.data.data, ev.data.detectedSet);
+                workerRef.current.onmessage = originalHandler;
+                setIsCapturing(false); capturingRef.current = false;
+            } else if (ev.data.type === 'error') {
+                notifyFailed('ফাইল থেকে OMR detect হয়নি।');
+                workerRef.current.onmessage = originalHandler;
+                setIsCapturing(false); capturingRef.current = false;
+            }
+        };
+
+        workerRef.current.onmessage = handleOnce;
+        workerRef.current.postMessage({
+            imageData, width: targetCanvas.width, height: targetCanvas.height, numQ: totalQToEvaluate,
+            numOpts: exam.optionsPerQuestion || 4, isMasterKeyMode, selectedSet
+        }, [imageData.data.buffer]);
     };
 
     const handleFileUpload = async (e) => {
@@ -536,6 +567,16 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
+                            {/* Server Engine Toggle */}
+                            <button
+                                onClick={() => setUsePythonServer(!usePythonServer)}
+                                className={`px-3 py-1.5 rounded-xl text-[10px] font-black border-2 transition-all flex items-center gap-1.5 ${usePythonServer ? 'bg-sky-50 border-sky-200 text-sky-600' : 'bg-emerald-50 border-emerald-200 text-emerald-600'}`}
+                                title={usePythonServer ? 'Using Cloud Server (More accurate) - Tap to switch to Local' : 'Using Local Edge AI (Faster) - Tap to switch to Cloud'}
+                            >
+                                <div className={`w-2 h-2 rounded-full ${usePythonServer ? 'bg-sky-500 animate-pulse' : 'bg-emerald-500'}`}></div>
+                                {usePythonServer ? 'CLOUD ENGINE' : 'LOCAL ENGINE'}
+                            </button>
+
                             <button
                                 onClick={() => setIsMasterKeyMode(!isMasterKeyMode)}
                                 className={`px-3 py-1.5 rounded-xl text-[10px] font-black border-2 transition-all ${isMasterKeyMode ? 'bg-orange-500 border-orange-600 text-white animate-pulse' : 'bg-white border-slate-200 text-slate-500'}`}
@@ -652,8 +693,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                                         <p className="text-xs font-bold text-slate-400 mb-4">Roll: <span className="text-slate-700">{scannedData.roll}</span></p>
                                     )}
 
-                                    {/* Score Grid — compact */}
-                                    <div className="grid grid-cols-3 gap-2 mb-4">
+                                    <div className="grid grid-cols-2 gap-2 mb-4">
                                         <div className="bg-emerald-50 rounded-xl p-2 border border-emerald-100">
                                             <p className="text-[9px] font-black text-emerald-400 uppercase">Correct</p>
                                             <p className="text-xl font-black text-emerald-600">{scannedData.correct}</p>
@@ -665,6 +705,10 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                                         <div className="bg-red-50 rounded-xl p-2 border border-red-100">
                                             <p className="text-[9px] font-black text-red-400 uppercase">Wrong</p>
                                             <p className="text-xl font-black text-red-500">{scannedData.wrong}</p>
+                                        </div>
+                                        <div className="bg-white rounded-xl p-2 border border-slate-200">
+                                            <p className="text-[9px] font-black text-slate-400 uppercase">Skip</p>
+                                            <p className="text-xl font-black text-slate-600">{scannedData.unattempted}</p>
                                         </div>
                                     </div>
 

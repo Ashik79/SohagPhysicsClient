@@ -187,7 +187,7 @@ self.onmessage = function (e) {
         //    Roll bubbles are 20px circles → scan radius 10px
         let finalRoll = '';
         const rSX = 0.072, rCG = 0.07, rSY = 0.165, rRG = 0.0165;
-        const rollR = 11;  // ROI half-size in pixels
+        const rollR = 8;  // Maximized to 8px for better coverage without crosstalk (spacing is ~16.5px)
         for (let c = 0; c < 6; c++) {
             let best = null, mD = 0, sD = 0;
             const allD = [];
@@ -196,11 +196,11 @@ self.onmessage = function (e) {
                 allD.push(d);
                 if (d > mD) { sD = mD; mD = d; best = r; } else if (d > sD) sD = d;
             }
-            // Adaptive min: use 80% of mean-nonzero pixels in this column
-            const nonzero = allD.filter(d => d > 10);
-            const dynMin = nonzero.length ? Math.round(nonzero.reduce((a, b) => a + b, 0) / nonzero.length * 0.8) : 50;
-            // Confident if density above floor AND top is 1.5x the second best
-            const confident = mD >= Math.max(50, dynMin) && (sD === 0 || mD / Math.max(sD, 1) >= 1.5);
+            // Adaptive min: use 50% of mean-nonzero pixels in this column (relaxed from 0.7)
+            const nonzero = allD.filter(d => d > 5);
+            const dynMin = nonzero.length ? Math.round(nonzero.reduce((a, b) => a + b, 0) / nonzero.length * 0.5) : 25;
+            // Confident if density above floor AND top is 1.25x the second best (relaxed from 1.35)
+            const confident = mD >= Math.max(25, dynMin) && (sD === 0 || mD / Math.max(sD, 1) >= 1.25);
             finalRoll += confident ? String(best) : '?';
         }
 

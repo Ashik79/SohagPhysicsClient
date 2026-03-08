@@ -387,98 +387,225 @@ const OmrHub = ({ exam, onClose, students }) => {
 
         // External Border
         doc.setDrawColor(...accentColor);
-        doc.setLineWidth(0.8);
+        doc.setLineWidth(0.6);
         doc.rect(5, 5, pageW - 10, pageH - 10);
-        doc.setLineWidth(0.2);
-        doc.rect(7, 7, pageW - 14, pageH - 14);
+        doc.setLineWidth(0.15);
+        doc.rect(6.5, 6.5, pageW - 13, pageH - 13);
 
-        // Header Section
+        // Header Section - Shrunk
         if (logoData) {
-            doc.addImage(logoData, 'PNG', pageW / 2 - 15, 12, 30, 30);
+            doc.addImage(logoData, 'PNG', pageW / 2 - 12, 10, 24, 24);
         }
 
-        doc.setFontSize(22);
+        doc.setFontSize(26);
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(...accentColor);
-        doc.text('SOHAG PHYSICS', pageW / 2, 52, { align: 'center' });
+        doc.setTextColor(2, 132, 199);
+        doc.text('SOHAG PHYSICS', pageW / 2, 40, { align: 'center' });
 
         doc.setFontSize(9);
-        doc.setTextColor(100);
-        doc.setFont('helvetica', 'normal');
-        doc.text('ACADEMIC EXCELLENCE & DIGITAL OMR SYSTEM', pageW / 2, 58, { align: 'center' });
+        doc.setTextColor(148, 163, 184); // Slate 400
+        doc.setFont('helvetica', 'bold');
+        doc.text('OFFICIAL DIGITAL SCORECARD • ACADEMIC SESSION 2026', pageW / 2, 46, { align: 'center', charSpace: 1 });
 
         doc.setDrawColor(230);
-        doc.line(20, 65, pageW - 20, 65);
+        doc.line(20, 52, pageW - 20, 52);
 
-        doc.setFontSize(14);
+        doc.setFontSize(12);
         doc.setTextColor(0);
         doc.setFont('helvetica', 'bold');
-        doc.text('STUDENT PERFORMANCE REPORT', pageW / 2, 75, { align: 'center' });
+        doc.text('STUDENT PERFORMANCE REPORT', pageW / 2, 60, { align: 'center' });
 
-        // Info Box
+        // Info Box - Compact
         doc.setFillColor(248, 250, 252);
-        doc.roundedRect(20, 82, pageW - 40, 38, 3, 3, 'F');
+        doc.roundedRect(20, 65, pageW - 40, 32, 2, 2, 'F');
+        doc.setFillColor(...accentColor);
+        doc.rect(20, 65, 1.5, 32, 'F'); // Left accent bar
 
-        doc.setFontSize(10);
+        doc.setFontSize(9);
         doc.setTextColor(...accentColor);
-        doc.text('STUDENT INFORMATION', 25, 89);
+        doc.text('STUDENT INFORMATION', 25, 71);
 
-        doc.setTextColor(60);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Name:`, 25, 98); doc.setFont('helvetica', 'bold'); doc.text(res.studentName || 'N/A', 55, 98);
-        doc.setFont('helvetica', 'normal'); doc.text(`Roll:`, 25, 106); doc.setFont('helvetica', 'bold'); doc.text(res.roll || 'N/A', 55, 106);
-        doc.setFont('helvetica', 'normal'); doc.text(`Exam:`, 110, 98); doc.setFont('helvetica', 'bold'); doc.text(exam.title || 'N/A', 135, 98);
-        doc.setFont('helvetica', 'normal'); doc.text(`Date:`, 110, 106); doc.setFont('helvetica', 'bold'); doc.text(exam.date || 'N/A', 135, 106);
-        doc.setFont('helvetica', 'normal'); doc.text(`Batch:`, 25, 114); doc.setFont('helvetica', 'bold'); doc.text(res.studentBatch || 'N/A', 55, 114);
+        doc.setFontSize(9);
+        doc.setTextColor(51, 65, 85); // Slate 700
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Name:`, 25, 79); doc.setTextColor(2, 132, 199); doc.text(res.studentName || 'N/A', 55, 79);
+        doc.setTextColor(51, 65, 85); doc.text(`Roll:`, 25, 86); doc.setTextColor(2, 132, 199); doc.text(res.roll || 'N/A', 55, 86);
+        doc.setTextColor(51, 65, 85); doc.text(`Exam:`, 110, 79); doc.setTextColor(2, 132, 199); doc.text(exam.title || 'N/A', 135, 79);
+        doc.setTextColor(51, 65, 85); doc.text(`Date:`, 110, 86); doc.setTextColor(2, 132, 199); doc.text(exam.date || 'N/A', 135, 86);
+        doc.setTextColor(51, 65, 85); doc.text(`Batch:`, 25, 93); doc.setTextColor(2, 132, 199); doc.text(res.studentBatch || 'N/A', 55, 93);
 
-        // Score Table
+        // Score Table - Tighter
         doc.autoTable({
-            startY: 128,
+            startY: 102,
             head: [['COMPONENT', 'FULL MARKS', 'OBTAINED', 'PERCENTAGE']],
             body: [
                 ['MCQ Assessment', activeQuestions, res.correct, `${((res.correct / activeQuestions) * 100).toFixed(1)}%`],
-                ['Grand Total', activeQuestions, res.score, `${((res.score / activeQuestions) * 100).toFixed(1)}%`],
+                ['Grand Total', activeQuestions, res.score, `${((res.score / (activeQuestions || 1)) * 100).toFixed(1)}%`],
             ],
             theme: 'grid',
-            headStyles: { fillColor: accentColor, textColor: 255, halign: 'center' },
-            bodyStyles: { halign: 'center', fontSize: 10 },
-            columnStyles: { 0: { halign: 'left', cellWidth: 70 } },
+            headStyles: { fillColor: accentColor, textColor: 255, halign: 'center', cellPadding: 2 },
+            bodyStyles: { halign: 'center', fontSize: 9, cellPadding: 2 },
+            columnStyles: { 0: { halign: 'left', cellWidth: 60 } },
             margin: { left: 20, right: 20 }
         });
 
-        // Stats Summary
-        const scoreY = doc.lastAutoTable.finalY + 15;
-        doc.setFillColor(240, 253, 244);
-        doc.roundedRect(20, scoreY, 50, 25, 3, 3, 'F');
-        doc.setFontSize(8); doc.setTextColor(21, 128, 61); doc.text('CORRECT', 45, scoreY + 8, { align: 'center' });
-        doc.setFontSize(14); doc.text(res.correct.toString(), 45, scoreY + 18, { align: 'center' });
+        // Stats Summary - 4 Boxes for Pro Look
+        const scoreY = doc.lastAutoTable.finalY + 8;
+        const boxW = 38;
+        const gap = 6;
 
-        doc.setFillColor(254, 242, 242);
-        doc.roundedRect(80, scoreY, 50, 25, 3, 3, 'F');
-        doc.setFontSize(8); doc.setTextColor(185, 28, 28); doc.text('WRONG', 105, scoreY + 8, { align: 'center' });
-        doc.setFontSize(14); doc.text(res.wrong.toString(), 105, scoreY + 18, { align: 'center' });
+        // 1. CORRECT
+        doc.setFillColor(34, 197, 94); // Green
+        doc.roundedRect(20, scoreY, boxW, 18, 2, 2, 'F');
+        doc.setFontSize(7); doc.setTextColor(255); doc.text('CORRECT', 20 + boxW / 2, scoreY + 6, { align: 'center' });
+        doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.text(res.correct.toString(), 20 + boxW / 2, scoreY + 14, { align: 'center' });
 
-        doc.setFillColor(248, 250, 252);
-        doc.roundedRect(140, scoreY, 50, 25, 3, 3, 'F');
-        doc.setFontSize(8); doc.setTextColor(100); doc.text('SCORE', 165, scoreY + 8, { align: 'center' });
-        doc.setFontSize(14); doc.text(res.score.toString(), 165, scoreY + 18, { align: 'center' });
+        // 2. WRONG
+        doc.setFillColor(239, 68, 68); // Red
+        doc.roundedRect(20 + boxW + gap, scoreY, boxW, 18, 2, 2, 'F');
+        doc.setFontSize(7); doc.setTextColor(255); doc.text('WRONG', 20 + boxW + gap + boxW / 2, scoreY + 6, { align: 'center' });
+        doc.setFontSize(11); doc.text(res.wrong.toString(), 20 + boxW + gap + boxW / 2, scoreY + 14, { align: 'center' });
 
-        // Answers Detail
+        // 3. SKIP
+        doc.setFillColor(255, 255, 255); // White
+        doc.setDrawColor(203, 213, 225); // Slate 200
+        doc.setLineWidth(0.5);
+        doc.roundedRect(20 + (boxW + gap) * 2, scoreY, boxW, 18, 2, 2, 'FD'); // FD = Fill + Draw
+        doc.setFontSize(7); doc.setTextColor(71, 85, 105); doc.text('SKIP', 20 + (boxW + gap) * 2 + boxW / 2, scoreY + 6, { align: 'center' });
+        doc.setFontSize(11); doc.text((res.unattempted || 0).toString(), 20 + (boxW + gap) * 2 + boxW / 2, scoreY + 14, { align: 'center' });
+
+        // 4. SCORE
+        doc.setFillColor(2, 132, 199); // Blue
+        doc.roundedRect(20 + (boxW + gap) * 3, scoreY, boxW, 18, 2, 2, 'F');
+        doc.setFontSize(7); doc.setTextColor(255); doc.text('SCORE', 20 + (boxW + gap) * 3 + boxW / 2, scoreY + 6, { align: 'center' });
+        doc.setFontSize(11); doc.text(res.score.toString(), 20 + (boxW + gap) * 3 + boxW / 2, scoreY + 14, { align: 'center' });
+
+        // Answers Detail - MULTI COLUMN to fit in one page
         if (res.breakdown) {
+            const totalQ = res.breakdown.length;
+            const cols = totalQ > 50 ? 3 : 2;
+            const rowsPerCol = Math.ceil(totalQ / cols);
+            const multiColData = [];
+
+            for (let i = 0; i < rowsPerCol; i++) {
+                const row = [];
+                for (let c = 0; c < cols; c++) {
+                    const qIdx = i + c * rowsPerCol;
+                    if (qIdx < totalQ) {
+                        const q = res.breakdown[qIdx];
+                        const resCode = q.result.toUpperCase().substring(0, 1);
+                        const resText = resCode === 'C' ? 'RIGHT' : (resCode === 'W' ? 'WRONG' : 'SKIP');
+                        row.push(q.qNum, q.detected || '—', q.keyAnswer || '?', resText);
+                    } else {
+                        row.push('', '', '', '');
+                    }
+                    if (c < cols - 1) row.push(''); // spacer
+                }
+                multiColData.push(row);
+            }
+
+            const headRow = [];
+            const colStyles = {};
+            for (let c = 0; c < cols; c++) {
+                headRow.push('Q#', 'ANS', 'KEY', 'RESULT');
+                if (c < cols - 1) {
+                    headRow.push('');
+                    colStyles[c * 5 + 4] = { cellWidth: 5 }; // spacer index
+                }
+            }
+
             doc.autoTable({
-                startY: scoreY + 35,
-                head: [['Q#', 'YOUR ANS', 'CORRECT KEY', 'RESULT']],
-                body: res.breakdown.map(q => [q.qNum, q.detected || '—', q.keyAnswer || '?', q.result.toUpperCase()]),
-                theme: 'striped',
-                headStyles: { fillColor: [51, 65, 85], textColor: 255, halign: 'center' },
-                styles: { fontSize: 8, halign: 'center' },
-                margin: { left: 20, right: 20 },
-                tableWidth: 'auto'
+                startY: scoreY + 25,
+                head: [headRow],
+                body: multiColData,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [51, 65, 85],
+                    textColor: 255,
+                    halign: 'center',
+                    fontSize: 7,
+                    cellPadding: 1,
+                    fontStyle: 'bold'
+                },
+                styles: {
+                    fontSize: 8.5,
+                    halign: 'center',
+                    cellPadding: 2,
+                    lineColor: [240, 240, 240],
+                    font: 'helvetica',
+                    textColor: [51, 65, 85]
+                },
+                columnStyles: colStyles,
+                margin: { left: 15, right: 15 },
+                tableWidth: 'auto',
+                didDrawCell: (data) => {
+                    if (data.section === 'body') {
+                        const colIdx = data.column.index % 5;
+                        const row = data.row.raw;
+                        const result = row[Math.floor(data.column.index / 5) * 5 + 3];
+
+                        if (colIdx === 1 || colIdx === 2) { // ANS or KEY column
+                            if (result === 'C') doc.setTextColor(21, 128, 61); // Green
+                            else if (result === 'W') {
+                                if (colIdx === 1) doc.setTextColor(190, 18, 60); // Red for wrong answer
+                                else doc.setTextColor(21, 128, 61); // Green for correct key
+                            }
+                            else doc.setTextColor(148, 163, 184); // Slate 400 for skip text
+                            doc.setFont('helvetica', 'bold');
+                        }
+
+                        // Color coding the Result column BG - PRO LEVEL
+                        if (colIdx === 3 && data.cell.raw) {
+                            const val = data.cell.raw;
+                            doc.setFont('helvetica', 'bold');
+                            doc.setFontSize(7.5); // Slightly smaller to fit "WRONG" comfortably
+
+                            if (val === 'RIGHT') { // Correct - Vibrant Green
+                                doc.setFillColor(22, 163, 74);
+                                doc.setTextColor(255, 255, 255);
+                                doc.rect(data.cell.x + 0.5, data.cell.y + 0.5, data.cell.width - 1, data.cell.height - 1, 'F');
+                                doc.text('RIGHT', data.cell.x + data.cell.width / 2, data.cell.y + data.cell.height / 2 + 1.5, { align: 'center' });
+                            } else if (val === 'WRONG') { // Wrong - Hot Red
+                                doc.setFillColor(220, 38, 38);
+                                doc.setTextColor(255, 255, 255);
+                                doc.rect(data.cell.x + 0.5, data.cell.y + 0.5, data.cell.width - 1, data.cell.height - 1, 'F');
+                                doc.text('WRONG', data.cell.x + data.cell.width / 2, data.cell.y + data.cell.height / 2 + 1.5, { align: 'center' });
+                            } else { // Skip - White with Neutral Border
+                                doc.setFillColor(255, 255, 255);
+                                doc.setDrawColor(226, 232, 240); // Slate 200
+                                doc.setTextColor(71, 85, 105); // Slate 600
+                                doc.rect(data.cell.x + 0.5, data.cell.y + 0.5, data.cell.width - 1, data.cell.height - 1, 'FD');
+                                doc.text('SKIP', data.cell.x + data.cell.width / 2, data.cell.y + data.cell.height / 2 + 1.5, { align: 'center' });
+                            }
+                        }
+                    }
+                }
             });
+
+            // Signature Section - Bottom PRO
+            const finalY = doc.lastAutoTable.finalY + 15;
+            if (finalY < pageH - 45) {
+                doc.setDrawColor(2, 132, 199);
+                doc.setLineWidth(0.8);
+                doc.line(25, finalY + 18, 80, finalY + 18); // Left line
+                doc.line(pageW - 80, finalY + 18, pageW - 25, finalY + 18); // Right line
+
+                doc.setFontSize(9);
+                doc.setTextColor(30, 41, 59); // Slate 800
+                doc.setFont('helvetica', 'bold');
+                doc.text("GUARDIAN'S SIGNATURE", 52.5, finalY + 24, { align: 'center' });
+                doc.text("PRINCIPAL'S SIGNATURE", pageW - 52.5, finalY + 24, { align: 'center' });
+
+                doc.setTextColor(148, 163, 184);
+                doc.setFontSize(6.5);
+                doc.text("SYSTEM GENERATED REPORT • NO PHYSICAL SIGNATURE REQUIRED UNLESS REQUESTED", pageW / 2, finalY + 32, { align: 'center' });
+            }
         }
 
-        // Footer
-        const sigY = pageH - 35;
+        // Footer - Relative to dynamic table
+        const footerY = Math.min(pageH - 35, doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : pageH - 35);
+        const sigY = footerY + 15;
+
         doc.setDrawColor(200);
         doc.line(30, sigY, 70, sigY);
         doc.setFontSize(8); doc.setTextColor(100);
@@ -488,12 +615,11 @@ const OmrHub = ({ exam, onClose, students }) => {
 
         doc.setFontSize(7);
         doc.setTextColor(180);
-        doc.text(`Generated on ${new Date().toLocaleString()} | Digital Report Card by Sohag Physics Management`, pageW / 2, pageH - 10, { align: 'center' });
+        doc.text(`Generated on ${new Date().toLocaleString()} | Digital Report Card by Sohag Physics Management`, pageW / 2, pageH - 8, { align: 'center' });
     };
 
     // --- Bulk Reports Generator ---
     const handleBulkReportsPDF = () => {
-        if (scannedResults.length === 0) return;
         const doc = new jsPDF('p', 'mm', 'a4');
 
         scannedResults.forEach((res, i) => {
