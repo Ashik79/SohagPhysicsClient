@@ -74,12 +74,13 @@ self.onmessage = function (e) {
         thresh = new cv.Mat();
         blurMat = new cv.Mat();
 
-        // ── Pre-process: CLAHE + Gaussian blur + Adaptive threshold
+        // ── Pre-process: CLAHE + Gaussian blur + Adaptive + Otsu combined
         cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
         const clahe = new cv.CLAHE(2.5, new cv.Size(8, 8));
         clahe.apply(gray, gray);
         clahe.delete();
         cv.GaussianBlur(gray, blurMat, new cv.Size(5, 5), 0);
+        // Adaptive threshold (good for shadows)
         cv.adaptiveThreshold(blurMat, thresh, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 11, 2);
 
         // ── Find 4 corner registration markers
@@ -87,18 +88,38 @@ self.onmessage = function (e) {
         const hierarchy = new cv.Mat();
         cv.findContours(thresh, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
+        const imgW = src.cols, imgH = src.rows;
+        // Corner zone: each marker must be within 30% of image from its respective corner
+        const CORNER_ZONE = 0.30;
+
         const markers = [];
         for (let i = 0; i < contours.size(); i++) {
             const cnt = contours.get(i);
             const area = cv.contourArea(cnt);
-            if (area > 80 && area < 12000) {
+            // Tighter area range: OMR corner squares are medium-sized black squares
+            if (area > 150 && area < 8000) {
                 const approx = new cv.Mat();
                 cv.approxPolyDP(cnt, approx, 0.04 * cv.arcLength(cnt, true), true);
                 if (approx.rows === 4) {
                     const r = cv.boundingRect(approx);
-                    if (r.width / r.height >= 0.65 && r.width / r.height <= 1.45) {
+                    const aspectRatio = r.width / r.height;
+                    // Must be roughly square
+                    if (aspectRatio >= 0.6 && aspectRatio <= 1.6) {
                         const mom = cv.moments(cnt);
-                        if (mom.m00 !== 0) markers.push({ x: mom.m10 / mom.m00, y: mom.m01 / mom.m00 });
+                        if (mom.m00 !== 0) {
+                            const cx = mom.m10 / mom.m00;
+                            const cy = mom.m01 / mom.m00;
+                            // ─ Corner proximity check ─
+                            // Only accept if the centroid is in one of the 4 corner zones
+                            const inTopZone = cy < imgH * CORNER_ZONE;
+                            const inBottomZone = cy > imgH * (1 - CORNER_ZONE);
+                            const inLeftZone = cx < imgW * CORNER_ZONE;
+                            const inRightZone = cx > imgW * (1 - CORNER_ZONE);
+                            const isCorner = (inTopZone || inBottomZone) && (inLeftZone || inRightZone);
+                            if (isCorner) {
+                                markers.push({ x: cx, y: cy });
+                            }
+                        }
                     }
                 }
                 approx.delete();
@@ -116,6 +137,21 @@ self.onmessage = function (e) {
         markers.sort((a, b) => a.y - b.y);
         const top2 = markers.slice(0, 2).sort((a, b) => a.x - b.x);
         const bot2 = markers.slice(-2).sort((a, b) => a.x - b.x);
+
+        // ── Final sanity check: each sorted marker must be in its expected quadrant
+        const halfW = imgW / 2, halfH = imgH / 2;
+        const validLayout =
+            top2[0].x < halfW && top2[0].y < halfH &&   // top-left: left+top half
+            top2[1].x > halfW && top2[1].y < halfH &&   // top-right: right+top half
+            bot2[0].x < halfW && bot2[0].y > halfH &&   // bottom-left: left+bottom half
+            bot2[1].x > halfW && bot2[1].y > halfH;     // bottom-right: right+bottom half
+
+        if (!validLayout) {
+            self.postMessage({ type: 'detecting', markersFound: 0 });
+            contours.delete(); hierarchy.delete();
+            return;
+        }
+
         const markerPoints = [top2[0], top2[1], bot2[1], bot2[0]];
 
         ordered = cv.matFromArray(4, 1, cv.CV_32FC2, [top2[0].x, top2[0].y, top2[1].x, top2[1].y, bot2[1].x, bot2[1].y, bot2[0].x, bot2[0].y]);
@@ -125,13 +161,24 @@ self.onmessage = function (e) {
         warped = new cv.Mat();
         cv.warpPerspective(src, warped, M, new cv.Size(WARPED_W, WARPED_H));
 
-        // ── Enhance warped image for scanning
+        // ── Enhance warped image for scanning: CLAHE + Adaptive + Otsu combined
         warpedGray = new cv.Mat();
+        const warpedBlur = new cv.Mat();
+        const threshOtsu = new cv.Mat();
         cv.cvtColor(warped, warpedGray, cv.COLOR_RGBA2GRAY);
-        const clahe2 = new cv.CLAHE(3.0, new cv.Size(8, 8));
+        const clahe2 = new cv.CLAHE(3.5, new cv.Size(8, 8));
         clahe2.apply(warpedGray, warpedGray);
         clahe2.delete();
-        cv.adaptiveThreshold(warpedGray, warpedGray, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 15, 5);
+        cv.GaussianBlur(warpedGray, warpedBlur, new cv.Size(3, 3), 0);
+        // Adaptive threshold
+        cv.adaptiveThreshold(warpedBlur, warpedGray, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 17, 6);
+        // Otsu threshold — merge with adaptive
+        cv.threshold(warpedBlur, threshOtsu, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU);
+        cv.bitwise_or(warpedGray, threshOtsu, warpedGray);
+        // Morphological cleanup: remove tiny noise
+        const kernel = cv.Mat.ones(2, 2, cv.CV_8U);
+        cv.morphologyEx(warpedGray, warpedGray, cv.MORPH_OPEN, kernel);
+        kernel.delete(); warpedBlur.delete(); threshOtsu.delete();
 
         // ── SET Detection removed
         const finalSet = selectedSet || 'A';
@@ -140,22 +187,34 @@ self.onmessage = function (e) {
         //    Roll bubbles are 20px circles → scan radius 10px
         let finalRoll = '';
         const rSX = 0.072, rCG = 0.07, rSY = 0.165, rRG = 0.0165;
+        const rollR = 11;  // ROI half-size in pixels
         for (let c = 0; c < 6; c++) {
             let best = null, mD = 0, sD = 0;
+            const allD = [];
             for (let r = 0; r < 10; r++) {
-                const d = countPixels(warpedGray, Math.round(WARPED_W * (rSX + c * rCG)), Math.round(WARPED_H * (rSY + r * rRG)), 10);
+                const d = countPixels(warpedGray, Math.round(WARPED_W * (rSX + c * rCG)), Math.round(WARPED_H * (rSY + r * rRG)), rollR);
+                allD.push(d);
                 if (d > mD) { sD = mD; mD = d; best = r; } else if (d > sD) sD = d;
             }
-            finalRoll += (mD < 50 || (mD > 50 && sD > 30 && mD / (sD || 1) < 1.3)) ? '?' : String(best);
+            // Adaptive min: use 80% of mean-nonzero pixels in this column
+            const nonzero = allD.filter(d => d > 10);
+            const dynMin = nonzero.length ? Math.round(nonzero.reduce((a, b) => a + b, 0) / nonzero.length * 0.8) : 50;
+            // Confident if density above floor AND top is 1.5x the second best
+            const confident = mD >= Math.max(50, dynMin) && (sD === 0 || mD / Math.max(sD, 1) >= 1.5);
+            finalRoll += confident ? String(best) : '?';
         }
 
-        // ── Answer Bubbles: scan all 60, but mark as SKIPPED_INACTIVE beyond activeQ
-        //    Question bubbles are 22px circles → scan radius 12px
+        // ── Answer Bubbles — density-based detection (matches Python engine)
+        const BUBBLE_R = 12;
+        const BUBBLE_AREA = (BUBBLE_R * 2) * (BUBBLE_R * 2);  // square ROI area
+        const EMPTY_PCT = 22;   // below → unattempted
+        const VALID_PCT = 52;   // above → valid answer
+        const MULTI_SECOND = 40; // second bubble above this → multi-fill
+        const CONF_RATIO = 1.45;
+
         const detectedAnswers = [];
         for (let i = 0; i < TOTAL_SHEET_Q; i++) {
             const qNum = i + 1;
-
-            // Beyond active questions: mark as skipped, do not evaluate
             if (qNum > activeQ) {
                 detectedAnswers.push({ qNum, detected: null, isError: false, errorType: 'SKIPPED_INACTIVE' });
                 continue;
@@ -165,19 +224,22 @@ self.onmessage = function (e) {
             const by = bubbleY(i);
             const optData = [];
             for (let oi = 0; oi < 4; oi++) {
-                optData.push({ opt: OPTION_LABELS[oi], pixels: countPixels(warpedGray, bubbleX(ci, oi), by, 12) });
+                const px = countPixels(warpedGray, bubbleX(ci, oi), by, BUBBLE_R);
+                optData.push({ opt: OPTION_LABELS[oi], pixels: px, pct: (px / BUBBLE_AREA) * 100 });
             }
-            optData.sort((a, b) => b.pixels - a.pixels);
+            optData.sort((a, b) => b.pct - a.pct);
 
-            const top1 = optData[0].pixels;
-            const top2 = optData[1].pixels;
-            const isMultiple = top1 > 100 && top2 > 60 && (top1 / (top2 || 1)) < 1.4;
-            const isEmpty = top1 < 80;
+            const topPct = optData[0].pct;
+            const secondPct = optData[1].pct;
+
+            const isEmpty = topPct < EMPTY_PCT;
+            const isMultiple = topPct >= VALID_PCT && secondPct >= MULTI_SECOND && (topPct / Math.max(secondPct, 1)) < CONF_RATIO;
+            const isValid = topPct >= VALID_PCT && !isMultiple;
 
             detectedAnswers.push({
                 qNum,
-                detected: (!isEmpty && !isMultiple) ? optData[0].opt : null,
-                isError: isMultiple || isEmpty,
+                detected: isValid ? optData[0].opt : null,
+                isError: isMultiple,
                 errorType: isMultiple ? 'MULTIPLE_FILL' : (isEmpty ? 'EMPTY' : null)
             });
         }
