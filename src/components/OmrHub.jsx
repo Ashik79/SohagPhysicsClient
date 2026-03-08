@@ -47,6 +47,23 @@ const OmrHub = ({ exam, onClose, students }) => {
     // Editing states
     const [editingRollId, setEditingRollId] = useState(null);
     const [tempRollValue, setTempRollValue] = useState('');
+    const [logoData, setLogoData] = useState(null);
+
+    // ── Fetch Logo for PDFs
+    useEffect(() => {
+        const fetchLogo = async () => {
+            try {
+                const logoPath = '/logo.png';
+                const response = await fetch(logoPath);
+                if (!response.ok) return;
+                const blob = await response.blob();
+                const reader = new FileReader();
+                reader.onloadend = () => setLogoData(reader.result);
+                reader.readAsDataURL(blob);
+            } catch (error) { console.error("Logo fetch error:", error); }
+        };
+        fetchLogo();
+    }, []);
 
     // Auto-Save to LocalStorage — strip capturedImg to avoid QuotaExceededError
     useEffect(() => {
@@ -356,90 +373,190 @@ const OmrHub = ({ exam, onClose, students }) => {
         { id: 'sms', label: '5. Bulk SMS', icon: MdSms },
     ];
 
-    // --- Idea 2: Individual Student Achievement Card ---
+    // --- Improved Student Report Generator (Individual) ---
     const generateStudentReport = (res) => {
         const doc = new jsPDF('p', 'mm', 'a4');
-        const accentRes = [3, 105, 161]; // Sky 700
+        drawIndividualReport(doc, res);
+        doc.save(`Report_${res.roll}_${res.studentName.replace(/\s+/g, '_')}.pdf`);
+    };
 
-        // Header Background
-        doc.setFillColor(...accentRes);
-        doc.rect(0, 0, 210, 40, 'F');
+    const drawIndividualReport = (doc, res) => {
+        const pageW = doc.internal.pageSize.width;
+        const pageH = doc.internal.pageSize.height;
+        const accentColor = [14, 165, 233]; // Sky 500
 
-        doc.setTextColor(255);
+        // External Border
+        doc.setDrawColor(...accentColor);
+        doc.setLineWidth(0.8);
+        doc.rect(5, 5, pageW - 10, pageH - 10);
+        doc.setLineWidth(0.2);
+        doc.rect(7, 7, pageW - 14, pageH - 14);
+
+        // Header Section
+        if (logoData) {
+            doc.addImage(logoData, 'PNG', pageW / 2 - 15, 12, 30, 30);
+        }
+
         doc.setFontSize(22);
         doc.setFont('helvetica', 'bold');
-        doc.text('EXAM ACHIEVEMENT REPORT', 105, 18, { align: 'center' });
+        doc.setTextColor(...accentColor);
+        doc.text('SOHAG PHYSICS', pageW / 2, 52, { align: 'center' });
+
+        doc.setFontSize(9);
+        doc.setTextColor(100);
+        doc.setFont('helvetica', 'normal');
+        doc.text('ACADEMIC EXCELLENCE & DIGITAL OMR SYSTEM', pageW / 2, 58, { align: 'center' });
+
+        doc.setDrawColor(230);
+        doc.line(20, 65, pageW - 20, 65);
+
+        doc.setFontSize(14);
+        doc.setTextColor(0);
+        doc.setFont('helvetica', 'bold');
+        doc.text('STUDENT PERFORMANCE REPORT', pageW / 2, 75, { align: 'center' });
+
+        // Info Box
+        doc.setFillColor(248, 250, 252);
+        doc.roundedRect(20, 82, pageW - 40, 38, 3, 3, 'F');
+
         doc.setFontSize(10);
-        doc.text(`SOHAG PHYSICS — PRO ASSESSMENT SERIES`, 105, 25, { align: 'center' });
+        doc.setTextColor(...accentColor);
+        doc.text('STUDENT INFORMATION', 25, 89);
 
-        // Student Info
-        doc.setTextColor(40);
-        doc.setFontSize(12);
-        doc.text(`Name: ${res.studentName}`, 20, 50);
-        doc.text(`Roll: ${res.roll}`, 20, 57);
-        doc.text(`Batch: ${res.studentBatch}`, 20, 64);
-        doc.text(`Exam: ${exam.title}`, 190, 50, { align: 'right' });
-        doc.text(`Date: ${exam.date}`, 190, 57, { align: 'right' });
+        doc.setTextColor(60);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Name:`, 25, 98); doc.setFont('helvetica', 'bold'); doc.text(res.studentName || 'N/A', 55, 98);
+        doc.setFont('helvetica', 'normal'); doc.text(`Roll:`, 25, 106); doc.setFont('helvetica', 'bold'); doc.text(res.roll || 'N/A', 55, 106);
+        doc.setFont('helvetica', 'normal'); doc.text(`Exam:`, 110, 98); doc.setFont('helvetica', 'bold'); doc.text(exam.title || 'N/A', 135, 98);
+        doc.setFont('helvetica', 'normal'); doc.text(`Date:`, 110, 106); doc.setFont('helvetica', 'bold'); doc.text(exam.date || 'N/A', 135, 106);
+        doc.setFont('helvetica', 'normal'); doc.text(`Batch:`, 25, 114); doc.setFont('helvetica', 'bold'); doc.text(res.studentBatch || 'N/A', 55, 114);
 
-        // Score Badge
-        doc.setDrawColor(...accentRes);
-        doc.setLineWidth(1);
-        doc.roundedRect(65, 80, 80, 35, 3, 3, 'S');
-        doc.setFontSize(28);
-        doc.setTextColor(...accentRes);
-        doc.text(`${res.score}`, 105, 102, { align: 'center' });
+        // Score Table
+        doc.autoTable({
+            startY: 128,
+            head: [['COMPONENT', 'FULL MARKS', 'OBTAINED', 'PERCENTAGE']],
+            body: [
+                ['MCQ Assessment', activeQuestions, res.correct, `${((res.correct / activeQuestions) * 100).toFixed(1)}%`],
+                ['Grand Total', activeQuestions, res.score, `${((res.score / activeQuestions) * 100).toFixed(1)}%`],
+            ],
+            theme: 'grid',
+            headStyles: { fillColor: accentColor, textColor: 255, halign: 'center' },
+            bodyStyles: { halign: 'center', fontSize: 10 },
+            columnStyles: { 0: { halign: 'left', cellWidth: 70 } },
+            margin: { left: 20, right: 20 }
+        });
+
+        // Stats Summary
+        const scoreY = doc.lastAutoTable.finalY + 15;
+        doc.setFillColor(240, 253, 244);
+        doc.roundedRect(20, scoreY, 50, 25, 3, 3, 'F');
+        doc.setFontSize(8); doc.setTextColor(21, 128, 61); doc.text('CORRECT', 45, scoreY + 8, { align: 'center' });
+        doc.setFontSize(14); doc.text(res.correct.toString(), 45, scoreY + 18, { align: 'center' });
+
+        doc.setFillColor(254, 242, 242);
+        doc.roundedRect(80, scoreY, 50, 25, 3, 3, 'F');
+        doc.setFontSize(8); doc.setTextColor(185, 28, 28); doc.text('WRONG', 105, scoreY + 8, { align: 'center' });
+        doc.setFontSize(14); doc.text(res.wrong.toString(), 105, scoreY + 18, { align: 'center' });
+
+        doc.setFillColor(248, 250, 252);
+        doc.roundedRect(140, scoreY, 50, 25, 3, 3, 'F');
+        doc.setFontSize(8); doc.setTextColor(100); doc.text('SCORE', 165, scoreY + 8, { align: 'center' });
+        doc.setFontSize(14); doc.text(res.score.toString(), 165, scoreY + 18, { align: 'center' });
+
+        // Answers Detail
+        if (res.breakdown) {
+            doc.autoTable({
+                startY: scoreY + 35,
+                head: [['Q#', 'YOUR ANS', 'CORRECT KEY', 'RESULT']],
+                body: res.breakdown.map(q => [q.qNum, q.detected || '—', q.keyAnswer || '?', q.result.toUpperCase()]),
+                theme: 'striped',
+                headStyles: { fillColor: [51, 65, 85], textColor: 255, halign: 'center' },
+                styles: { fontSize: 8, halign: 'center' },
+                margin: { left: 20, right: 20 },
+                tableWidth: 'auto'
+            });
+        }
+
+        // Footer
+        const sigY = pageH - 35;
+        doc.setDrawColor(200);
+        doc.line(30, sigY, 70, sigY);
+        doc.setFontSize(8); doc.setTextColor(100);
+        doc.text("Guardian's Signature", 50, sigY + 5, { align: 'center' });
+        doc.line(140, sigY, 180, sigY);
+        doc.text("Authorized Signature", 160, sigY + 5, { align: 'center' });
+
+        doc.setFontSize(7);
+        doc.setTextColor(180);
+        doc.text(`Generated on ${new Date().toLocaleString()} | Digital Report Card by Sohag Physics Management`, pageW / 2, pageH - 10, { align: 'center' });
+    };
+
+    // --- Bulk Reports Generator ---
+    const handleBulkReportsPDF = () => {
+        if (scannedResults.length === 0) return;
+        const doc = new jsPDF('p', 'mm', 'a4');
+
+        scannedResults.forEach((res, i) => {
+            if (i > 0) doc.addPage();
+            drawIndividualReport(doc, res);
+        });
+
+        doc.save(`All_Reports_${exam.title.replace(/\s+/g, '_')}.pdf`);
+        notifySuccess(`${scannedResults.length} reports generated successfully.`);
+    };
+
+    const handleMeritListPDF = () => {
+        if (scannedResults.length === 0) return;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const pageW = doc.internal.pageSize.width;
+        const accentColor = [14, 165, 233];
+
+        if (logoData) {
+            try { doc.addImage(logoData, 'PNG', 14, 10, 20, 20); } catch (e) { }
+        }
+
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...accentColor);
+        doc.text('SOHAG PHYSICS', pageW / 2, 18, { align: 'center' });
+
         doc.setFontSize(10);
         doc.setTextColor(100);
-        doc.text(`TOTAL SCORE / ${exam.mcqTotal}`, 105, 110, { align: 'center' });
+        doc.setFont('helvetica', 'normal');
+        doc.text('PRELIMINARY MERIT LIST (SCANNED BATCH)', pageW / 2, 24, { align: 'center' });
+        doc.text(exam.title || 'Exam Results', pageW / 2, 30, { align: 'center' });
 
-        // Performance Breakdown
-        const stats = [
-            ['CORRECT', res.correct, 'text-emerald-600'],
-            ['WRONG', res.wrong, 'text-rose-600'],
-            ['UNATTEMPTED', res.unattempted, 'text-slate-400']
-        ];
+        const ranked = [...scannedResults].sort((a, b) => b.score - a.score);
+        const headers = [['Pos', 'Roll', 'Name', 'Correct', 'Wrong', 'Score']];
+        const rows = ranked.map((r, i) => [i + 1, r.roll, r.studentName, r.correct, r.wrong, r.score]);
 
-        let statX = 40;
-        stats.forEach(s => {
-            doc.setFontSize(8);
-            doc.setTextColor(150);
-            doc.text(s[0], statX, 130, { align: 'center' });
-            doc.setFontSize(14);
-            doc.setTextColor(50);
-            doc.text(s[1].toString(), statX, 138, { align: 'center' });
-            statX += 65;
-        });
-
-        // Question Table
-        const tableData = res.breakdown.map(q => [q.qNum, q.detected || '—', q.keyAnswer || '?', q.result.toUpperCase()]);
         doc.autoTable({
-            startY: 150,
-            head: [['Q#', 'YOUR ANS', 'CORRECT KEY', 'RESULT']],
-            body: tableData,
+            head: headers,
+            body: rows,
+            startY: 40,
             theme: 'striped',
-            headStyles: { fillColor: accentRes },
-            styles: { fontSize: 8, halign: 'center' }
+            headStyles: { fillColor: accentColor, textColor: 255, halign: 'center' },
+            bodyStyles: { halign: 'center', fontSize: 9 },
+            columnStyles: { 2: { halign: 'left' } }
         });
 
-        const authY = doc.autoTable.previous.finalY + 30;
-        doc.setDrawColor(200);
-        doc.line(140, authY, 190, authY);
-        doc.setFontSize(8);
-        doc.text('AUTHORIZED SIGNATURE', 165, authY + 5, { align: 'center' });
-
-        doc.save(`Report_${res.roll}_${res.studentName}.pdf`);
+        doc.save(`Merit_List_${exam.title.replace(/\s+/g, '_')}.pdf`);
+        notifySuccess(`Merit List generated for ${scannedResults.length} students.`);
     };
 
     // --- Analytics Logic ---
     const getQuestionStats = () => {
         const stats = {};
-        for (let i = 1; i <= exam.mcqTotal; i++) stats[i] = { correct: 0, wrong: 0, skipped: 0 };
+        const maxQ = Math.max(Number(exam.mcqTotal) || 0, activeQuestions || 0);
+        for (let i = 1; i <= maxQ; i++) stats[i] = { correct: 0, wrong: 0, skipped: 0 };
 
         scannedResults.forEach(res => {
             res.breakdown?.forEach(q => {
-                if (q.result === 'correct') stats[q.qNum].correct++;
-                else if (q.result === 'wrong') stats[q.qNum].wrong++;
-                else stats[q.qNum].skipped++;
+                if (stats[q.qNum]) {
+                    if (q.result === 'correct') stats[q.qNum].correct++;
+                    else if (q.result === 'wrong') stats[q.qNum].wrong++;
+                    else stats[q.qNum].skipped++;
+                }
             });
         });
         return stats;
@@ -674,6 +791,20 @@ const OmrHub = ({ exam, onClose, students }) => {
                                             className="btn btn-sm bg-emerald-100 hover:bg-emerald-200 text-emerald-700 border-none gap-2 rounded-xl capitalize"
                                         >
                                             <MdFileDownload size={18} /> Export Excel
+                                        </button>
+                                        <button
+                                            onClick={handleBulkReportsPDF}
+                                            disabled={scannedResults.length === 0}
+                                            className="btn btn-sm bg-sky-100 hover:bg-sky-200 text-sky-700 border-none gap-2 rounded-xl capitalize"
+                                        >
+                                            <MdFileDownload size={18} /> Report PDF
+                                        </button>
+                                        <button
+                                            onClick={handleMeritListPDF}
+                                            disabled={scannedResults.length === 0}
+                                            className="btn btn-sm bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-none gap-2 rounded-xl capitalize"
+                                        >
+                                            <MdFileDownload size={18} /> Merit List PDF
                                         </button>
                                         <button
                                             onClick={handleClearDraft}
