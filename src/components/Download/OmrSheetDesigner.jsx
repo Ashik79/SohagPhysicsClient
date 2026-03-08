@@ -12,8 +12,8 @@ import PremiumOmrSheet from './PremiumOmrSheet';
 const OPTION_LABELS = ['A', 'B', 'C', 'D'];
 const OPTION_COLORS = { A: '#3b82f6', B: '#10b981', C: '#f59e0b', D: '#ef4444' };
 
-// Active question options: 10, 15, 20 ... 60 (step 5)
-const ACTIVE_Q_OPTIONS = Array.from({ length: 11 }, (_, i) => (i + 2) * 5);
+// Active question options: 10, 15, 20 ... 100 (step 5)
+const ACTIVE_Q_OPTIONS = Array.from({ length: 19 }, (_, i) => (i + 2) * 5);
 
 function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKey, setAnswerKey: setExternalAnswerKey, onSaveKey, activeQuestions: externalActiveQ, setActiveQuestions: setExternalActiveQ }) {
     const [activeTab, setActiveTab] = useState('design');
