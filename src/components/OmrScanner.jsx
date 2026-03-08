@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useContext } from 'react';
+import * as pdfjsLib from 'pdfjs-dist';
 import { AuthContext } from '../Provider';
 import {
     MdCameraAlt as Camera,
@@ -7,6 +8,7 @@ import {
     MdImage as ImageIcon,
     MdAdjust as Target,
     MdRefresh as Retake,
+    MdVideocamOff as CameraOff,
 } from 'react-icons/md';
 
 const OPTION_LABELS = ['A', 'B', 'C', 'D'];
@@ -30,11 +32,18 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
     const [devices, setDevices] = useState([]);
     const [selectedDeviceId, setSelectedDeviceId] = useState('');
     const [usePythonServer, setUsePythonServer] = useState(true);
+    const [facingMode, setFacingMode] = useState('environment'); // 'environment'=back, 'user'=front
 
     // Capture states
+    const [isCameraOn, setIsCameraOn] = useState(false);
     const [isAligned, setIsAligned] = useState(false);
     const [isCapturing, setIsCapturing] = useState(false);
     const [serverWarming, setServerWarming] = useState(false);
+
+    // PDF page picker state
+    const [pdfPages, setPdfPages] = useState([]);   // array of {pageNum, dataUrl}
+    const [pdfFile, setPdfFile] = useState(null);    // pending PDF file
+    const [showPdfPicker, setShowPdfPicker] = useState(false);
 
     const capturingRef = useRef(false); // instant double-click guard (sync with isCapturing state)
 
@@ -126,7 +135,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
             if (e.data.type === 'ready') {
                 setIsCvLoaded(true);
                 setStatus('ready');
-                startCamera();
+                // startCamera(); // Removed: don't auto-start camera anymore
             } else if (e.data.type === 'detecting') {
                 setIsAligned(false);
             } else if (e.data.type === 'scan_result') {
@@ -143,22 +152,56 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const startCamera = async (deviceId = null) => {
+    // Smart camera start: tries back camera first, falls back to any camera
+    const startCamera = async (deviceId = null, forceFacing = null) => {
         try {
             stopCamera();
-            const constraints = deviceId
-                ? { video: { deviceId: { exact: deviceId }, width: { ideal: 1920 }, height: { ideal: 1080 } } }
-                : { video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } };
-            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            const facing = forceFacing || facingMode;
+            let stream;
+            if (deviceId) {
+                // Explicit device selected by user
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { deviceId: { exact: deviceId }, width: { ideal: 1920 }, height: { ideal: 1080 } }
+                });
+            } else {
+                // Try facingMode (works on phones)
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: { ideal: facing }, width: { ideal: 1920 }, height: { ideal: 1080 } }
+                    });
+                } catch {
+                    // fallback — any camera
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                }
+            }
             if (videoRef.current) { videoRef.current.srcObject = stream; streamRef.current = stream; }
+
+            // Enumerate and label all video devices
             const allDevices = await navigator.mediaDevices.enumerateDevices();
-            setDevices(allDevices.filter(d => d.kind === 'videoinput'));
-            if (!deviceId && allDevices.length > 0) setSelectedDeviceId(allDevices[0].deviceId);
-        } catch { setStatus('error'); }
+            const videoDevices = allDevices.filter(d => d.kind === 'videoinput');
+            setDevices(videoDevices);
+
+            // Get the active track's deviceId and mark as selected
+            const activeTrack = stream.getVideoTracks()[0];
+            const activeDeviceId = activeTrack?.getSettings()?.deviceId || '';
+            setSelectedDeviceId(activeDeviceId);
+            setIsCameraOn(true);
+        } catch (err) {
+            console.error('Camera start failed:', err);
+            setStatus('error');
+        }
+    };
+
+    // Toggle between front and back camera
+    const toggleFacingMode = () => {
+        const newFacing = facingMode === 'environment' ? 'user' : 'environment';
+        setFacingMode(newFacing);
+        startCamera(null, newFacing);
     };
 
     const stopCamera = () => {
         if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null; }
+        setIsCameraOn(false);
     };
 
     // ── Resize + Grayscale before upload → ~3-4x smaller payload than original
@@ -322,46 +365,150 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
         setStatus('ready');
     };
 
-    const handleFileUpload = (e) => {
+    // ── PDF.js helper — renders one PDF page to a canvas and returns it
+    const pdfPageToCanvas = async (file, pageNum = 1, pdfDocInput = null) => {
+        try {
+            // Set worker from a reliable CDN matched to the installed version
+            pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
+            let pdfDoc = pdfDocInput;
+            if (!pdfDoc) {
+                const arrayBuffer = await file.arrayBuffer();
+                pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            }
+            const page = await pdfDoc.getPage(pageNum);
+            const scale = 2.0; // higher scale → better quality for OMR detection
+            const viewport = page.getViewport({ scale });
+            const canvas = document.createElement('canvas');
+            canvas.width = viewport.width; canvas.height = viewport.height;
+            const ctx = canvas.getContext('2d');
+            await page.render({ canvasContext: ctx, viewport }).promise;
+            return { canvas, totalPages: pdfDoc.numPages, pdfDoc };
+        } catch (err) {
+            console.error('PDF.js Error:', err);
+            throw new Error('PDF প্রসেস করা সম্ভব হয়নি।');
+        }
+    };
+
+    // ── Generate thumbnails for all PDF pages (for the page picker modal)
+    const generatePdfThumbnails = async (file, pdfDocInput = null) => {
+        try {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
+            let pdfDoc = pdfDocInput;
+            if (!pdfDoc) {
+                const arrayBuffer = await file.arrayBuffer();
+                pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            }
+
+            // Render all thumbnails in parallel for "very fast" performance
+            const pagePromises = Array.from({ length: pdfDoc.numPages }, (_, i) => i + 1).map(async (p) => {
+                const page = await pdfDoc.getPage(p);
+                const vp = page.getViewport({ scale: 0.2 }); // small scale for thumbs
+                const c = document.createElement('canvas');
+                c.width = vp.width; c.height = vp.height;
+                await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+                return { pageNum: p, dataUrl: c.toDataURL('image/jpeg', 0.4) }; // lower quality for thumbs
+            });
+
+            return await Promise.all(pagePromises);
+        } catch (err) {
+            console.error('PDF.js Thumbnails Error:', err);
+            throw new Error('PDF থাম্বনেইল তৈরি করা সম্ভব হয়নি।');
+        }
+    };
+
+    // ── Process a canvas through the existing pipeline (Python or Edge AI)
+    const processCanvas = async (canvas) => {
+        if (usePythonServer) {
+            const base64 = resizeForUpload(canvas);
+            await processFramePython(base64);
+        } else {
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const originalHandler = workerRef.current.onmessage;
+            const handleOnce = (ev) => {
+                if (ev.data.type === 'scan_result') {
+                    handleScanResult(ev.data.data, ev.data.detectedSet);
+                    workerRef.current.onmessage = originalHandler;
+                    setIsCapturing(false); capturingRef.current = false;
+                } else if (ev.data.type === 'error') {
+                    notifyFailed('ফাইল থেকে OMR detect হয়নি।');
+                    workerRef.current.onmessage = originalHandler;
+                    setIsCapturing(false); capturingRef.current = false;
+                }
+            };
+            workerRef.current.onmessage = handleOnce;
+            workerRef.current.postMessage({
+                imageData, width: canvas.width, height: canvas.height, numQ: totalQToEvaluate,
+                numOpts: exam.optionsPerQuestion || 4, isMasterKeyMode, selectedSet
+            }, [imageData.data.buffer]);
+        }
+    };
+
+    const handleFileUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
         if (capturingRef.current || status !== 'ready') return;
+        e.target.value = '';
+
+        const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+
+        if (isPdf) {
+            // PDF flow
+            capturingRef.current = true;
+            setIsCapturing(true);
+            try {
+                // Return pdfDoc to reuse it
+                const { canvas, totalPages, pdfDoc } = await pdfPageToCanvas(file, 1);
+                if (totalPages === 1) {
+                    // Single page → scan directly
+                    await processCanvas(canvas);
+                } else {
+                    // Multi-page → show page picker
+                    const thumbs = await generatePdfThumbnails(file, pdfDoc);
+                    setPdfFile(file);
+                    setPdfPages(thumbs);
+                    setShowPdfPicker(true);
+                    setIsCapturing(false);
+                    capturingRef.current = false;
+                }
+            } catch (err) {
+                notifyFailed('PDF পড়া যায়নি। অন্য ফাইল চেষ্টা করুন।');
+                setIsCapturing(false);
+                capturingRef.current = false;
+            }
+        } else {
+            // Image flow (existing)
+            capturingRef.current = true;
+            setIsCapturing(true);
+            const img = new Image();
+            img.onload = async () => {
+                const canvas = canvasRef.current;
+                if (!canvas) { setIsCapturing(false); capturingRef.current = false; return; }
+                canvas.width = img.width; canvas.height = img.height;
+                const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                ctx.drawImage(img, 0, 0);
+                await processCanvas(canvas);
+            };
+            img.src = URL.createObjectURL(file);
+        }
+    };
+
+    // ── PDF page picker — user selects which page to scan
+    const handlePdfPageSelect = async (pageNum) => {
+        setShowPdfPicker(false);
         capturingRef.current = true;
         setIsCapturing(true);
-        const img = new Image();
-        img.onload = async () => {
-            const canvas = canvasRef.current;
-            if (!canvas) { setIsCapturing(false); capturingRef.current = false; return; }
-            canvas.width = img.width; canvas.height = img.height;
-            const ctx = canvas.getContext('2d', { willReadFrequently: true });
-            ctx.drawImage(img, 0, 0);
-            if (usePythonServer) {
-                // Resize before upload
-                const base64 = resizeForUpload(canvas);
-                await processFramePython(base64);
-            } else {
-                const imageData = ctx.getImageData(0, 0, img.width, img.height);
-                const originalHandler = workerRef.current.onmessage;
-                const handleOnce = (ev) => {
-                    if (ev.data.type === 'scan_result') {
-                        handleScanResult(ev.data.data, ev.data.detectedSet);
-                        workerRef.current.onmessage = originalHandler;
-                        setIsCapturing(false); capturingRef.current = false;
-                    } else if (ev.data.type === 'error') {
-                        notifyFailed('ফাইল থেকে OMR detect হয়নি।');
-                        workerRef.current.onmessage = originalHandler;
-                        setIsCapturing(false); capturingRef.current = false;
-                    }
-                };
-                workerRef.current.onmessage = handleOnce;
-                workerRef.current.postMessage({
-                    imageData, width: img.width, height: img.height, numQ: totalQToEvaluate,
-                    numOpts: exam.optionsPerQuestion || 4, isMasterKeyMode, selectedSet
-                }, [imageData.data.buffer]);
-            }
-        };
-        img.src = URL.createObjectURL(file);
-        e.target.value = '';
+        try {
+            const { canvas } = await pdfPageToCanvas(pdfFile, pageNum);
+            await processCanvas(canvas);
+        } catch {
+            notifyFailed('PDF পেজ process হয়নি।');
+            setIsCapturing(false);
+            capturingRef.current = false;
+        }
+        setPdfFile(null); setPdfPages([]);
     };
 
     // ── Status text helper
@@ -389,20 +536,6 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
-                            {/* Camera selector */}
-                            {devices.length > 1 && (
-                                <select
-                                    value={selectedDeviceId}
-                                    onChange={e => { setSelectedDeviceId(e.target.value); startCamera(e.target.value); }}
-                                    className="text-[10px] font-bold border border-slate-200 rounded-lg px-2 py-1 text-slate-600 bg-white"
-                                >
-                                    {devices.map((d, i) => (
-                                        <option key={d.deviceId} value={d.deviceId}>
-                                            📷 Camera {i + 1}
-                                        </option>
-                                    ))}
-                                </select>
-                            )}
                             <button
                                 onClick={() => setIsMasterKeyMode(!isMasterKeyMode)}
                                 className={`px-3 py-1.5 rounded-xl text-[10px] font-black border-2 transition-all ${isMasterKeyMode ? 'bg-orange-500 border-orange-600 text-white animate-pulse' : 'bg-white border-slate-200 text-slate-500'}`}
@@ -421,7 +554,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                         <canvas ref={canvasRef} className="hidden" />
 
                         {/* Alignment frame overlay */}
-                        {status === 'ready' && sourceType === 'camera' && (
+                        {status === 'ready' && sourceType === 'camera' && isCameraOn && (
                             <div className="absolute inset-0 z-10 pointer-events-none">
                                 {isAligned && (
                                     <div className="absolute top-5 inset-x-0 flex justify-center z-50">
@@ -437,6 +570,30 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                                     <div className={`absolute -top-2 -right-2 w-12 h-12 border-t-4 border-r-4 rounded-tr-3xl ${isAligned ? 'border-emerald-400' : 'border-sky-500'}`} />
                                     <div className={`absolute -bottom-2 -left-2 w-12 h-12 border-b-4 border-l-4 rounded-bl-3xl ${isAligned ? 'border-emerald-400' : 'border-sky-500'}`} />
                                     <div className={`absolute -bottom-2 -right-2 w-12 h-12 border-b-4 border-r-4 rounded-br-3xl ${isAligned ? 'border-emerald-400' : 'border-sky-500'}`} />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Start Camera Overlay */}
+                        {status === 'ready' && sourceType === 'camera' && !isCameraOn && (
+                            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-950/40 backdrop-blur-[2px]">
+                                <button
+                                    onClick={() => startCamera()}
+                                    className="group flex flex-col items-center gap-4 p-8 rounded-[3rem] bg-white text-slate-900 shadow-2xl hover:scale-105 transition-all duration-300"
+                                >
+                                    <div className="w-20 h-20 bg-sky-100 rounded-full flex items-center justify-center text-sky-600 group-hover:bg-sky-600 group-hover:text-white transition-colors duration-300">
+                                        <Camera size={40} />
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-lg font-black uppercase tracking-tight">Open Camera</p>
+                                        <p className="text-xs font-bold text-slate-400 mt-1">ক্যামেরা চালু করতে এখানে ট্যাপ করুন</p>
+                                    </div>
+                                </button>
+
+                                <div className="mt-8 px-6 py-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
+                                    <p className="text-white text-[10px] font-black uppercase tracking-widest text-center">
+                                        OR UPLOAD FILE BELOW
+                                    </p>
                                 </div>
                             </div>
                         )}
@@ -520,19 +677,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                                             <Retake size={14} /> Retake
                                         </button>
 
-                                        {!scannedData.icrVerified && !editRoll.trim() && (
-                                            <button
-                                                onClick={() => {
-                                                    const confirmedData = { ...scannedData, roll: 'Unknown_' + Math.floor(1000 + Math.random() * 9000) };
-                                                    onSave(confirmedData);
-                                                    setBatchHistory(p => [confirmedData, ...p]);
-                                                    setEditRoll(''); setScannedData(null); setStatus('ready');
-                                                }}
-                                                className="flex-1 py-3 bg-amber-50 border border-amber-200 text-amber-600 font-black rounded-2xl text-xs uppercase hover:bg-amber-100 transition-colors"
-                                            >
-                                                Skip Roll
-                                            </button>
-                                        )}
+
 
                                         <button
                                             onClick={handleConfirm}
@@ -549,29 +694,49 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                 </div>
 
                 {/* FOOTER */}
-                <div className="px-6 py-4 bg-white border-t flex items-center justify-between">
-                    <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</p>
-                        <p className="text-xs font-bold text-slate-600">{statusText()}</p>
+                <div className="px-4 py-3 bg-white border-t">
+                    {/* Top row: status + history */}
+                    <div className="flex items-center justify-between mb-3">
+                        <div>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</p>
+                            <p className="text-xs font-bold text-slate-600">{statusText()}</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">History</p>
+                            <p className="text-xs font-bold text-slate-600">{batchHistory.length} Scanned</p>
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        {/* File upload */}
-                        <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
-                        <button
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={isCapturing || status !== 'ready'}
-                            className="w-11 h-11 rounded-full bg-slate-100 hover:bg-slate-200 disabled:opacity-40 flex items-center justify-center text-slate-500 transition-colors"
-                            title="Upload Image"
-                        >
-                            <ImageIcon size={20} />
-                        </button>
+                    {/* Bottom row: controls */}
+                    <div className="flex items-center justify-between gap-2">
 
-                        {/* BIG CAPTURE / SCAN KEY BUTTON */}
+                        {/* LEFT: Upload/Scanner Button — big and prominent */}
+                        <div className="flex flex-col items-center gap-1">
+                            <input
+                                type="file"
+                                accept="image/*,.pdf,application/pdf"
+                                capture={undefined}
+                                className="hidden"
+                                ref={fileInputRef}
+                                onChange={handleFileUpload}
+                            />
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={isCapturing || status !== 'ready'}
+                                className="h-11 px-4 rounded-2xl bg-slate-800 hover:bg-black disabled:opacity-40 flex items-center gap-2 text-white text-xs font-black transition-colors shadow-md"
+                                title="Upload image, PDF, or scan from USB scanner"
+                            >
+                                <ImageIcon size={16} />
+                                <span>Upload / Scanner</span>
+                            </button>
+                            <p className="text-[9px] text-slate-400 font-bold">Image · PDF · USB Scanner</p>
+                        </div>
+
+                        {/* CENTER: Big Capture button */}
                         <button
                             onClick={handleManualCapture}
                             disabled={isCapturing || status !== 'ready'}
-                            className={`relative w-20 h-20 rounded-full flex flex-col items-center justify-center font-black text-[10px] uppercase tracking-widest transition-all duration-300 shadow-xl
+                            className={`relative w-20 h-20 rounded-full flex flex-col items-center justify-center font-black text-[10px] uppercase tracking-widest transition-all duration-300 shadow-xl flex-shrink-0
                                 ${isCapturing
                                     ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
                                     : isMasterKeyMode
@@ -594,14 +759,100 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                                 </>
                             )}
                         </button>
-                    </div>
 
-                    <div className="text-right">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">History</p>
-                        <p className="text-xs font-bold text-slate-600">{batchHistory.length} Scanned</p>
+                        {/* RIGHT: Camera controls */}
+                        <div className="flex flex-col items-end gap-1.5 min-w-[100px]">
+                            {isCameraOn ? (
+                                <>
+                                    {/* Stop Camera Button */}
+                                    <button
+                                        onClick={stopCamera}
+                                        className="h-9 px-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 text-xs font-black transition-colors flex items-center gap-2"
+                                        title="Turn Off Camera"
+                                    >
+                                        <CameraOff size={16} />
+                                        <span>Camera Off</span>
+                                    </button>
+
+                                    {/* Front/Back toggle */}
+                                    <button
+                                        onClick={toggleFacingMode}
+                                        disabled={isCapturing}
+                                        className="h-9 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 disabled:opacity-40 flex items-center gap-2 text-slate-600 text-xs font-black transition-colors"
+                                        title={facingMode === 'environment' ? 'Back Camera — tap for Front' : 'Front Camera — tap for Back'}
+                                    >
+                                        {facingMode === 'environment' ? '📷 Back' : '🤳 Front'}
+                                    </button>
+
+                                    {/* Camera selector dropdown (only if multiple cameras) */}
+                                    {devices.length > 1 && (
+                                        <select
+                                            value={selectedDeviceId}
+                                            onChange={e => { setSelectedDeviceId(e.target.value); startCamera(e.target.value); }}
+                                            className="text-[10px] font-bold border border-slate-200 rounded-lg px-2 py-1 text-slate-600 bg-white max-w-[130px] truncate"
+                                        >
+                                            {devices.map((d, i) => {
+                                                const label = d.label || `Camera ${i + 1}`;
+                                                const isBack = /back|rear|environment/i.test(label);
+                                                const isFront = /front|user|face/i.test(label);
+                                                const icon = isBack ? '📷' : isFront ? '🤳' : '📹';
+                                                return (
+                                                    <option key={d.deviceId} value={d.deviceId}>
+                                                        {icon} {label.length > 20 ? label.slice(0, 20) + '…' : label}
+                                                    </option>
+                                                );
+                                            })}
+                                        </select>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="text-right">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Camera</p>
+                                    <p className="text-xs font-bold text-slate-300">OFF</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
+
+            {/* ── PDF Page Picker Modal */}
+            {showPdfPicker && (
+                <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-slate-950/80 backdrop-blur-sm">
+                    <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+                        <div className="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 className="text-base font-black text-slate-900">PDF Page Select</h3>
+                                <p className="text-xs text-slate-400 font-bold">{pdfPages.length} pages — কোন page scan করবেন?</p>
+                            </div>
+                            <button
+                                onClick={() => { setShowPdfPicker(false); setPdfFile(null); setPdfPages([]); }}
+                                className="p-2 text-slate-400 hover:text-red-500 rounded-xl"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-3 gap-3">
+                            {pdfPages.map(({ pageNum, dataUrl }) => (
+                                <button
+                                    key={pageNum}
+                                    onClick={() => handlePdfPageSelect(pageNum)}
+                                    className="group relative rounded-2xl overflow-hidden border-2 border-slate-100 hover:border-sky-400 transition-all shadow-sm aspect-[3/4] bg-slate-50"
+                                    title={`Page ${pageNum} scan করুন`}
+                                >
+                                    <img src={dataUrl} alt={`Page ${pageNum}`} className="w-full h-full object-contain" />
+                                    <div className="absolute inset-0 bg-sky-500/0 group-hover:bg-sky-500/10 transition-colors" />
+                                    <div className="absolute bottom-1 inset-x-0 flex justify-center">
+                                        <span className="text-[10px] font-black bg-white/90 px-2 py-0.5 rounded-full text-slate-600">
+                                            Page {pageNum}
+                                        </span>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

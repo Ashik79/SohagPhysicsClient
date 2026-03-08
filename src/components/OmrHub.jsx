@@ -75,9 +75,13 @@ const OmrHub = ({ exam, onClose, students }) => {
     // --- Identification Logic ---
     const identifyStudent = (roll) => {
         if (!roll) return { roll: 'N/A', name: 'Invalid Roll', batch: '-', phone: '' };
-        // Clean roll for comparison
-        const cleanRoll = roll.toString().trim();
-        const student = students.find(s => String(s.roll).trim() === cleanRoll || String(s.id).trim() === cleanRoll);
+        // Clean roll for comparison (trim and remove leading zeros, but keep '0' as '0')
+        const normalize = (r) => String(r || '').trim().replace(/^0+/, '') || '0';
+        const cleanRoll = normalize(roll);
+
+        const student = students.find(s => {
+            return normalize(s.roll) === cleanRoll || normalize(s.id) === cleanRoll;
+        });
         return student || { roll: roll, name: 'Unknown Student', batch: 'Not Found', phone: '' };
     };
 
@@ -86,6 +90,17 @@ const OmrHub = ({ exam, onClose, students }) => {
             const newKey = data.key; // We use flat key for simplicity in current universal OMR
             setAnswerKey(newKey);
             saveAnswerKeyCloud(newKey);
+            return;
+        }
+
+        // STRICTION: Reject unknown and invalid rolls immediately
+        const student = identifyStudent(data.roll);
+        if (data.roll.toString().includes('?')) {
+            notifyFailed(`রোল #${data.roll} অসম্পূর্ণ! হাতে লিখে সঠিক রোল দিন।`);
+            return;
+        }
+        if (student.name === 'Unknown Student') {
+            notifyFailed(`রোল #${data.roll} ডাটাবেজে নেই! আগে স্টুডেন্ট এড করুন।`);
             return;
         }
 
@@ -101,10 +116,14 @@ const OmrHub = ({ exam, onClose, students }) => {
             if (!proceed) return;
         }
 
-        // ── Duplicate roll detection
+        // ── Duplicate roll detection (with normalization)
+        const normalize = (r) => String(r || '').trim().replace(/^0+/, '') || '0';
+        const currentRollNormalized = normalize(data.roll);
+
         const existingIndex = scannedResults.findIndex(
-            r => r.roll.toString().trim() === data.roll.toString().trim()
+            r => normalize(r.roll) === currentRollNormalized
         );
+
         if (existingIndex !== -1) {
             const overwrite = window.confirm(
                 `⚠️ Duplicate Scan!\n\nRoll: ${data.roll} ইতিমধ্যে scan করা আছে।\n\n` +
@@ -112,7 +131,6 @@ const OmrHub = ({ exam, onClose, students }) => {
             );
             if (!overwrite) return;
             // Override the existing entry
-            const student = identifyStudent(data.roll);
             const finalScore = Math.max(0, data.score - (data.wrong * negativeMarking));
             const updatedResult = {
                 ...data,
@@ -125,12 +143,11 @@ const OmrHub = ({ exam, onClose, students }) => {
                 scanTimestamp: new Date().toISOString()
             };
             setScannedResults(prev => prev.map((r, i) => i === existingIndex ? updatedResult : r));
-            notifySuccess(`Re-scanned: ${student.name} (updated)`);
+            notifySuccess(`Updated: ${student.name}`);
             return;
         }
 
         // ── Normal new scan
-        const student = identifyStudent(data.roll);
         const finalScore = Math.max(0, data.score - (data.wrong * negativeMarking));
         const result = {
             ...data,
@@ -143,7 +160,7 @@ const OmrHub = ({ exam, onClose, students }) => {
             scanTimestamp: new Date().toISOString()
         };
         setScannedResults(prev => [result, ...prev]);
-        notifySuccess(`✓ Scanned: ${student.name}`);
+        notifySuccess(`✓ Added to List: ${student.name}`);
     };
 
     const handleUpdateWritten = (id, marks) => {
@@ -154,6 +171,12 @@ const OmrHub = ({ exam, onClose, students }) => {
 
     const handleUpdateRoll = (id, newRoll) => {
         const student = identifyStudent(newRoll);
+
+        if (student.name === 'Unknown Student') {
+            notifyFailed(`রোল #${newRoll} ডাটাবেজে পাওয়া যায়নি।`);
+            return;
+        }
+
         setScannedResults(prev => prev.map(res =>
             res.id === id ? {
                 ...res,
