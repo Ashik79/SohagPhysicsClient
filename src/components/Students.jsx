@@ -1,6 +1,6 @@
 import API_URL from '../apiConfig';
-import React, { useContext, useState } from 'react'
-import StudentsList from './StudentList';
+import React, { useContext, useState, Suspense, lazy } from 'react'
+const StudentsList = lazy(() => import('./StudentList'));
 import { AuthContext } from '../Provider';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiSearch, FiUser, FiHash, FiFilter, FiUserCheck } from 'react-icons/fi';
@@ -140,7 +140,9 @@ function Students() {
                             </h2>
                             <div className="h-px flex-1 bg-slate-100"></div>
                         </div>
-                        <StudentsList students={students} />
+                        <Suspense fallback={<div className="py-10 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">Preparing Student Profiles...</div>}>
+                            <StudentsList students={students} />
+                        </Suspense>
                     </motion.div>
                 )}
             </AnimatePresence>

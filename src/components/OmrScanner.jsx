@@ -1035,7 +1035,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                                 className="text-[9px] font-black text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full hover:bg-sky-100 transition-colors"
                                 title="Force Refresh App"
                             >
-                                v0.1.0-260309-2050 📱🎨
+                                v0.1.0-260309-2060 🚀📱
                             </button>
                         </div>
                         <div className="text-right flex-1">

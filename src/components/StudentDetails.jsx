@@ -1,14 +1,16 @@
 import API_URL from '../apiConfig';
 import React, { useContext, useState } from 'react';
 import { Link, Navigate, useLoaderData } from 'react-router-dom';
-import StudentDetailsPart from './StudentDetailsPart';
-import MonthlyPaymentsComponent from './MonthlyPaymentsComponent';
 import { AuthContext } from '../Provider';
 import Swal from 'sweetalert2';
-import AttendanceCalendar from './AttendanceComponent';
-import ExamsList from './ExamsList';
-import ProgramList from './ProgramList';
-import DisplayNotes from './DisplayNotes';
+
+// Lazy load sub-components for better performance
+const StudentDetailsPart = React.lazy(() => import('./StudentDetailsPart'));
+const MonthlyPaymentsComponent = React.lazy(() => import('./MonthlyPaymentsComponent'));
+const AttendanceCalendar = React.lazy(() => import('./AttendanceComponent'));
+const ExamsList = React.lazy(() => import('./ExamsList'));
+const ProgramList = React.lazy(() => import('./ProgramList'));
+const DisplayNotes = React.lazy(() => import('./DisplayNotes'));
 import { IoMdClose } from "react-icons/io";
 import { FiEdit, FiMail, FiTrash2, FiInfo, FiLayers, FiFileText, FiCalendar, FiCheckSquare, FiCreditCard, FiDollarSign, FiArrowLeft, FiCamera, FiMapPin, FiPhone, FiChevronRight, FiX, FiSend, FiPrinter, FiUser, FiCheckCircle } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -196,28 +198,35 @@ const StudentDetails = () => {
         transition={{ duration: 0.2 }}
         className="bg-white/50 backdrop-blur-xl p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-white/20 min-h-[400px]"
       >
-        {(() => {
-          switch (activeTab) {
-            case 'details': return <StudentDetailsPart student={student} />;
-            case 'programs': return <ProgramList student={student} />;
-            case 'notes': return <DisplayNotes notes={student.notes || []} id={student.id} />;
-            case 'results': return <ExamsList student={student} />;
-            case 'attendance': return <AttendanceCalendar student={student} />;
-            case 'monthlyPayments': return <MonthlyPaymentsComponent payments={student.payments} student={student} />;
-            case 'otherPayments': return (
-              <div className="space-y-4">
-                {otherPaymentsReversed.map((payment, index) => <PaymentCard key={index} payment={payment} />)}
-                {otherPaymentsReversed.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-20 text-slate-300">
-                    <FiDollarSign size={48} className="mb-4 opacity-20" />
-                    <p className="font-bold text-sm uppercase tracking-widest">No extra payments found</p>
-                  </div>
-                )}
-              </div>
-            );
-            default: return null;
-          }
-        })()}
+        <Suspense fallback={
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-10 h-10 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
+            <p className="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Fetching Data...</p>
+          </div>
+        }>
+          {(() => {
+            switch (activeTab) {
+              case 'details': return <StudentDetailsPart student={student} />;
+              case 'programs': return <ProgramList student={student} />;
+              case 'notes': return <DisplayNotes notes={student.notes || []} id={student.id} />;
+              case 'results': return <ExamsList student={student} />;
+              case 'attendance': return <AttendanceCalendar student={student} />;
+              case 'monthlyPayments': return <MonthlyPaymentsComponent payments={student.payments} student={student} />;
+              case 'otherPayments': return (
+                <div className="space-y-4">
+                  {otherPaymentsReversed.map((payment, index) => <PaymentCard key={index} payment={payment} />)}
+                  {otherPaymentsReversed.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-20 text-slate-300">
+                      <FiDollarSign size={48} className="mb-4 opacity-20" />
+                      <p className="font-bold text-sm uppercase tracking-widest">No extra payments found</p>
+                    </div>
+                  )}
+                </div>
+              );
+              default: return null;
+            }
+          })()}
+        </Suspense>
       </motion.div>
     );
   };

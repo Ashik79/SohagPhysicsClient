@@ -4,12 +4,15 @@ import { useLoaderData, Link } from 'react-router-dom';
 import { FiX, FiPlus, FiCamera, FiDownload, FiFileText, FiTrash2, FiSend, FiUser, FiCalendar, FiBookOpen, FiActivity, FiAward, FiBarChart2, FiArrowLeft, FiChevronLeft, FiChevronRight, FiCheckCircle } from "react-icons/fi";
 import { AuthContext } from '../Provider';
 import * as XLSX from 'xlsx';
-import ExamPDFExport from './ExamPDFExport';
-import OmrSheetDesigner from './Download/OmrSheetDesigner';
-import OmrHub from './OmrHub';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Lazy load heavy sub-components
+const ExamPDFExport = React.lazy(() => import('./ExamPDFExport'));
+const OmrHub = React.lazy(() => import('./OmrHub'));
+const OmrSheetDesigner = React.lazy(() => import('./Download/OmrSheetDesigner'));
 import { saveAs } from 'file-saver';
 import Swal from 'sweetalert2';
-import { motion, AnimatePresence } from 'framer-motion';
+// framer-motion already imported above
 
 function Exam() {
     const { notifySuccess, notifyFailed, getMonth, loggedUser, today } = useContext(AuthContext);
@@ -402,8 +405,10 @@ function Exam() {
                 </div>
             </dialog>
 
-            {showPdf && <ExamPDFExport exam={exam} results={rankedResults} onClose={() => setShowPdf(false)} />}
-            {showOmrHub && <OmrHub exam={exam} students={students} onClose={() => setShowOmrHub(false)} />}
+            <Suspense fallback={<div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm text-white">Loading Explorer...</div>}>
+                {showPdf && <ExamPDFExport exam={exam} results={rankedResults} onClose={() => setShowPdf(false)} />}
+                {showOmrHub && <OmrHub exam={exam} students={students} onClose={() => setShowOmrHub(false)} />}
+            </Suspense>
         </motion.div>
     );
 }

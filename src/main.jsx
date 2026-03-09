@@ -1,5 +1,5 @@
 import API_URL from './apiConfig';
-import React, { Children } from 'react'
+import React, { lazy, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 
 import './index.css'
@@ -7,53 +7,49 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
+
+// Layout & Core
 import Root from './components/Root';
 import Provider from './Provider';
-import Home from './components/Home';
-
-import Login from './components/Login';
 import PrivateRoute from './PrivateRoute';
-import Admission from './components/Admission';
-import Payment from './components/Payment';
-import AddUsers from './components/AddUsers';
-import AddPayment from './components/AddPayment';
-import NotFound from './components/NotFound';
-import Students from './components/Students';
-import StudentDetails from './components/StudentDetails';
-import UpdateStudent from './components/UpdateStudent';
-import PaymentComponent from './components/PaymentOverview';
-import TakeAttendance from './components/TakeAttendance';
-import Exams from './components/Exams';
-import Exam from './components/Exam';
-import Message from './components/Message';
+import Loading from './components/Loading';
 
-import ProgramEntry from './components/ProgramEntry';
-import Programs from './components/Programs';
-import Coupons from './components/Coupons';
-
-import Note from './components/Note';
-import EditNote from './components/EditNote';
-import StudentOverview from './components/StudentOverview';
-import Batch from './components/Batch';
-import PrintReceipt from './components/PrintReceipt';
-import MyEntry from './components/StuffPart/MyEntry';
-import Monitor from './components/StuffPart/Monitor';
-import AttendanceBatch from './components/AttendanceBatch';
-
-import Staffs from './components/StuffPart/Staffs';
-import StaffDetails from './components/StuffPart/StaffDetails';
-import EditorDashboard from './components/StudentSite/EditorDashboard';
-import VideoManager from './components/StudentSite/VideoManager';
-import VideoLibrary from './components/StudentSite/VideoLibrary';
-
-import DownloadCenter from './components/Download/DownloadCenter';
-import ManagementContainer from './components/UserManagement/ManagementContainer';
-import User from './components/UserManagement/User';
-import TakeAttendanceId from './components/TakeAttendanceId';
-
-
-
-
+// Lazy Loaded Components
+const Home = lazy(() => import('./components/Home'));
+const Login = lazy(() => import('./components/Login'));
+const Admission = lazy(() => import('./components/Admission'));
+const Payment = lazy(() => import('./components/Payment'));
+const AddUsers = lazy(() => import('./components/AddUsers'));
+const AddPayment = lazy(() => import('./components/AddPayment'));
+const NotFound = lazy(() => import('./components/NotFound'));
+const Students = lazy(() => import('./components/Students'));
+const StudentDetails = lazy(() => import('./components/StudentDetails'));
+const UpdateStudent = lazy(() => import('./components/UpdateStudent'));
+const PaymentComponent = lazy(() => import('./components/PaymentOverview'));
+const TakeAttendance = lazy(() => import('./components/TakeAttendance'));
+const Exams = lazy(() => import('./components/Exams'));
+const Exam = lazy(() => import('./components/Exam'));
+const Message = lazy(() => import('./components/Message'));
+const ProgramEntry = lazy(() => import('./components/ProgramEntry'));
+const Programs = lazy(() => import('./components/Programs'));
+const Coupons = lazy(() => import('./components/Coupons'));
+const Note = lazy(() => import('./components/Note'));
+const EditNote = lazy(() => import('./components/EditNote'));
+const StudentOverview = lazy(() => import('./components/StudentOverview'));
+const Batch = lazy(() => import('./components/Batch'));
+const PrintReceipt = lazy(() => import('./components/PrintReceipt'));
+const MyEntry = lazy(() => import('./components/StuffPart/MyEntry'));
+const Monitor = lazy(() => import('./components/StuffPart/Monitor'));
+const AttendanceBatch = lazy(() => import('./components/AttendanceBatch'));
+const Staffs = lazy(() => import('./components/StuffPart/Staffs'));
+const StaffDetails = lazy(() => import('./components/StuffPart/StaffDetails'));
+const EditorDashboard = lazy(() => import('./components/StudentSite/EditorDashboard'));
+const VideoManager = lazy(() => import('./components/StudentSite/VideoManager'));
+const VideoLibrary = lazy(() => import('./components/StudentSite/VideoLibrary'));
+const DownloadCenter = lazy(() => import('./components/Download/DownloadCenter'));
+const ManagementContainer = lazy(() => import('./components/UserManagement/ManagementContainer'));
+const User = lazy(() => import('./components/UserManagement/User'));
+const TakeAttendanceId = lazy(() => import('./components/TakeAttendanceId'));
 
 
 const fetchStudent = async ({ params }) => {
@@ -315,6 +311,10 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <Provider><RouterProvider router={router} future={{ v7_startTransition: true }} /></Provider>
+    <Provider>
+      <Suspense fallback={<Loading />}>
+        <RouterProvider router={router} future={{ v7_startTransition: true }} />
+      </Suspense>
+    </Provider>
   </React.StrictMode>,
 )
