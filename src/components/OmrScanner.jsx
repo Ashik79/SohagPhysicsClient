@@ -15,7 +15,7 @@ const OPTION_LABELS = ['A', 'B', 'C', 'D'];
 const OPTION_COLORS = {
     A: '#3b82f6', B: '#10b981', C: '#f59e0b', D: '#ef4444'
 };
-const PYTHON_TIMEOUT_MS = 22000; // 22s — Render cold-start can take ~20s
+const PYTHON_TIMEOUT_MS = 50000; // 50s — Render cold-start can take ~50s
 
 const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuestions }) => {
     const { notifySuccess, notifyFailed } = useContext(AuthContext);
@@ -160,6 +160,24 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // ── Server Wake-Up Ping: Render free tier cold-start-এ সাহায্য করে
+    useEffect(() => {
+        const pingServer = async () => {
+            try {
+                const apiBase = window.location.hostname === 'localhost'
+                    ? 'http://localhost:5050'
+                    : (import.meta.env.VITE_OMR_API_URL || 'https://omrenginepython.onrender.com');
+                await fetch(`${apiBase}/health`, { method: 'GET', signal: AbortSignal.timeout(60000) });
+                console.log('[+] Server is warm and ready.');
+            } catch (e) {
+                // Silently ignore — this is just a background warm-up
+                console.log('[-] Server warm-up ping failed (will try on scan):', e.message);
+            }
+        };
+        pingServer();
+    }, []); // mount হওয়ার সময় একবারই চলে
+
+
     // Smart camera start: tries back camera first, falls back to any camera
     const startCamera = async (deviceId = null, forceFacing = null) => {
         try {
@@ -242,7 +260,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
     };
 
 
-    // ── Python server call with 22s timeout
+    // ── Python server call with 50s timeout
     const processFramePython = useCallback(async (base64Image) => {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
@@ -255,7 +273,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
         try {
             const apiBase = window.location.hostname === 'localhost'
                 ? 'http://localhost:5050'
-                : (process.env.REACT_APP_OMR_API_URL || 'https://omrenginepython.onrender.com');
+                : (import.meta.env.VITE_OMR_API_URL || 'https://omrenginepython.onrender.com');
             const response = await fetch(`${apiBase}/scan`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -282,7 +300,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
 
             let errMsg = 'Python Server Error';
             if (err.name === 'AbortError') {
-                errMsg = 'Server Timeout (22s)';
+                errMsg = 'Server Timeout (50s)';
             } else if (err.message.includes('Failed to fetch')) {
                 errMsg = 'Server Connection Refused (Is it running?)';
             } else {
