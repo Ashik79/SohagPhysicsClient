@@ -48,7 +48,7 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
     const [printMode, setPrintMode] = useState({ mode: 'preview' });
 
     const performPrint = useReactToPrint({
-        contentRef: printRef,
+        content: () => printRef.current,
         documentTitle: `OMR_Sheet_${exam?.title?.replace(/\s+/g, '_') || 'Universal'}`,
         pageStyle: `
             @page { size: A4 portrait; margin: 0; }
@@ -79,7 +79,17 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
 
     const triggerPrint = (mode) => {
         setPrintMode({ mode });
-        setTimeout(() => { performPrint(); }, 500);
+        // Use a slight delay to ensure state update and component re-render
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Preparing PDF...',
+                text: 'Please wait while we generate your OMR sheet.',
+                timer: 2000,
+                showConfirmButton: false,
+                didOpen: () => Swal.showLoading()
+            });
+        }
+        setTimeout(() => { performPrint(); }, 1200);
     };
 
     const handlePrintBlank = () => triggerPrint('sheet');
@@ -336,9 +346,9 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
 
     return (
         <>
-            {/* OFF-SCREEN PRINT AREA (Required for robust PDF generation) */}
-            <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', pointerEvents: 'none' }}>
-                <div ref={printRef} className="print-area">
+            {/* OFF-SCREEN PRINT AREA (Ensures browser captures styles and images) */}
+            <div style={{ position: 'fixed', left: 0, top: 0, opacity: 0, pointerEvents: 'none', zIndex: -1 }}>
+                <div ref={printRef} className="print-area" style={{ width: '210mm', height: '297mm', background: 'white' }}>
                     <PremiumOmrSheet
                         answerKey={printMode.mode === 'answer_key' ? answerKey : undefined}
                         isAnswerKeyMode={printMode.mode === 'answer_key'}
