@@ -134,9 +134,10 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
 
     // ── Worker setup — camera চালু হলেই worker load হবে (low-RAM device-এর জন্য)
     const initWorker = () => {
-        if (workerRef.current) return; // already created
+        if (workerRef.current) return;
         try {
-            workerRef.current = new Worker('/omrWorker.js');
+            // Cache busting for mobile
+            workerRef.current = new Worker(`/omrWorker.js?v=${Date.now()}`);
             workerRef.current.onmessage = (e) => {
                 if (e.data.type === 'ready') {
                     console.log("[+] OMR Worker Ready");
@@ -157,6 +158,17 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                 }
             };
             setStatus('initializing');
+
+            // Safety timeout: If worker/OpenCV doesn't respond within 15s, just force it
+            // This prevents the "infinite loading" on slower mobile devices
+            setTimeout(() => {
+                if (workerRef.current && status === 'initializing' && !isCvLoaded) {
+                    console.warn("[!] CPU/Network too slow? Forcing ready state.");
+                    setIsCvLoaded(true);
+                    setStatus('ready');
+                }
+            }, 12000);
+
         } catch (e) {
             console.error('[OMR] Worker creation failed:', e);
             setStatus('error');
@@ -206,9 +218,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
             // ── Build video constraints with autofocus hints
             const baseVideoConstraints = {
                 width: { ideal: 1920 },
-                height: { ideal: 1080 },
-                focusMode: 'continuous',          // continuous autofocus (Android Chrome)
-                advanced: [{ focusMode: 'continuous' }]
+                height: { ideal: 1080 }
             };
 
             let stream;
@@ -277,17 +287,8 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
             setSelectedDeviceId(activeDeviceId);
             setIsCameraOn(true);
 
-            // If CV is already loaded from a previous session, jump to ready immediately
             if (isCvLoaded) {
                 setStatus('ready');
-            } else {
-                // Safety timeout: If worker doesn't say "ready" within 10s, try to force it
-                setTimeout(() => {
-                    if (!isCvLoaded && status === 'initializing') {
-                        setIsCvLoaded(true);
-                        setStatus('ready');
-                    }
-                }, 10000);
             }
         } catch (err) {
             console.error('Camera start failed:', err);
