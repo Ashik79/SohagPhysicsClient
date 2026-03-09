@@ -116,8 +116,8 @@ self.onmessage = function (e) {
         }
 
         const imgW = src.cols, imgH = src.rows;
-        // CORNER_ZONE 0.45 — Matched to Python engine for robust quadrant validation
-        const CORNER_ZONE = 0.45;
+        // CORNER_ZONE 0.55 — (Reverted to v1925 "perfect" state)
+        const CORNER_ZONE = 0.55;
 
         // ── Helper: scan contours for corner markers
         function scanContours(threshMat, areaMin, areaMax) {
@@ -242,9 +242,9 @@ self.onmessage = function (e) {
         // SET Detection removed as requested
         let finalSet = '';
 
-        // ── Roll Number Detection (Matched to Python engine v3.1)
-        const rSX = 0.070, rCG = 0.048, rSY = 0.148, rRG = 0.0182;
-        const rollR = 9;
+        // ── Roll Number Detection (Reverted to v1925 "perfect" state)
+        const rSX = 0.070, rCG = 0.048, rSY = 0.145, rRG = 0.0182;
+        const rollR = 7;
         for (let c = 0; c < 6; c++) {
             let best = null, mD = 0, sD = 0;
             const allD = [];

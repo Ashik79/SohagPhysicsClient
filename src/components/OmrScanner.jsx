@@ -32,8 +32,8 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
     const [devices, setDevices] = useState([]);
     const [selectedDeviceId, setSelectedDeviceId] = useState('');
     const [usePythonServer, setUsePythonServer] = useState(true);
-    // ── Default to Edge AI (Worker) for Mobile to bypass connectivity/cold-start issues
-    const [useAiMode, setUseAiMode] = useState(true);
+    // ── Default to Python Server (v1925 state) as it was "perfect" for the user's PC
+    const [useAiMode, setUseAiMode] = useState(false);
     const [facingMode, setFacingMode] = useState('environment'); // 'environment'=back, 'user'=front
 
     // Capture states
@@ -1017,7 +1017,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                                 className="text-[9px] font-black text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full hover:bg-sky-100 transition-colors"
                                 title="Force Refresh App"
                             >
-                                v0.1.0-260309-2005 ⚡
+                                v0.1.0-260309-2020 🚀
                             </button>
                         </div>
                         <div className="text-right flex-1">
