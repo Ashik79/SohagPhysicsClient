@@ -962,13 +962,17 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                 {/* FOOTER */}
                 <div className="px-4 py-3 bg-white border-t">
                     {/* Top row: status + history */}
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center justify-between mb-3 border-b border-slate-50 pb-2">
                         <div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</p>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Status</p>
                             <p className="text-xs font-bold text-slate-600">{statusText()}</p>
                         </div>
+                        <div className="text-center">
+                            <p className="text-[10px] font-black text-sky-400 uppercase tracking-widest leading-none mb-1">Build</p>
+                            <p className="text-[9px] font-black text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full">v0.1.0-260309-1905</p>
+                        </div>
                         <div className="text-right">
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">History</p>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">History</p>
                             <p className="text-xs font-bold text-slate-600">{batchHistory.length} Scanned</p>
                         </div>
                     </div>
