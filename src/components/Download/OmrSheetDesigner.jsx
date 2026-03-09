@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { MdPrint, MdKey, MdAutoAwesome, MdClose, MdInfo } from 'react-icons/md';
-import { useReactToPrint } from 'react-to-print';
+import { MdPrint, MdKey, MdAutoAwesome, MdClose, MdInfo } from 'react-icons/md';
 import PremiumOmrSheet from './PremiumOmrSheet';
+import { generateOmrPdf } from '../../utils/omrPdf';
 
 // ── Universal OMR Sheet Designer ──────────────────────────────────────
 //  The OMR sheet is ALWAYS 100 questions (fixed and universal).
@@ -44,56 +45,8 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
     const answeredCount = Object.keys(answerKey).length;
 
     // ── Print Integration ──────────────────────────────────────────────
-    const printRef = useRef(null);
-    const [printMode, setPrintMode] = useState({ mode: 'preview' });
-
-    const performPrint = useReactToPrint({
-        content: () => printRef.current,
-        documentTitle: `OMR_Sheet_${exam?.title?.replace(/\s+/g, '_') || 'Universal'}`,
-        pageStyle: `
-            @page { size: A4 portrait; margin: 0; }
-            @media print {
-                * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-                html, body { 
-                    width: 210mm !important; 
-                    height: 297mm !important; 
-                    margin: 0 !important; 
-                    padding: 0 !important; 
-                    background: white !important; 
-                    overflow: hidden !important;
-                }
-                .print-page { 
-                    width: 210mm !important; 
-                    height: 297mm !important; 
-                    max-width: 210mm !important; 
-                    max-height: 297mm !important; 
-                    border: none !important; 
-                    box-shadow: none !important; 
-                    margin: 0 auto !important; 
-                    page-break-after: always; 
-                    box-sizing: border-box !important;
-                }
-            }
-        `
-    });
-
-    const triggerPrint = (mode) => {
-        setPrintMode({ mode });
-        // Use a slight delay to ensure state update and component re-render
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                title: 'Preparing PDF...',
-                text: 'Please wait while we generate your OMR sheet.',
-                timer: 2000,
-                showConfirmButton: false,
-                didOpen: () => Swal.showLoading()
-            });
-        }
-        setTimeout(() => { performPrint(); }, 1200);
-    };
-
-    const handlePrintBlank = () => triggerPrint('sheet');
-    const handlePrintAnswerKey = () => triggerPrint('answer_key');
+    const handlePrintBlank = () => generateOmrPdf(exam, undefined, false);
+    const handlePrintAnswerKey = () => generateOmrPdf(exam, answerKey, true);
 
     // ── Tabs ───────────────────────────────────────────────────────────
     const tabs = [
@@ -346,16 +299,6 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
 
     return (
         <>
-            {/* OFF-SCREEN PRINT AREA (Ensures browser captures styles and images) */}
-            <div style={{ position: 'fixed', left: 0, top: 0, opacity: 0, pointerEvents: 'none', zIndex: -1 }}>
-                <div ref={printRef} className="print-area" style={{ width: '210mm', height: '297mm', background: 'white' }}>
-                    <PremiumOmrSheet
-                        answerKey={printMode.mode === 'answer_key' ? answerKey : undefined}
-                        isAnswerKeyMode={printMode.mode === 'answer_key'}
-                    />
-                </div>
-            </div>
-
             {/* NORMAL RENDER */}
             {onClose ? (
                 <div className='fixed inset-0 z-[100] bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4'>
