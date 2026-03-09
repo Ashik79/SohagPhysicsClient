@@ -406,7 +406,7 @@ const OmrHub = ({ exam, onClose, students }) => {
         doc.setFontSize(8);
         doc.setTextColor(148, 163, 184); // Slate 400
         doc.setFont('helvetica', 'bold');
-        doc.text('OFFICIAL DIGITAL SCORECARD • ACADEMIC SESSION 2026', pageW / 2, 41, { align: 'center', charSpace: 0.8 });
+        doc.text('OFFICIAL DIGITAL SCORECARD • ACADEMIC SESSION 2026', pageW / 2 - 5, 41, { align: 'center', charSpace: 0.8 });
 
         doc.setDrawColor(240);
         doc.line(20, 46, pageW - 20, 46);
