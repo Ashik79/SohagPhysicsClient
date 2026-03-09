@@ -129,6 +129,11 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
             };
             setScannedData(newData);
             setStatus('scanned');
+
+            // ── Haptic Feedback (Vibrate on success)
+            if ('vibrate' in navigator) {
+                try { navigator.vibrate(50); } catch (e) { /* ignore */ }
+            }
         }
     }, [calculateScore, onSave, notifySuccess]);
 
@@ -748,7 +753,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
         if (isCapturing) return serverWarming ? '🔥 Server Warming Up...' : '⏳ Processing...';
         if (isAligned) return '🟢 Sheet Detected';
         if (status === 'scanned') return '📝 Review Result';
-        if (status === 'initializing') return '⚙️ Starting Engine...';
+        if (status === 'initializing') return '⚡ Loading Engine...';
         if (status === 'idle') return '💤 Standby';
         if (status === 'ready') return '📷 Ready';
         return status;
@@ -963,15 +968,33 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                 <div className="px-4 py-3 bg-white border-t">
                     {/* Top row: status + history */}
                     <div className="flex items-center justify-between mb-3 border-b border-slate-50 pb-2">
-                        <div>
+                        <div className="flex-1">
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Status</p>
-                            <p className="text-xs font-bold text-slate-600">{statusText()}</p>
+                            <div className="flex flex-col gap-1">
+                                <p className="text-xs font-bold text-slate-600">{statusText()}</p>
+                                {status === 'initializing' && !isCvLoaded && (
+                                    <div className="w-20 h-1 bg-slate-100 rounded-full overflow-hidden">
+                                        <motion.div
+                                            initial={{ x: '-100%' }}
+                                            animate={{ x: '100%' }}
+                                            transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                                            className="w-full h-full bg-sky-500"
+                                        />
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                        <div className="text-center">
+                        <div className="text-center flex-1">
                             <p className="text-[10px] font-black text-sky-400 uppercase tracking-widest leading-none mb-1">Build</p>
-                            <p className="text-[9px] font-black text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full">v0.1.0-260309-1905</p>
+                            <button
+                                onClick={() => window.location.reload(true)}
+                                className="text-[9px] font-black text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full hover:bg-sky-100 transition-colors"
+                                title="Force Refresh App"
+                            >
+                                v0.1.0-260309-1915 🔄
+                            </button>
                         </div>
-                        <div className="text-right">
+                        <div className="text-right flex-1">
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">History</p>
                             <p className="text-xs font-bold text-slate-600">{batchHistory.length} Scanned</p>
                         </div>
