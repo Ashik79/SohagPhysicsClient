@@ -131,34 +131,43 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
         }
     }, [calculateScore, onSave, notifySuccess]);
 
-    // ── Worker setup
+    // ── Worker setup — camera চালু হলেই worker load হবে (low-RAM device-এর জন্য)
+    const initWorker = () => {
+        if (workerRef.current) return; // already created
+        try {
+            workerRef.current = new Worker('/omrWorker.js');
+            workerRef.current.onmessage = (e) => {
+                if (e.data.type === 'ready') {
+                    setIsCvLoaded(true);
+                    setStatus('ready');
+                } else if (e.data.type === 'detecting') {
+                    setIsAligned(false);
+                    setRealTimeOverlayData(null);
+                } else if (e.data.type === 'scan_result') {
+                    setIsAligned(true);
+                    setRealTimeOverlayData({
+                        markerPoints: e.data.markerPoints,
+                        bubbles: e.data.data.detectedAnswers
+                    });
+                } else if (e.data.type === 'error') {
+                    setIsAligned(false);
+                    setRealTimeOverlayData(null);
+                }
+            };
+        } catch (e) {
+            console.error('[OMR] Worker creation failed:', e);
+            setStatus('error');
+        }
+    };
+
     useEffect(() => {
-        workerRef.current = new Worker('/omrWorker.js');
-        workerRef.current.onmessage = (e) => {
-            if (e.data.type === 'ready') {
-                setIsCvLoaded(true);
-                setStatus('ready');
-            } else if (e.data.type === 'detecting') {
-                setIsAligned(false);
-                setRealTimeOverlayData(null);
-            } else if (e.data.type === 'scan_result') {
-                setIsAligned(true);
-                // Store bubble coordinates for real-time overlay
-                setRealTimeOverlayData({
-                    markerPoints: e.data.markerPoints,
-                    bubbles: e.data.data.detectedAnswers
-                });
-            } else if (e.data.type === 'error') {
-                setIsAligned(false);
-                setRealTimeOverlayData(null);
-            }
-        };
         return () => {
-            if (workerRef.current) workerRef.current.terminate();
+            if (workerRef.current) { workerRef.current.terminate(); workerRef.current = null; }
             stopCamera();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
 
     // ── Server Wake-Up Ping: Render free tier cold-start-এ সাহায্য করে
     useEffect(() => {
@@ -182,6 +191,9 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
     const startCamera = async (deviceId = null, forceFacing = null) => {
         try {
             stopCamera();
+            // ── Worker-কে এখন init করো (lazy — camera চাপলেই OpenCV লোড হবে)
+            initWorker();
+            setStatus('initializing');
             const facing = forceFacing || facingMode;
 
             // ── Build video constraints with autofocus hints
