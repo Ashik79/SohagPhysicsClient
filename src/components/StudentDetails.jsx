@@ -1,5 +1,5 @@
 import API_URL from '../apiConfig';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, Suspense, lazy } from 'react';
 import { Link, Navigate, useLoaderData } from 'react-router-dom';
 import { AuthContext } from '../Provider';
 import Swal from 'sweetalert2';
