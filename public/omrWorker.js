@@ -113,59 +113,82 @@ self.onmessage = function (e) {
         }
 
         const imgW = src.cols, imgH = src.rows;
-        const CORNER_ZONE = 0.45;
+        // CORNER_ZONE 0.55 — sheet যদি একটু কাত থাকে তাহলেও corner detect হবে
+        const CORNER_ZONE = 0.55;
 
-        // ── MULTI-THRESHOLD LOOP: Try different adaptive settings if markers not found
-        if (markers.length < 4) {
-            const configs = [
-                { block: 15, C: 3 },
-                { block: 11, C: 2 },
-                { block: 21, C: 4 },
-                { block: 25, C: 5 }
-            ];
+        // ── Helper: scan contours for corner markers
+        function scanContours(threshMat, areaMin, areaMax) {
+            const found = [];
+            const contours = new cv.MatVector();
+            const hierarchy = new cv.Mat();
+            cv.findContours(threshMat, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
-            for (let cfg of configs) {
-                markers = []; // Reset markers for each attempt
-                cv.adaptiveThreshold(blurMat, thresh, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, cfg.block, cfg.C);
-
-                // Declare contours/hierarchy outside the inner block so they can be safely deleted
-                const contours = new cv.MatVector();
-                const hierarchy = new cv.Mat();
-                cv.findContours(thresh, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-
-                for (let i = 0; i < contours.size(); i++) {
-                    const cnt = contours.get(i);
-                    const area = cv.contourArea(cnt);
-                    if (area > 80 && area < 25000) {
-                        const approx = new cv.Mat();
-                        cv.approxPolyDP(cnt, approx, 0.05 * cv.arcLength(cnt, true), true);
-                        if (approx.rows === 4) {
-                            const r = cv.boundingRect(approx);
-                            if (r.width / r.height >= 0.5 && r.width / r.height <= 2.0) {
-                                const mom = cv.moments(cnt);
-                                if (mom.m00 !== 0) {
-                                    const cx = mom.m10 / mom.m00, cy = mom.m01 / mom.m00;
-                                    if ((cy < imgH * CORNER_ZONE || cy > imgH * (1 - CORNER_ZONE)) &&
-                                        (cx < imgW * CORNER_ZONE || cx > imgW * (1 - CORNER_ZONE))) {
-                                        markers.push({ x: cx, y: cy });
-                                    }
+            for (let i = 0; i < contours.size(); i++) {
+                const cnt = contours.get(i);
+                const area = cv.contourArea(cnt);
+                if (area > areaMin && area < areaMax) {
+                    const approx = new cv.Mat();
+                    // epsilon বাড়িয়ে perspective distortion handle করা হয়েছে
+                    cv.approxPolyDP(cnt, approx, 0.06 * cv.arcLength(cnt, true), true);
+                    if (approx.rows >= 4 && approx.rows <= 6) {
+                        const r = cv.boundingRect(approx);
+                        // aspect ratio 0.3-3.5 — perspective distortion-এ rectangle rectangular নাও দেখাতে পারে
+                        const ratio = r.width / Math.max(r.height, 1);
+                        if (ratio >= 0.3 && ratio <= 3.5) {
+                            const mom = cv.moments(cnt);
+                            if (mom.m00 > 0) {
+                                const cx = mom.m10 / mom.m00, cy = mom.m01 / mom.m00;
+                                const inCornerX = cx < imgW * CORNER_ZONE || cx > imgW * (1 - CORNER_ZONE);
+                                const inCornerY = cy < imgH * CORNER_ZONE || cy > imgH * (1 - CORNER_ZONE);
+                                if (inCornerX && inCornerY) {
+                                    found.push({ x: cx, y: cy });
                                 }
                             }
                         }
-                        approx.delete();
                     }
+                    approx.delete();
                 }
-                contours.delete();
-                hierarchy.delete();
-
-                if (markers.length >= 4) break;
             }
+            contours.delete();
+            hierarchy.delete();
+            return found;
+        }
+
+        // ── MULTI-THRESHOLD STRATEGY: সবচেয়ে বেশি marker যে config-এ পাওয়া গেছে সেটা রাখো
+        // let markers = []; // This was already declared above, so commenting out to avoid redeclaration
+
+        const configs = [
+            { block: 15, C: 3 },
+            { block: 11, C: 2 },
+            { block: 21, C: 4 },
+            { block: 25, C: 5 },
+            { block: 35, C: 7 },   // larger block for high-resolution images
+            { block: 9, C: 1 },   // very fine for sharp images
+        ];
+
+        for (let cfg of configs) {
+            const tempThresh = new cv.Mat();
+            cv.adaptiveThreshold(blurMat, tempThresh, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, cfg.block, cfg.C);
+            const found = scanContours(tempThresh, 60, 40000);
+            tempThresh.delete();
+            if (found.length > markers.length) markers = found; // best result রাখো
+            if (markers.length >= 4) break;
+        }
+
+        // Otsu threshold দিয়েও চেষ্টা করো (uniform lighting-এ ভালো কাজ করে)
+        if (markers.length < 4) {
+            const otsuThresh = new cv.Mat();
+            cv.threshold(blurMat, otsuThresh, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU);
+            const found = scanContours(otsuThresh, 60, 40000);
+            otsuThresh.delete();
+            if (found.length > markers.length) markers = found;
         }
 
         // ── Not enough markers: report and exit
         if (markers.length < 4) {
-            throw new Error(`৪টি রেজিস্ট্রেশন মার্কার পাওয়া যায়নি। ${markers.length}টি পাওয়া গেছে।`);
+            throw new Error(`৪টি রেজিস্ট্রেশন মার্কার পাওয়া যায়নি। ${markers.length}টি পাওয়া গেছে।`);
         }
+
 
         // ── Sort markers: top-left, top-right, bottom-right, bottom-left
         markers.sort((a, b) => a.y - b.y);
