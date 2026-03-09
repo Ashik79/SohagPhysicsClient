@@ -183,23 +183,62 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
         try {
             stopCamera();
             const facing = forceFacing || facingMode;
+
+            // ── Build video constraints with autofocus hints
+            const baseVideoConstraints = {
+                width: { ideal: 1920 },
+                height: { ideal: 1080 },
+                focusMode: 'continuous',          // continuous autofocus (Android Chrome)
+                advanced: [{ focusMode: 'continuous' }]
+            };
+
             let stream;
             if (deviceId) {
-                // Explicit device selected by user
                 stream = await navigator.mediaDevices.getUserMedia({
-                    video: { deviceId: { exact: deviceId }, width: { ideal: 1920 }, height: { ideal: 1080 } }
+                    video: { ...baseVideoConstraints, deviceId: { exact: deviceId } }
                 });
             } else {
-                // Try facingMode (works on phones)
                 try {
                     stream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: { ideal: facing }, width: { ideal: 1920 }, height: { ideal: 1080 } }
+                        video: { ...baseVideoConstraints, facingMode: { ideal: facing } }
                     });
                 } catch {
-                    // fallback — any camera
-                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    // fallback — basic constraints
+                    try {
+                        stream = await navigator.mediaDevices.getUserMedia({
+                            video: { facingMode: { ideal: facing } }
+                        });
+                    } catch {
+                        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    }
                 }
             }
+
+            // ── Apply advanced autofocus after stream starts
+            const track = stream.getVideoTracks()[0];
+            if (track) {
+                const capabilities = track.getCapabilities?.() || {};
+                const advancedConstraints = {};
+
+                // Enable continuous autofocus if supported
+                if (capabilities.focusMode?.includes?.('continuous')) {
+                    advancedConstraints.focusMode = 'continuous';
+                }
+                // Disable torch/flash if available (helps focus in normal light)
+                if (capabilities.torch) {
+                    advancedConstraints.torch = false;
+                }
+
+                if (Object.keys(advancedConstraints).length > 0) {
+                    try {
+                        await track.applyConstraints({ advanced: [advancedConstraints] });
+                        console.log('[+] Camera: autofocus enabled');
+                    } catch (e) {
+                        console.log('[-] applyConstraints failed (non-critical):', e.message);
+                    }
+                }
+            }
+
             if (videoRef.current) { videoRef.current.srcObject = stream; streamRef.current = stream; }
 
             // Enumerate and label all video devices
@@ -207,9 +246,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
             const videoDevices = allDevices.filter(d => d.kind === 'videoinput');
             setDevices(videoDevices);
 
-            // Get the active track's deviceId and mark as selected
-            const activeTrack = stream.getVideoTracks()[0];
-            const activeDeviceId = activeTrack?.getSettings()?.deviceId || '';
+            const activeDeviceId = track?.getSettings()?.deviceId || '';
             setSelectedDeviceId(activeDeviceId);
             setIsCameraOn(true);
         } catch (err) {
@@ -217,6 +254,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
             setStatus('error');
         }
     };
+
 
     // Toggle between front and back camera
     const toggleFacingMode = () => {
@@ -398,7 +436,6 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
 
     // ── Manual capture — called when user presses big Capture button
     const handleManualCapture = useCallback(async () => {
-        // FIX Bug 3: use ref for instant double-click guard
         if (capturingRef.current || status !== 'ready') return;
         const video = videoRef.current;
         const canvas = canvasRef.current;
@@ -409,22 +446,30 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
         capturingRef.current = true;
         setIsCapturing(true);
 
-        // Feedback effects
+        // Feedback effects: flash + vibrate
         setShowFlash(true);
         setTimeout(() => setShowFlash(false), 200);
         if ('vibrate' in navigator) navigator.vibrate(50);
 
+        // ── Focus settle delay: camera-কে autofocus করতে 800ms দাও,
+        //    তারপর ছবি তোলা হবে (blurry image সমস্যা কমায়)
+        await new Promise(resolve => setTimeout(resolve, 800));
+
         canvas.width = w; canvas.height = h;
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        ctx.drawImage(video, 0, 0, w, h);
+        // Re-read video dimensions after delay (may have changed)
+        const fw = video.videoWidth, fh = video.videoHeight;
+        ctx.drawImage(video, 0, 0, fw || w, fh || h);
+        canvas.width = fw || w;
+        canvas.height = fh || h;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
         if (usePythonServer) {
-            // Resize before upload → much faster network transfer
             const base64 = resizeForUpload(canvas);
             await processFramePython(base64);
         } else {
             // Edge AI one-shot fallback
-            const imageData = ctx.getImageData(0, 0, w, h);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const originalHandler = workerRef.current.onmessage;
             const handleOnce = (e) => {
                 if (e.data.type === 'scan_result') {
@@ -441,7 +486,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
             };
             workerRef.current.onmessage = handleOnce;
             workerRef.current.postMessage({
-                imageData, width: w, height: h, numQ: totalQToEvaluate,
+                imageData, width: canvas.width, height: canvas.height, numQ: totalQToEvaluate,
                 numOpts: exam.optionsPerQuestion || 4, isMasterKeyMode,
                 useAiMode
             }, [imageData.data.buffer]);
