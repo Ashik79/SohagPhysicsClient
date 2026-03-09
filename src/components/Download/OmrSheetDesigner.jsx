@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import { MdPrint, MdKey, MdAutoAwesome, MdClose, MdInfo } from 'react-icons/md';
-import { MdPrint, MdKey, MdAutoAwesome, MdClose, MdInfo } from 'react-icons/md';
 import PremiumOmrSheet from './PremiumOmrSheet';
 import { generateOmrPdf } from '../../utils/omrPdf';
 
