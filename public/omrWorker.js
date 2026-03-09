@@ -268,8 +268,15 @@ self.onmessage = function (e) {
             const by = bubbleY(i);
             const optData = [];
             for (let oi = 0; oi < 4; oi++) {
-                const res = countPixels(warpedGray, bubbleX(ci, oi), by, BUBBLE_R);
-                optData.push({ opt: OPTION_LABELS[oi], pixels: res.count, pct: (res.count / res.total) * 100 });
+                const bx = bubbleX(ci, oi);
+                const res = countPixels(warpedGray, bx, by, BUBBLE_R);
+                optData.push({
+                    opt: OPTION_LABELS[oi],
+                    pixels: res.count,
+                    pct: (res.count / res.total) * 100,
+                    x: bx,
+                    y: by
+                });
             }
             optData.sort((a, b) => b.pct - a.pct);
 
@@ -284,7 +291,8 @@ self.onmessage = function (e) {
                 qNum,
                 detected: isValid ? optData[0].opt : null,
                 isError: isMultiple,
-                errorType: isMultiple ? 'MULTIPLE_FILL' : (isEmpty ? 'EMPTY' : null)
+                errorType: isMultiple ? 'MULTIPLE_FILL' : (isEmpty ? 'EMPTY' : null),
+                options: optData // Now includes X, Y for every bubble
             });
         }
 

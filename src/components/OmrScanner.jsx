@@ -50,9 +50,12 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
 
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
+    const overlayCanvasRef = useRef(null);
     const streamRef = useRef(null);
     const fileInputRef = useRef(null);
     const workerRef = useRef(null);
+
+    const [realTimeOverlayData, setRealTimeOverlayData] = useState(null);
 
     const [answerKey, setAnswerKey] = useState(externalKey || {});
     const [marksPerCorrect, setMarksPerCorrect] = useState(1);
@@ -135,14 +138,19 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
             if (e.data.type === 'ready') {
                 setIsCvLoaded(true);
                 setStatus('ready');
-                // startCamera(); // Removed: don't auto-start camera anymore
             } else if (e.data.type === 'detecting') {
                 setIsAligned(false);
+                setRealTimeOverlayData(null);
             } else if (e.data.type === 'scan_result') {
-                // Detection-only: just show alignment indicator, never auto-capture
                 setIsAligned(true);
+                // Store bubble coordinates for real-time overlay
+                setRealTimeOverlayData({
+                    markerPoints: e.data.markerPoints,
+                    bubbles: e.data.data.detectedAnswers
+                });
             } else if (e.data.type === 'error') {
                 setIsAligned(false);
+                setRealTimeOverlayData(null);
             }
         };
         return () => {
@@ -290,13 +298,66 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
         }
     }, [totalQToEvaluate, handleScanResult, notifyFailed, useAiMode]);
 
-    // ── Detection-only frame loop (pauses during capture to avoid race conditions)
+    // ── Real-time Overlay Drawing ──
+    const drawOverlay = useCallback(() => {
+        const canvas = overlayCanvasRef.current;
+        if (!canvas || !realTimeOverlayData) {
+            if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+            return;
+        }
+
+        const ctx = canvas.getContext('2d');
+        const video = videoRef.current;
+        if (!video) return;
+
+        // Resize canvas to match display size of video
+        const rect = video.getBoundingClientRect();
+        if (canvas.width !== rect.width || canvas.height !== rect.height) {
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Map worker coordinates (800x1000) to screen coordinates
+        const scaleX = canvas.width / 800;
+        const scaleY = canvas.height / 1000;
+
+        realTimeOverlayData.bubbles.forEach(q => {
+            if (!q.options) return;
+            q.options.forEach(opt => {
+                const isMarked = q.detected === opt.opt;
+                const x = opt.x * scaleX;
+                const y = opt.y * scaleY;
+                const r = 8 * scaleX;
+
+                if (isMarked) {
+                    ctx.beginPath();
+                    ctx.arc(x, y, r + 4, 0, Math.PI * 2);
+                    ctx.strokeStyle = '#10b981'; // Emerald 500
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+
+                    ctx.fillStyle = 'rgba(16, 185, 129, 0.2)';
+                    ctx.fill();
+
+                    // Optional label
+                    ctx.fillStyle = '#fff';
+                    ctx.font = `bold ${Math.round(10 * scaleX)}px Inter`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText(opt.opt, x, y + (4 * scaleX));
+                }
+            });
+        });
+    }, [realTimeOverlayData]);
+
     useEffect(() => {
         let timer;
         const loop = () => {
+            drawOverlay();
             const video = videoRef.current;
             const canvas = canvasRef.current;
-            // FIX Bug 2: pause detection while capturing
+
             if (status === 'ready' && !capturingRef.current && sourceType === 'camera' && video && canvas && isCvLoaded && workerRef.current) {
                 const w = video.videoWidth, h = video.videoHeight;
                 if (w && h) {
@@ -306,7 +367,8 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                     const imageData = ctx.getImageData(0, 0, w, h);
                     workerRef.current.postMessage({
                         imageData, width: w, height: h, numQ: totalQToEvaluate,
-                        numOpts: exam.optionsPerQuestion || 4, isMasterKeyMode
+                        numOpts: exam.optionsPerQuestion || 4, isMasterKeyMode,
+                        useAiMode // Keep for now in logic
                     }, [imageData.data.buffer]);
                 }
             }
@@ -314,7 +376,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
         };
         loop();
         return () => cancelAnimationFrame(timer);
-    }, [status, sourceType, isCvLoaded, totalQToEvaluate, exam, isMasterKeyMode]);
+    }, [status, sourceType, isCvLoaded, totalQToEvaluate, exam, isMasterKeyMode, drawOverlay, useAiMode]);
 
     // ── Manual capture — called when user presses big Capture button
     const handleManualCapture = useCallback(async () => {
@@ -584,30 +646,21 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
-                            {/* Server Engine Toggle */}
-                            <button
-                                onClick={() => setUsePythonServer(!usePythonServer)}
-                                className={`px-3 py-1.5 rounded-xl text-[10px] font-black border-2 transition-all flex items-center gap-1.5 ${usePythonServer ? 'bg-sky-50 border-sky-200 text-sky-600' : 'bg-emerald-50 border-emerald-200 text-emerald-600'}`}
-                                title={usePythonServer ? 'Using Cloud Server (More accurate) - Tap to switch to Local' : 'Using Local Edge AI (Faster) - Tap to switch to Cloud'}
-                            >
-                                <div className={`w-2 h-2 rounded-full ${usePythonServer ? 'bg-sky-500 animate-pulse' : 'bg-emerald-500'}`}></div>
-                                {usePythonServer ? 'CLOUD ENGINE' : 'LOCAL ENGINE'}
-                            </button>
+                            <div className="flex flex-col items-end px-3">
+                                <div className="flex items-center gap-1.5 min-w-[120px] justify-end">
+                                    <div className={`w-2 h-2 rounded-full ${isAligned ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`}></div>
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">SMART ENGINE READY</span>
+                                </div>
+                                <p className="text-[9px] font-black text-slate-400">AUTO FALLBACK ENABLED</p>
+                            </div>
 
                             <button
-                                onClick={() => setUseAiMode(!useAiMode)}
-                                className={`px-3 py-1.5 rounded-xl text-[10px] font-black border-2 transition-all flex items-center gap-1.5 ${useAiMode ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-300'}`}
-                            >
-                                <div className={`w-2 h-2 rounded-full ${useAiMode ? 'bg-white animate-pulse' : 'bg-slate-300'}`}></div>
-                                {useAiMode ? 'AI MODE ON' : 'AI MODE OFF'}
-                            </button>
-                            <button
                                 onClick={() => setIsMasterKeyMode(!isMasterKeyMode)}
-                                className={`px-3 py-1.5 rounded-xl text-[10px] font-black border-2 transition-all ${isMasterKeyMode ? 'bg-orange-500 border-orange-600 text-white animate-pulse' : 'bg-white border-slate-200 text-slate-500'}`}
+                                className={`px-4 py-2 rounded-xl text-[10px] font-black border-2 transition-all shadow-sm ${isMasterKeyMode ? 'bg-orange-500 border-orange-600 text-white animate-pulse' : 'bg-white border-slate-200 text-slate-600 hover:border-orange-300'}`}
                             >
-                                <Zap size={14} /> {isMasterKeyMode ? 'SCANNING KEY...' : 'SET MASTER KEY'}
+                                <Zap size={14} className="inline mr-1" /> {isMasterKeyMode ? 'SCANNING...' : 'SET MASTER'}
                             </button>
-                            <button onClick={onClose} className="p-2 text-slate-400 hover:text-red-500 rounded-xl"><X size={18} /></button>
+                            <button onClick={onClose} className="p-2 text-slate-400 hover:text-red-500 transition-colors"><X size={20} /></button>
                         </div>
                     </div>
                 )}
@@ -616,6 +669,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                 <div className="flex-1 flex overflow-hidden">
                     <div className="flex-1 relative bg-slate-950 flex items-center justify-center">
                         <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
+                        <canvas ref={overlayCanvasRef} className="absolute inset-0 z-20 pointer-events-none" />
                         <canvas ref={canvasRef} className="hidden" />
 
                         {/* Flash Overlay */}
@@ -682,80 +736,77 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
 
                         {/* Result / Review Panel */}
                         {status === 'scanned' && scannedData && (
-                            <div className="absolute inset-0 flex items-end sm:items-center justify-center p-3 bg-slate-950/80 backdrop-blur-sm z-[60]">
-                                <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-y-auto max-h-[95%] p-5 text-center">
+                            <div className="absolute inset-0 flex items-end sm:items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md z-[60] transition-all animate-in fade-in duration-500">
+                                <div className="bg-white/90 backdrop-blur-xl rounded-[2.5rem] shadow-[0_32px_120px_-20px_rgba(0,0,0,0.5)] w-full max-w-sm overflow-hidden p-6 text-center border border-white/20">
 
-                                    {/* Roll Badge — smaller */}
-                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-2 mx-auto border-4 border-white shadow-xl ${scannedData.icrVerified ? 'bg-emerald-50' : 'bg-amber-50'}`}>
-                                        <p className={`text-base font-black ${scannedData.icrVerified ? 'text-emerald-700' : 'text-amber-600'}`}>
+                                    {/* Roll Badge */}
+                                    <div className={`w-20 h-20 rounded-[2rem] flex items-center justify-center mb-4 mx-auto border-[6px] border-white shadow-2xl transform -translate-y-2 ${scannedData.icrVerified ? 'bg-gradient-to-br from-emerald-400 to-emerald-600' : 'bg-gradient-to-br from-amber-400 to-amber-600'}`}>
+                                        <p className="text-2xl font-black text-white">
                                             {scannedData.icrVerified ? scannedData.roll.slice(-3) : '???'}
                                         </p>
                                     </div>
 
-                                    <h3 className="text-base font-black text-slate-900 mb-1">
-                                        {scannedData.icrVerified ? 'Sheet Scanned ✓' : 'Roll Unreadable ⚠️'}
+                                    <h3 className="text-xl font-black text-slate-900 mb-1">
+                                        {scannedData.icrVerified ? 'Success! Sheet Scanned ✓' : 'Correction Needed ⚠️'}
                                     </h3>
 
-                                    {/* Editable Roll — show when unreadable */}
+                                    {/* Editable Roll */}
                                     {!scannedData.icrVerified ? (
-                                        <div className="mb-3">
+                                        <div className="mb-4">
                                             {scannedData.rollCrop && (
-                                                <div className="mb-2 rounded-xl overflow-hidden border-2 border-slate-100 shadow-inner">
-                                                    <p className="text-[9px] font-black text-slate-400 bg-slate-50 py-0.5 uppercase">Sheet Roll Preview</p>
-                                                    <img src={scannedData.rollCrop} alt="Roll Crop" className="w-full h-12 object-contain bg-white" />
+                                                <div className="mb-3 rounded-2xl overflow-hidden border-2 border-slate-100 shadow-inner bg-slate-50 p-2">
+                                                    <img src={scannedData.rollCrop} alt="Roll Crop" className="w-full h-14 object-contain" />
                                                 </div>
                                             )}
-                                            <p className="text-xs text-amber-600 font-bold mb-1.5">Roll বুঝা যায়নি। নিচে লিখুন:</p>
                                             <input
                                                 type="text"
                                                 value={editRoll}
                                                 onChange={e => setEditRoll(e.target.value.replace(/\D/g, ''))}
-                                                placeholder="Roll Number লিখুন"
-                                                maxLength={10}
-                                                className="w-full px-4 py-3 border-2 border-amber-300 rounded-2xl text-center font-black text-slate-800 text-lg focus:outline-none focus:border-sky-500 bg-amber-50"
+                                                placeholder="Enter Roll Number"
+                                                className="w-full px-5 py-4 border-2 border-amber-200 rounded-2xl text-center font-black text-slate-800 text-xl focus:outline-none focus:border-sky-500 bg-amber-50/50 transition-all"
                                                 autoFocus
                                             />
                                         </div>
                                     ) : (
-                                        <p className="text-xs font-bold text-slate-400 mb-4">Roll: <span className="text-slate-700">{scannedData.roll}</span></p>
+                                        <div className="mb-6 flex flex-col items-center">
+                                            <span className="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Scanned Roll</span>
+                                            <p className="text-lg font-black text-slate-600">{scannedData.roll}</p>
+                                        </div>
                                     )}
 
-                                    <div className="grid grid-cols-2 gap-2 mb-4">
-                                        <div className="bg-emerald-50 rounded-xl p-2 border border-emerald-100">
-                                            <p className="text-[9px] font-black text-emerald-400 uppercase">Correct</p>
-                                            <p className="text-xl font-black text-emerald-600">{scannedData.correct}</p>
+                                    <div className="grid grid-cols-2 gap-3 mb-6">
+                                        <div className="bg-emerald-50/50 rounded-2xl p-3 border border-emerald-100 transition-transform hover:scale-105">
+                                            <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Correct</p>
+                                            <p className="text-2xl font-black text-emerald-600">{scannedData.correct}</p>
                                         </div>
-                                        <div className="bg-sky-50 rounded-xl p-2 border border-sky-100">
-                                            <p className="text-[9px] font-black text-sky-400 uppercase">Score</p>
-                                            <p className="text-xl font-black text-sky-600">{scannedData.score}</p>
+                                        <div className="bg-sky-50/50 rounded-2xl p-3 border border-sky-100 transition-transform hover:scale-105">
+                                            <p className="text-[10px] font-black text-sky-500 uppercase tracking-widest mb-1">Score</p>
+                                            <p className="text-2xl font-black text-sky-600 font-mono italic">{scannedData.score}</p>
                                         </div>
-                                        <div className="bg-red-50 rounded-xl p-2 border border-red-100">
-                                            <p className="text-[9px] font-black text-red-400 uppercase">Wrong</p>
-                                            <p className="text-xl font-black text-red-500">{scannedData.wrong}</p>
+                                        <div className="bg-rose-50/50 rounded-2xl p-3 border border-rose-100 transition-transform hover:scale-105">
+                                            <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-1">Errors</p>
+                                            <p className="text-2xl font-black text-rose-500">{scannedData.wrong}</p>
                                         </div>
-                                        <div className="bg-white rounded-xl p-2 border border-slate-200">
-                                            <p className="text-[9px] font-black text-slate-400 uppercase">Skip</p>
-                                            <p className="text-xl font-black text-slate-600">{scannedData.unattempted}</p>
+                                        <div className="bg-slate-50/50 rounded-2xl p-3 border border-slate-100 transition-transform hover:scale-105">
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Blank</p>
+                                            <p className="text-2xl font-black text-slate-500">{scannedData.unattempted}</p>
                                         </div>
                                     </div>
 
-                                    <div className="flex gap-2">
-                                        {/* Retake button */}
+                                    <div className="flex gap-3">
                                         <button
                                             onClick={() => { setScannedData(null); setEditRoll(''); setStatus('ready'); }}
-                                            className="flex-1 py-3 bg-rose-50 border border-rose-200 text-rose-500 font-black rounded-2xl text-xs uppercase hover:bg-rose-100 transition-colors flex items-center justify-center gap-1"
+                                            className="flex-1 py-4 bg-slate-100 text-slate-500 font-black rounded-2xl text-[11px] uppercase hover:bg-slate-200 transition-all flex items-center justify-center gap-2"
                                         >
-                                            <Retake size={14} /> Retake
+                                            <Retake size={16} /> Retake
                                         </button>
-
-
 
                                         <button
                                             onClick={handleConfirm}
                                             disabled={!scannedData.icrVerified && !editRoll.trim()}
-                                            className="flex-[2] py-3 bg-slate-900 text-white font-black rounded-2xl text-[11px] uppercase shadow-xl hover:bg-black transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                            className="flex-[2] py-4 bg-slate-900 text-white font-black rounded-2xl text-xs uppercase shadow-[0_20px_40px_-10px_rgba(15,23,42,0.3)] hover:bg-black hover:-translate-y-1 transition-all disabled:opacity-30 disabled:translate-y-0"
                                         >
-                                            ✓ Save
+                                            ✓ Confirm & Next
                                         </button>
                                     </div>
                                 </div>
