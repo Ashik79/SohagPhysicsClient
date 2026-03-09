@@ -26,19 +26,9 @@
  *    bubbleSpacingX: 5.5%
  */
 
-self.importScripts('https://docs.opencv.org/4.5.4/opencv.js');
-self.importScripts('https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js');
 
-let ortSession = null;
-async function initAi() {
-    try {
-        ortSession = await ort.InferenceSession.create('/omr_markers.onnx', { executionProviders: ['wasm'] });
-        console.log("[+] AI Worker: ONNX Session Ready");
-    } catch (e) {
-        console.log("[-] AI Worker: ONNX Load Failed (will use Legacy)", e);
-    }
-}
-initAi();
+self.importScripts('https://docs.opencv.org/4.5.4/opencv.js');
+
 
 const OPTION_LABELS = ['A', 'B', 'C', 'D'];
 const WARPED_W = 800;
@@ -117,9 +107,9 @@ self.onmessage = function (e) {
         let markers = [];
         const isAiEnabled = e.data.useAiMode;
 
-        if (isAiEnabled && ortSession) {
-            // AI Detection Logic - Placeholder for now
-            console.log("[*] AI Marker Detection logic would run here");
+        if (isAiEnabled) {
+            // AI Detection: placeholder (ONNX removed for performance)
+            console.log("[*] AI mode not active — using Legacy detection");
         }
 
         const imgW = src.cols, imgH = src.rows;

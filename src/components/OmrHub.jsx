@@ -1,13 +1,15 @@
 import API_URL from '../apiConfig';
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, lazy, Suspense } from 'react';
 import { AuthContext } from '../Provider';
 import {
     MdClose, MdSettings, MdKey, MdCameraAlt,
     MdAnalytics, MdSms, MdCheckCircle, MdError,
     MdCloudUpload, MdFileDownload, MdSearch
 } from 'react-icons/md';
-import OmrScanner from './OmrScanner';
 import OmrSheetDesigner from './Download/OmrSheetDesigner';
+// OmrScanner lazy load করা হয়েছে — OpenCV (~8MB) শুধু scanner tab খুললে লোড হবে
+const OmrScanner = lazy(() => import('./OmrScanner'));
+
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
@@ -827,13 +829,25 @@ const OmrHub = ({ exam, onClose, students }) => {
 
                         {activeTab === 'scan' && (
                             <div className="h-full flex flex-col p-6">
-                                <OmrScanner
-                                    exam={{ ...exam, mcqTotal: exam.mcqTotal || 0 }}
-                                    onSave={(data) => handleScanComplete(data)}
-                                    externalKey={answerKey}
-                                    activeQuestions={activeQuestions}
-                                    embedded={true}
-                                />
+                                <Suspense fallback={
+                                    <div className="flex-1 flex items-center justify-center">
+                                        <div className="flex flex-col items-center gap-4">
+                                            <svg className="w-10 h-10 animate-spin text-sky-400" viewBox="0 0 24 24" fill="none">
+                                                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.3" />
+                                                <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                                            </svg>
+                                            <p className="text-sm font-bold text-slate-400">Scanner লোড হচ্ছে...</p>
+                                        </div>
+                                    </div>
+                                }>
+                                    <OmrScanner
+                                        exam={{ ...exam, mcqTotal: exam.mcqTotal || 0 }}
+                                        onSave={(data) => handleScanComplete(data)}
+                                        externalKey={answerKey}
+                                        activeQuestions={activeQuestions}
+                                        embedded={true}
+                                    />
+                                </Suspense>
                             </div>
                         )}
 

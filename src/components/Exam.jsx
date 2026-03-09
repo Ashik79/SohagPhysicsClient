@@ -4,7 +4,6 @@ import { useLoaderData, Link } from 'react-router-dom';
 import { FiX, FiPlus, FiCamera, FiDownload, FiFileText, FiTrash2, FiSend, FiUser, FiCalendar, FiBookOpen, FiActivity, FiAward, FiBarChart2, FiArrowLeft, FiChevronLeft, FiChevronRight, FiCheckCircle } from "react-icons/fi";
 import { AuthContext } from '../Provider';
 import * as XLSX from 'xlsx';
-import OmrScanner from './OmrScanner';
 import ExamPDFExport from './ExamPDFExport';
 import OmrSheetDesigner from './Download/OmrSheetDesigner';
 import OmrHub from './OmrHub';
