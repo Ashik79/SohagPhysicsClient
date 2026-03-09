@@ -32,7 +32,8 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
     const [devices, setDevices] = useState([]);
     const [selectedDeviceId, setSelectedDeviceId] = useState('');
     const [usePythonServer, setUsePythonServer] = useState(true);
-    const [useAiMode, setUseAiMode] = useState(false);
+    // ── Default to Edge AI (Worker) for Mobile to bypass connectivity/cold-start issues
+    const [useAiMode, setUseAiMode] = useState(true);
     const [facingMode, setFacingMode] = useState('environment'); // 'environment'=back, 'user'=front
 
     // Capture states
@@ -199,7 +200,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
             try {
                 const apiBase = window.location.hostname === 'localhost'
                     ? 'http://localhost:5050'
-                    : (import.meta.env.VITE_OMR_API_URL || 'https://omrenginepython.onrender.com');
+                    : (import.meta.env.VITE_OMR_API_URL || 'https://sohag-physics-omr-engine.vercel.app'); // Updated to stable vercel prod endpoint
                 await fetch(`${apiBase}/health`, { method: 'GET', signal: AbortSignal.timeout(60000) });
                 console.log('[+] Server is warm and ready.');
             } catch (e) {
@@ -1016,7 +1017,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                                 className="text-[9px] font-black text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full hover:bg-sky-100 transition-colors"
                                 title="Force Refresh App"
                             >
-                                v0.1.0-260309-1925 🚀
+                                v0.1.0-260309-2005 ⚡
                             </button>
                         </div>
                         <div className="text-right flex-1">
