@@ -119,12 +119,11 @@ self.onmessage = function (e) {
 
         if (isAiEnabled && ortSession) {
             // AI Detection Logic - Placeholder for now
-            // 1. Preprocess: resize to 640x640, normalize
-            // 2. ortSession.run()
-            // 3. Postprocess: filter boxes, find 4 corners
-            // (Mapping back to original image size)
             console.log("[*] AI Marker Detection logic would run here");
         }
+
+        const imgW = src.cols, imgH = src.rows;
+        const CORNER_ZONE = 0.45;
 
         // ── MULTI-THRESHOLD LOOP: Try different adaptive settings if markers not found
         if (markers.length < 4) {
@@ -135,13 +134,11 @@ self.onmessage = function (e) {
                 { block: 25, C: 5 }
             ];
 
-            const imgW = src.cols, imgH = src.rows;
-            const CORNER_ZONE = 0.45;
-
             for (let cfg of configs) {
                 markers = []; // Reset markers for each attempt
                 cv.adaptiveThreshold(blurMat, thresh, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, cfg.block, cfg.C);
 
+                // Declare contours/hierarchy outside the inner block so they can be safely deleted
                 const contours = new cv.MatVector();
                 const hierarchy = new cv.Mat();
                 cv.findContours(thresh, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
@@ -149,13 +146,12 @@ self.onmessage = function (e) {
                 for (let i = 0; i < contours.size(); i++) {
                     const cnt = contours.get(i);
                     const area = cv.contourArea(cnt);
-                    // More inclusive area range for different image sizes
                     if (area > 80 && area < 25000) {
                         const approx = new cv.Mat();
                         cv.approxPolyDP(cnt, approx, 0.05 * cv.arcLength(cnt, true), true);
                         if (approx.rows === 4) {
                             const r = cv.boundingRect(approx);
-                            if (r.width / r.height >= 0.5 && r.width / r.height <= 2.0) { // Relaxed ratio
+                            if (r.width / r.height >= 0.5 && r.width / r.height <= 2.0) {
                                 const mom = cv.moments(cnt);
                                 if (mom.m00 !== 0) {
                                     const cx = mom.m10 / mom.m00, cy = mom.m01 / mom.m00;
@@ -169,9 +165,10 @@ self.onmessage = function (e) {
                         approx.delete();
                     }
                 }
-                contours.delete(); hierarchy.delete();
+                contours.delete();
+                hierarchy.delete();
 
-                if (markers.length >= 4) break; // Found enough!
+                if (markers.length >= 4) break;
             }
         }
 
@@ -195,7 +192,6 @@ self.onmessage = function (e) {
 
         if (!validLayout) {
             self.postMessage({ type: 'detecting', markersFound: 0 });
-            contours.delete(); hierarchy.delete();
             return;
         }
 
