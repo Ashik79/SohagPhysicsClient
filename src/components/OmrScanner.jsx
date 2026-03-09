@@ -46,6 +46,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
     const [pdfFile, setPdfFile] = useState(null);    // pending PDF file
     const [showPdfPicker, setShowPdfPicker] = useState(false);
     const [showFlash, setShowFlash] = useState(false);
+    const [scanLineY, setScanLineY] = useState(0);
 
     const capturingRef = useRef(false); // instant double-click guard (sync with isCapturing state)
 
@@ -404,11 +405,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
     // ── Real-time Overlay Drawing ──
     const drawOverlay = useCallback(() => {
         const canvas = overlayCanvasRef.current;
-        if (!canvas || !realTimeOverlayData) {
-            if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-            return;
-        }
-
+        if (!canvas) return;
         const ctx = canvas.getContext('2d');
         const video = videoRef.current;
         if (!video) return;
@@ -422,37 +419,65 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Map worker coordinates (800x1000) to screen coordinates
-        const scaleX = canvas.width / 800;
-        const scaleY = canvas.height / 1000;
+        // 1. Bubbles & Markers (if data exists)
+        if (realTimeOverlayData) {
+            const scaleX = canvas.width / 800;
+            const scaleY = canvas.height / 1000;
 
-        realTimeOverlayData.bubbles.forEach(q => {
-            if (!q.options) return;
-            q.options.forEach(opt => {
-                const isMarked = q.detected === opt.opt;
-                const x = opt.x * scaleX;
-                const y = opt.y * scaleY;
-                const r = 8 * scaleX;
-
-                if (isMarked) {
-                    ctx.beginPath();
-                    ctx.arc(x, y, r + 4, 0, Math.PI * 2);
-                    ctx.strokeStyle = '#10b981'; // Emerald 500
-                    ctx.lineWidth = 3;
-                    ctx.stroke();
-
-                    ctx.fillStyle = 'rgba(16, 185, 129, 0.2)';
-                    ctx.fill();
-
-                    // Optional label
-                    ctx.fillStyle = '#fff';
-                    ctx.font = `bold ${Math.round(10 * scaleX)}px Inter`;
-                    ctx.textAlign = 'center';
-                    ctx.fillText(opt.opt, x, y + (4 * scaleX));
-                }
+            realTimeOverlayData.bubbles.forEach(q => {
+                if (!q.options) return;
+                q.options.forEach(opt => {
+                    if (q.detected === opt.opt) {
+                        const x = opt.x * scaleX;
+                        const y = opt.y * scaleY;
+                        const r = 8 * scaleX;
+                        ctx.beginPath();
+                        ctx.arc(x, y, r + 4, 0, Math.PI * 2);
+                        ctx.strokeStyle = '#10b981';
+                        ctx.lineWidth = 3;
+                        ctx.stroke();
+                        ctx.fillStyle = 'rgba(16, 185, 129, 0.2)';
+                        ctx.fill();
+                        ctx.fillStyle = '#fff';
+                        ctx.font = `bold ${Math.round(10 * scaleX)}px Inter`;
+                        ctx.textAlign = 'center';
+                        ctx.fillText(opt.opt, x, y + (4 * scaleX));
+                    }
+                });
             });
-        });
-    }, [realTimeOverlayData]);
+
+            const { markerPoints } = realTimeOverlayData;
+            const pulse = 1 + Math.sin(Date.now() / 150) * 0.1;
+            ctx.lineWidth = 3 * pulse;
+            ctx.strokeStyle = '#10b981';
+            markerPoints.forEach(p => {
+                const px = p.x * scaleX, py = p.y * scaleY;
+                ctx.strokeRect(px - (10 * pulse), py - (10 * pulse), 20 * pulse, 20 * pulse);
+            });
+        }
+
+        // 2. Scanning Sweep Line (Always moving when camera is on and ready)
+        if (status === 'ready' && !capturingRef.current) {
+            const scanY = (Date.now() % 2000) / 2000 * canvas.height;
+            ctx.beginPath();
+            ctx.moveTo(0, scanY);
+            ctx.lineTo(canvas.width, scanY);
+            ctx.lineWidth = 2;
+            const gradient = ctx.createLinearGradient(0, scanY - 20, 0, scanY + 2);
+            gradient.addColorStop(0, 'rgba(14, 165, 233, 0)');
+            gradient.addColorStop(0.5, 'rgba(14, 165, 233, 0.1)');
+            gradient.addColorStop(1, 'rgba(14, 165, 233, 0.6)');
+            ctx.strokeStyle = gradient;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(0, scanY);
+            ctx.lineTo(canvas.width, scanY);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'rgba(125, 211, 252, 0.8)';
+            ctx.stroke();
+        }
+    }, [realTimeOverlayData, status]);
 
     useEffect(() => {
         let timer;
@@ -991,7 +1016,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                                 className="text-[9px] font-black text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full hover:bg-sky-100 transition-colors"
                                 title="Force Refresh App"
                             >
-                                v0.1.0-260309-1915 🔄
+                                v0.1.0-260309-1925 🚀
                             </button>
                         </div>
                         <div className="text-right flex-1">

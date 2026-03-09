@@ -42,14 +42,17 @@ cv['onRuntimeInitialized'] = () => {
 
 // ── Bubble column X position (matches ENGINE.colBaseX + bubbleOffsetX + oi * bubbleSpacingX)
 function bubbleX(ci, oi) {
-    // 4 columns: 0, 1, 2, 3
     const colBaseX = ci === 0 ? 0.05 : (ci === 1 ? 0.285 : (ci === 2 ? 0.52 : 0.755));
-    return Math.round(WARPED_W * (colBaseX + 0.08 + oi * 0.038)); // Adjusted spacing for 4 cols
+    return Math.round(WARPED_W * (colBaseX + 0.08 + oi * 0.038));
 }
 
 function bubbleY(i) {
     const ri = i % Q_PER_COL;
-    return Math.round(WARPED_H * (0.345 + ri * 0.024 + Math.floor(ri / 5) * 0.006));
+    const ci = Math.floor(i / Q_PER_COL);
+    // Matches Python: q_start_y (0.342), q_row_space (0.0248), gap_height (0.003)
+    // Plus col_y_offset (-1 for col 3 & 4)
+    const yOffset = ci >= 2 ? -1 : 0;
+    return Math.round(WARPED_H * (0.342 + ri * 0.0248 + Math.floor(ri / 5) * 0.003)) + yOffset;
 }
 
 // ── Count filled pixels in a circular region (more accurate than rectangle)
@@ -258,12 +261,12 @@ self.onmessage = function (e) {
             finalRoll += confident ? String(best) : '?';
         }
 
-        // ── Answer Bubbles — density-based detection (matches Python engine)
-        const BUBBLE_R = 12;
-        const EMPTY_PCT = 4;    // matched to Python: EMPTY_THRESHOLD
-        const VALID_PCT = 10;   // matched to Python: VALID_THRESHOLD
-        const MULTI_SECOND = 8; // matched to Python: MULTI_SECOND_THRESH
-        const CONF_RATIO = 1.5; // matched to Python: CONF_RATIO
+        // ── Answer Bubbles — density-based detection (matches Python engine v3)
+        const BUBBLE_R = 15;   // Matched to Python: 15
+        const EMPTY_PCT = 2.5;  // Matched to Python: 2.5
+        const VALID_PCT = 6;    // Matched to Python: 6
+        const MULTI_SECOND = 5;    // Matched to Python: 5
+        const CONF_RATIO = 1.3;  // Matched to Python: 1.3
 
         const detectedAnswers = [];
         for (let i = 0; i < TOTAL_SHEET_Q; i++) {
