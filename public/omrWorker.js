@@ -245,11 +245,12 @@ self.onmessage = function (e) {
         // ── Roll Number Detection
         let finalRoll = '';
         const { engineParams } = e.data;
-        const rSX = 0.070, rCG = 0.048;
-        const rSY = engineParams?.rollStartY || 0.145; // Default: v1925
+        const rSX = engineParams?.rollStartX || 0.070; // Dynamic
+        const rCG = engineParams?.rollColSpace || 0.048; // Dynamic
+        const rSY = engineParams?.rollStartY || 0.145; // Dynamic
         const rRG = engineParams?.rollRowGap || 0.0182;
-        const rollR = engineParams?.rollR || 7;      // Default: v1925
-        const cornerZone = engineParams?.cornerZone || 0.55; // Default: v1925
+        const rollR = engineParams?.rollR || 7;
+        const cornerZone = engineParams?.cornerZone || 0.55;
         for (let c = 0; c < 6; c++) {
             let best = null, mD = 0, sD = 0;
             const allD = [];

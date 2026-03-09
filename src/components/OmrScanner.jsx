@@ -78,12 +78,16 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
     // ── Adaptive Engine Parameters (Matched to Device)
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     const engineParams = isMobile ? {
-        rollStartY: 0.148,
-        rollR: 9,
+        rollStartX: 0.052,
+        rollStartY: 0.142,
+        rollR: 10,
+        rollColSpace: 0.0504,
         cornerZone: 0.45
     } : {
-        rollStartY: 0.145,
-        rollR: 7,
+        rollStartX: 0.052,
+        rollStartY: 0.142,
+        rollR: 10,
+        rollColSpace: 0.0504,
         cornerZone: 0.55
     };
 
@@ -1031,7 +1035,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                                 className="text-[9px] font-black text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full hover:bg-sky-100 transition-colors"
                                 title="Force Refresh App"
                             >
-                                v0.1.0-260309-2030 📱💻
+                                v0.1.0-260309-2045 💎
                             </button>
                         </div>
                         <div className="text-right flex-1">
