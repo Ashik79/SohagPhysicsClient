@@ -49,7 +49,7 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
 
     const performPrint = useReactToPrint({
         contentRef: printRef,
-        documentTitle: `OMR_Universal_Sheet`,
+        documentTitle: `OMR_Sheet_${exam?.title?.replace(/\s+/g, '_') || 'Universal'}`,
         pageStyle: `
             @page { size: A4 portrait; margin: 0; }
             @media print {
@@ -336,9 +336,9 @@ function OmrSheetDesigner({ exam, onClose, embedded, answerKey: externalAnswerKe
 
     return (
         <>
-            {/* HIDDEN PRINT AREA */}
-            <div style={{ display: 'none' }}>
-                <div ref={printRef}>
+            {/* OFF-SCREEN PRINT AREA (Required for robust PDF generation) */}
+            <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', pointerEvents: 'none' }}>
+                <div ref={printRef} className="print-area">
                     <PremiumOmrSheet
                         answerKey={printMode.mode === 'answer_key' ? answerKey : undefined}
                         isAnswerKeyMode={printMode.mode === 'answer_key'}
