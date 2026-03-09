@@ -58,18 +58,35 @@ function bubbleX(ci, oi) {
 }
 
 function bubbleY(i) {
-    const ri = i % Q_PER_COL; // 0 to 24
-    return Math.round(WARPED_H * (0.33 + ri * 0.0255 + Math.floor(ri / 5) * 0.007)); // Adjusted for 25 rows
+    const ri = i % Q_PER_COL;
+    return Math.round(WARPED_H * (0.345 + ri * 0.024 + Math.floor(ri / 5) * 0.006));
 }
 
-// ── Count filled pixels in a circle region
+// ── Count filled pixels in a circular region (more accurate than rectangle)
 function countPixels(mat, cx, cy, r) {
     const x = cx - r, y = cy - r, s = r * 2;
     if (x < 0 || y < 0 || x + s > mat.cols || y + s > mat.rows) return 0;
+
     const roi = mat.roi(new cv.Rect(x, y, s, s));
-    const count = cv.countNonZero(roi);
+    let count = 0;
+    let totalCirclePixels = 0;
+
+    // Manual circular logic: check distance from center
+    // We use a simple loop over ROI for maximum precision on small radii
+    for (let i = 0; i < s; i++) {
+        for (let j = 0; j < s; j++) {
+            const dx = j - r;
+            const dy = i - r;
+            if (dx * dx + dy * dy <= (r - 1) * (r - 1)) {
+                totalCirclePixels++;
+                if (roi.ucharAt(i, j) > 0) count++;
+            }
+        }
+    }
+
     roi.delete();
-    return count;
+    // Return an object with count and total available pixels in circle
+    return { count, total: totalCirclePixels };
 }
 
 self.onmessage = function (e) {
@@ -213,33 +230,31 @@ self.onmessage = function (e) {
         // SET Detection removed as requested
         let finalSet = '';
 
-        // ── Roll Number Detection (matches ENGINE: rollStartX=7.0%, rollColSpace=4.8%, rollStartY=13.5%, rollRowSpace=1.82%)
+        // ── Roll Number Detection
         let finalRoll = '';
-        const rSX = 0.070, rCG = 0.048, rSY = 0.135, rRG = 0.0182;
-        const rollR = 7; // Smaller radius for smaller bubbles (17px diam -> ~8.5px radius)
+        const rSX = 0.070, rCG = 0.048, rSY = 0.145, rRG = 0.0182;
+        const rollR = 7;
         for (let c = 0; c < 6; c++) {
             let best = null, mD = 0, sD = 0;
             const allD = [];
             for (let r = 0; r < 10; r++) {
-                const d = countPixels(warpedGray, Math.round(WARPED_W * (rSX + c * rCG)), Math.round(WARPED_H * (rSY + r * rRG)), rollR);
+                const res = countPixels(warpedGray, Math.round(WARPED_W * (rSX + c * rCG)), Math.round(WARPED_H * (rSY + r * rRG)), rollR);
+                const d = res.count;
                 allD.push(d);
                 if (d > mD) { sD = mD; mD = d; best = r; } else if (d > sD) sD = d;
             }
-            // Adaptive min: use 50% of mean-nonzero pixels in this column (relaxed from 0.7)
             const nonzero = allD.filter(d => d > 5);
             const dynMin = nonzero.length ? Math.round(nonzero.reduce((a, b) => a + b, 0) / nonzero.length * 0.5) : 25;
-            // Confident if density above floor AND top is 1.25x the second best (relaxed from 1.35)
             const confident = mD >= Math.max(25, dynMin) && (sD === 0 || mD / Math.max(sD, 1) >= 1.25);
             finalRoll += confident ? String(best) : '?';
         }
 
         // ── Answer Bubbles — density-based detection (matches Python engine)
         const BUBBLE_R = 12;
-        const BUBBLE_AREA = (BUBBLE_R * 2) * (BUBBLE_R * 2);  // square ROI area
-        const EMPTY_PCT = 22;   // below → unattempted
-        const VALID_PCT = 52;   // above → valid answer
-        const MULTI_SECOND = 40; // second bubble above this → multi-fill
-        const CONF_RATIO = 1.45;
+        const EMPTY_PCT = 4;    // matched to Python: EMPTY_THRESHOLD
+        const VALID_PCT = 10;   // matched to Python: VALID_THRESHOLD
+        const MULTI_SECOND = 8; // matched to Python: MULTI_SECOND_THRESH
+        const CONF_RATIO = 1.5; // matched to Python: CONF_RATIO
 
         const detectedAnswers = [];
         for (let i = 0; i < TOTAL_SHEET_Q; i++) {
@@ -253,8 +268,8 @@ self.onmessage = function (e) {
             const by = bubbleY(i);
             const optData = [];
             for (let oi = 0; oi < 4; oi++) {
-                const px = countPixels(warpedGray, bubbleX(ci, oi), by, BUBBLE_R);
-                optData.push({ opt: OPTION_LABELS[oi], pixels: px, pct: (px / BUBBLE_AREA) * 100 });
+                const res = countPixels(warpedGray, bubbleX(ci, oi), by, BUBBLE_R);
+                optData.push({ opt: OPTION_LABELS[oi], pixels: res.count, pct: (res.count / res.total) * 100 });
             }
             optData.sort((a, b) => b.pct - a.pct);
 

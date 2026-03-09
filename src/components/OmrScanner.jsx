@@ -245,7 +245,9 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
         const warmingTimer = setTimeout(() => setServerWarming(true), 4000);
 
         try {
-            const apiBase = process.env.REACT_APP_API_URL || 'https://omrenginepython.onrender.com';
+            const apiBase = window.location.hostname === 'localhost'
+                ? 'http://localhost:5050'
+                : (process.env.REACT_APP_OMR_API_URL || 'https://omrenginepython.onrender.com');
             const response = await fetch(`${apiBase}/scan`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

@@ -164,14 +164,10 @@ function Exam() {
                 }
             })
 
-            const response2 = await fetch('https://bulksmsbd.net/api/smsapimany', {
+            const response2 = await fetch(`${API_URL}/send-bulk-sms`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    api_key: 'CUOP72nJJHahM30djaQG',
-                    senderid: '8809617642567',
-                    messages: messages
-                }),
+                body: JSON.stringify({ messages: messages }),
             })
             const result2 = await response2.json();
 
