@@ -36,7 +36,23 @@ const WARPED_H = 1000;
 const TOTAL_SHEET_Q = 100;
 const Q_PER_COL = 25;
 
+let circleMask = null;
+let rollMask = null;
+
 cv['onRuntimeInitialized'] = () => {
+    // Pre-calculate masks once for the entire worker lifecycle
+    // Bubble Mask (R=15)
+    const r = 15;
+    const s = r * 2;
+    circleMask = cv.Mat.zeros(s, s, cv.CV_8U);
+    cv.circle(circleMask, new cv.Point(r, r), r - 1, [255, 255, 255, 255], -1);
+
+    // Roll Mask (R=7)
+    const rr = 7;
+    const rs = rr * 2;
+    rollMask = cv.Mat.zeros(rs, rs, cv.CV_8U);
+    cv.circle(rollMask, new cv.Point(rr, rr), rr - 1, [255, 255, 255, 255], -1);
+
     self.postMessage({ type: 'ready' });
 };
 
@@ -49,37 +65,32 @@ function bubbleX(ci, oi) {
 function bubbleY(i) {
     const ri = i % Q_PER_COL;
     const ci = Math.floor(i / Q_PER_COL);
-    // Matches Python: q_start_y (0.342), q_row_space (0.0248), gap_height (0.003)
-    // Plus col_y_offset (-1 for col 3 & 4)
+    // Matches PremiumOmrSheet.jsx: qStartY (34.5), qRowSpace (2.4), gapHeight (0.6)
     const yOffset = ci >= 2 ? -1 : 0;
-    return Math.round(WARPED_H * (0.342 + ri * 0.0248 + Math.floor(ri / 5) * 0.003)) + yOffset;
+    return Math.round(WARPED_H * (0.345 + ri * 0.024 + Math.floor(ri / 5) * 0.006)) + yOffset;
 }
 
-// ── Count filled pixels in a circular region (more accurate than rectangle)
-function countPixels(mat, cx, cy, r) {
+// ── Optimized Pixel Counting using Native OpenCV bitwise_and + countNonZero
+function countPixels(mat, cx, cy, r, customMask = null) {
     const x = cx - r, y = cy - r, s = r * 2;
-    if (x < 0 || y < 0 || x + s > mat.cols || y + s > mat.rows) return 0;
+    if (x < 0 || y < 0 || x + s > mat.cols || y + s > mat.rows) return { count: 0, total: 1 };
 
     const roi = mat.roi(new cv.Rect(x, y, s, s));
-    let count = 0;
-    let totalCirclePixels = 0;
+    const mask = customMask || (r === 15 ? circleMask : (r === 7 ? rollMask : null));
 
-    // Manual circular logic: check distance from center
-    // We use a simple loop over ROI for maximum precision on small radii
-    for (let i = 0; i < s; i++) {
-        for (let j = 0; j < s; j++) {
-            const dx = j - r;
-            const dy = i - r;
-            if (dx * dx + dy * dy <= (r - 1) * (r - 1)) {
-                totalCirclePixels++;
-                if (roi.ucharAt(i, j) > 0) count++;
-            }
-        }
+    let count = 0;
+    if (mask) {
+        const masked = new cv.Mat();
+        cv.bitwise_and(roi, mask, masked);
+        count = cv.countNonZero(masked);
+        masked.delete();
+    } else {
+        count = cv.countNonZero(roi);
     }
 
     roi.delete();
-    // Return an object with count and total available pixels in circle
-    return { count, total: totalCirclePixels };
+    const total = Math.round(Math.PI * (r - 1) * (r - 1));
+    return { count, total };
 }
 
 self.onmessage = function (e) {
@@ -174,7 +185,8 @@ self.onmessage = function (e) {
             cv.adaptiveThreshold(blurMat, tempThresh, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, cfg.block, cfg.C);
             const found = scanContours(tempThresh, 60, 40000);
             tempThresh.delete();
-            if (found.length > markers.length) markers = found; // best result রাখো
+            if (found.length > markers.length) markers = found;
+            // Early exit if we found the 4 markers we need
             if (markers.length >= 4) break;
         }
 
