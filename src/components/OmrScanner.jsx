@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useContext } from 'react';
-import * as pdfjsLib from 'pdfjs-dist';
+// pdfjsLib: dynamic import — PDF upload করলেই লোড হবে (lazy)
 import { AuthContext } from '../Provider';
 import {
     MdCameraAlt as Camera,
@@ -421,30 +421,47 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
 
     useEffect(() => {
         let timer;
-        const loop = () => {
+        let lastDetectTime = 0;
+        const DETECT_INTERVAL_MS = 333; // ~3fps — 60fps থেকে 20x কম CPU/memory ব্যবহার
+
+        // ── Off-screen small canvas for detection only (1/4 resolution)
+        const detectionCanvas = document.createElement('canvas');
+        const DETECT_MAX_W = 480; // low-res এ detect করো, CAPTURE-এ full-res
+        const detectionCtx = detectionCanvas.getContext('2d', { willReadFrequently: true });
+
+        const loop = (timestamp) => {
             drawOverlay();
             const video = videoRef.current;
             const canvas = canvasRef.current;
 
-            if (status === 'ready' && !capturingRef.current && sourceType === 'camera' && video && canvas && isCvLoaded && workerRef.current) {
-                const w = video.videoWidth, h = video.videoHeight;
-                if (w && h) {
-                    canvas.width = w; canvas.height = h;
-                    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-                    ctx.drawImage(video, 0, 0, w, h);
-                    const imageData = ctx.getImageData(0, 0, w, h);
+            if (status === 'ready' && !capturingRef.current && sourceType === 'camera'
+                && video && canvas && isCvLoaded && workerRef.current
+                && timestamp - lastDetectTime >= DETECT_INTERVAL_MS) {
+
+                lastDetectTime = timestamp;
+                const vw = video.videoWidth, vh = video.videoHeight;
+                if (vw && vh) {
+                    // Scale down for detection (up to 480px wide)
+                    const scale = Math.min(1, DETECT_MAX_W / vw);
+                    const dw = Math.round(vw * scale);
+                    const dh = Math.round(vh * scale);
+                    detectionCanvas.width = dw;
+                    detectionCanvas.height = dh;
+                    detectionCtx.drawImage(video, 0, 0, dw, dh);
+                    const imageData = detectionCtx.getImageData(0, 0, dw, dh);
                     workerRef.current.postMessage({
-                        imageData, width: w, height: h, numQ: totalQToEvaluate,
+                        imageData, width: dw, height: dh, numQ: totalQToEvaluate,
                         numOpts: exam.optionsPerQuestion || 4, isMasterKeyMode,
-                        useAiMode // Keep for now in logic
+                        useAiMode
                     }, [imageData.data.buffer]);
                 }
             }
             timer = requestAnimationFrame(loop);
         };
-        loop();
+        timer = requestAnimationFrame(loop);
         return () => cancelAnimationFrame(timer);
     }, [status, sourceType, isCvLoaded, totalQToEvaluate, exam, isMasterKeyMode, drawOverlay, useAiMode]);
+
 
     // ── Manual capture — called when user presses big Capture button
     const handleManualCapture = useCallback(async () => {
