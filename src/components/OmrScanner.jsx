@@ -32,8 +32,8 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
     const [devices, setDevices] = useState([]);
     const [selectedDeviceId, setSelectedDeviceId] = useState('');
     const [usePythonServer, setUsePythonServer] = useState(true);
-    // ── Default to Python Server (v1925 state) as it was "perfect" for the user's PC
-    const [useAiMode, setUseAiMode] = useState(false);
+    // ── Adaptive Defaults: Mobile uses Edge AI by default, PC uses "perfect" Python Server
+    const [useAiMode, setUseAiMode] = useState(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
     const [facingMode, setFacingMode] = useState('environment'); // 'environment'=back, 'user'=front
 
     // Capture states
@@ -74,6 +74,18 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
     useEffect(() => {
         if (externalKey) setAnswerKey(externalKey);
     }, [externalKey]);
+
+    // ── Adaptive Engine Parameters (Matched to Device)
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const engineParams = isMobile ? {
+        rollStartY: 0.148,
+        rollR: 9,
+        cornerZone: 0.45
+    } : {
+        rollStartY: 0.145,
+        rollR: 7,
+        cornerZone: 0.55
+    };
 
     const calculateScore = useCallback((detectedAnswers) => {
         const activeAnswers = detectedAnswers.filter(a => a.errorType !== 'SKIPPED_INACTIVE');
@@ -513,7 +525,8 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                     workerRef.current.postMessage({
                         imageData, width: dw, height: dh, numQ: totalQToEvaluate,
                         numOpts: exam.optionsPerQuestion || 4, isMasterKeyMode,
-                        useAiMode
+                        useAiMode,
+                        engineParams
                     }, [imageData.data.buffer]);
                 }
             }
@@ -578,7 +591,8 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
             workerRef.current.postMessage({
                 imageData, width: canvas.width, height: canvas.height, numQ: totalQToEvaluate,
                 numOpts: exam.optionsPerQuestion || 4, isMasterKeyMode,
-                useAiMode
+                useAiMode,
+                engineParams
             }, [imageData.data.buffer]);
         }
     }, [status, usePythonServer, totalQToEvaluate, exam, isMasterKeyMode, handleScanResult, processFramePython, notifyFailed, useAiMode]);
@@ -1017,7 +1031,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                                 className="text-[9px] font-black text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full hover:bg-sky-100 transition-colors"
                                 title="Force Refresh App"
                             >
-                                v0.1.0-260309-2020 🚀
+                                v0.1.0-260309-2030 📱💻
                             </button>
                         </div>
                         <div className="text-right flex-1">

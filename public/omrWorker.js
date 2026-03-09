@@ -141,8 +141,8 @@ self.onmessage = function (e) {
                             const mom = cv.moments(cnt);
                             if (mom.m00 > 0) {
                                 const cx = mom.m10 / mom.m00, cy = mom.m01 / mom.m00;
-                                const inCornerX = cx < imgW * CORNER_ZONE || cx > imgW * (1 - CORNER_ZONE);
-                                const inCornerY = cy < imgH * CORNER_ZONE || cy > imgH * (1 - CORNER_ZONE);
+                                const inCornerX = cx < imgW * cornerZone || cx > imgW * (1 - cornerZone);
+                                const inCornerY = cy < imgH * cornerZone || cy > imgH * (1 - cornerZone);
                                 if (inCornerX && inCornerY) {
                                     found.push({ x: cx, y: cy });
                                 }
@@ -242,9 +242,14 @@ self.onmessage = function (e) {
         // SET Detection removed as requested
         let finalSet = '';
 
-        // ── Roll Number Detection (Reverted to v1925 "perfect" state)
-        const rSX = 0.070, rCG = 0.048, rSY = 0.145, rRG = 0.0182;
-        const rollR = 7;
+        // ── Roll Number Detection
+        let finalRoll = '';
+        const { engineParams } = e.data;
+        const rSX = 0.070, rCG = 0.048;
+        const rSY = engineParams?.rollStartY || 0.145; // Default: v1925
+        const rRG = engineParams?.rollRowGap || 0.0182;
+        const rollR = engineParams?.rollR || 7;      // Default: v1925
+        const cornerZone = engineParams?.cornerZone || 0.55; // Default: v1925
         for (let c = 0; c < 6; c++) {
             let best = null, mD = 0, sD = 0;
             const allD = [];
