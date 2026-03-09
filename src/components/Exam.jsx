@@ -229,7 +229,7 @@ function Exam() {
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-20">
             {/* Header / Action Bar */}
-            <div className='flex flex-col lg:flex-row justify-between items-start lg:items-center bg-white/50 backdrop-blur-xl p-8 rounded-[2.5rem] shadow-sm border border-slate-100 mb-10 gap-8'>
+            <div className='flex flex-col lg:flex-row justify-between items-start lg:items-center bg-white/50 backdrop-blur-xl p-4 lg:p-8 rounded-2xl lg:rounded-[2.5rem] shadow-sm border border-slate-100 mb-6 lg:mb-10 gap-6 lg:gap-8'>
                 <div className="flex items-center gap-5">
                     <Link to="/exams" className="p-3 bg-white border border-slate-100 rounded-2xl text-slate-400 hover:text-indigo-600 transition-all shadow-sm">
                         <FiArrowLeft size={20} />
@@ -278,7 +278,7 @@ function Exam() {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-12">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 lg:gap-6 mb-8 lg:mb-12">
                 {[
                     { label: "Batch", val: batch, icon: FiUser, color: "indigo" },
                     { label: "Program", val: program, icon: FiActivity, color: "cyan" },
@@ -287,7 +287,7 @@ function Exam() {
                     { label: "Total Entries", val: displayResults?.length, icon: FiCheckCircle, color: "emerald" },
                     { label: "Session", val: session, icon: FiBookOpen, color: "slate" }
                 ].map((stat, i) => (
-                    <div key={i} className="bg-white border border-slate-100 p-6 rounded-[2rem] shadow-sm">
+                    <div key={i} className="bg-white border border-slate-100 p-4 lg:p-6 rounded-2xl lg:rounded-[2rem] shadow-sm">
                         <div className={`p-2 bg-${stat.color}-50 text-${stat.color}-600 rounded-xl w-fit mb-4`}>
                             <stat.icon size={18} />
                         </div>
@@ -298,7 +298,7 @@ function Exam() {
             </div>
 
             {/* Results Table */}
-            <div className="bg-white/50 backdrop-blur-xl border border-white/20 p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50">
+            <div className="bg-white/50 backdrop-blur-xl border border-white/20 p-4 lg:p-8 rounded-2xl lg:rounded-[2.5rem] shadow-xl shadow-slate-200/50">
                 <div className="flex items-center justify-between mb-8">
                     <h2 className="font-black text-xl text-slate-800 tracking-tight">Merit List</h2>
                     <div className="flex items-center gap-2">

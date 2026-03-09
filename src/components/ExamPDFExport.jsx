@@ -261,6 +261,53 @@ const ExamPDFExport = ({ exam, results, onClose }) => {
         Swal.close();
     };
 
+    // ─── RESULT SLIPS (2 PER PAGE) ──────────────────────────────────────────
+    const handleResultSlipsPDF = async () => {
+        const doc = new jsPDF('portrait', 'mm', 'a4');
+        const logo = await fetchLogo();
+        const pageW = doc.internal.pageSize.width;
+        const pageH = doc.internal.pageSize.height;
+
+        const drawSlip = (result, yOffset) => {
+            const slipH = (pageH - 20) / 2;
+            doc.setDrawColor(200);
+            doc.setLineWidth(0.1);
+            doc.rect(10, yOffset, pageW - 20, slipH);
+
+            if (logo) doc.addImage(logo, 'PNG', 15, yOffset + 5, 15, 15);
+            doc.setFontSize(16); doc.setFont('helvetica', 'bold'); doc.setTextColor(14, 165, 233);
+            doc.text('SOHAG PHYSICS', pageW / 2, yOffset + 12, { align: 'center' });
+
+            doc.setFontSize(10); doc.setTextColor(0); doc.text(exam.title, pageW / 2, yOffset + 18, { align: 'center' });
+
+            doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+            doc.text(`Name: ${result.name}`, 15, yOffset + 28);
+            doc.text(`Roll: ${result.id}`, 15, yOffset + 34);
+            doc.text(`Batch: ${exam.batch}`, 15, yOffset + 40);
+
+            doc.text(`MCQ: ${result.mcqMarks} / ${eMcqTotal}`, 120, yOffset + 28);
+            doc.text(`Written: ${result.writenMarks} / ${eWrittenTotal}`, 120, yOffset + 34);
+            doc.setFont('helvetica', 'bold');
+            doc.text(`Total: ${result.total} / ${eGrandTotal}`, 120, yOffset + 40);
+            doc.text(`Merit: #${result.merit}`, 120, yOffset + 46);
+
+            doc.setDrawColor(230); doc.line(15, yOffset + 50, pageW - 15, yOffset + 50);
+            doc.setFontSize(7); doc.setTextColor(150); doc.setFont('helvetica', 'normal');
+            doc.text(`Generated on ${new Date().toLocaleDateString()}`, pageW / 2, yOffset + slipH - 5, { align: 'center' });
+        };
+
+        ranked.forEach((res, i) => {
+            if (i > 0 && i % 2 === 0) doc.addPage();
+            const y = (i % 2 === 0) ? 10 : (pageH / 2) + 5;
+            drawSlip(res, y);
+        });
+
+        Swal.fire({ title: 'Generating Result Slips...', didOpen: () => Swal.showLoading() });
+        saveAs(doc.output('blob'), `Result_Slips_${exam.title.replace(/\s+/g, '_')}.pdf`);
+        Swal.close();
+    };
+
+
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 border-t-4 border-sky-500">

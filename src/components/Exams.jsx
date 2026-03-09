@@ -139,10 +139,10 @@ function Exams() {
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="pb-20"
+            className="pb-20 max-w-full overflow-x-hidden"
         >
-            {/* Action Bar */}
-            <div className='flex flex-col lg:flex-row justify-between items-start lg:items-center bg-white/50 backdrop-blur-xl p-6 rounded-[2rem] shadow-sm border border-slate-100 mb-10 gap-6'>
+            {/* Header Section */}
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center bg-white/50 backdrop-blur-xl p-4 lg:p-10 rounded-2xl lg:rounded-[3rem] shadow-sm border border-slate-100 mb-6 lg:mb-12 gap-6">
                 <div className="flex items-center gap-4">
                     <div className="p-3 bg-indigo-100 rounded-2xl text-indigo-600">
                         <FiBookOpen size={24} />
@@ -236,10 +236,10 @@ function Exams() {
                     {displayExams.map((exam, idx) => (
                         <motion.div
                             key={exam._id}
-                            initial={{ opacity: 0, y: 10 }}
+                            initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: idx * 0.03 }}
-                            className='group relative bg-white border border-slate-100 p-4 rounded-2xl shadow-sm hover:shadow-md transition-all'
+                            className="group bg-white/50 backdrop-blur-xl border border-white p-4 lg:p-8 rounded-2xl lg:rounded-[2.5rem] shadow-xl shadow-slate-200/50 hover:shadow-indigo-100 transition-all hover:-translate-y-1 overflow-hidden relative"
                         >
                             <div className="flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 items-center">
                                 <Link to={`/exam/${exam._id}`} className="w-full md:w-auto md:col-span-5 flex items-center justify-between md:justify-start gap-4">
