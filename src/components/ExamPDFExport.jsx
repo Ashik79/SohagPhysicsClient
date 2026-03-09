@@ -181,51 +181,83 @@ const ExamPDFExport = ({ exam, results, onClose }) => {
         Swal.close();
     };
 
-    // ─── RESULT SLIPS ────────────────────────────────────────────────────────────
-    const handleResultSlipsPDF = async () => {
+    // ─── COMPACT REPORT CARD (1 PAGE) ──────────────────────────────────────────
+    const handleCompactReportPDF = async () => {
         const doc = new jsPDF('portrait', 'mm', 'a4');
         const logo = await fetchLogo();
         const pageW = doc.internal.pageSize.width;
         const pageH = doc.internal.pageSize.height;
-        const slipH = (pageH - 30) / 2;
 
-        const drawSlip = (result, yStart, isLast) => {
-            const x = 14, w = pageW - 28;
-            doc.setDrawColor(14, 165, 233); doc.setLineWidth(0.4); doc.roundedRect(x, yStart + 2, w, slipH - 4, 4, 4);
-            doc.setFillColor(14, 165, 233); doc.roundedRect(x, yStart + 2, w, 14, 4, 4, 'F'); doc.rect(x, yStart + 8, w, 8, 'F');
-            if (logo) doc.addImage(logo, 'PNG', x + 3, yStart + 4, 10, 10);
-            doc.setTextColor(255); doc.setFontSize(12); doc.setFont('helvetica', 'bold');
-            doc.text('Sohag Physics', pageW / 2, yStart + 10, { align: 'center' });
-            doc.setFontSize(7.5); doc.setFont('helvetica', 'normal'); doc.text('Result Slip', pageW / 2, yStart + 14.5, { align: 'center' });
+        const drawCompactCard = (result) => {
+            // Elegant Background & Border
+            doc.setDrawColor(240); doc.setFillColor(252, 254, 255); doc.rect(0, 0, pageW, pageH, 'F');
+            doc.setDrawColor(14, 165, 233); doc.setLineWidth(1.5); doc.rect(8, 8, pageW - 16, pageH - 16);
+            doc.setDrawColor(200); doc.setLineWidth(0.2); doc.rect(10, 10, pageW - 20, pageH - 20);
 
-            doc.setTextColor(0); doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.text(result.name, x + 5, yStart + 22);
-            doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
-            doc.text(`Roll: ${result.id}`, x + 5, yStart + 28); doc.text(`Exam: ${exam.title}`, x + 5, yStart + 34); doc.text(`Date: ${exam.date}`, x + 5, yStart + 40);
+            // Header Section
+            if (logo) doc.addImage(logo, 'PNG', 15, 15, 25, 25);
+            doc.setFontSize(26); doc.setFont('helvetica', 'bold'); doc.setTextColor(14, 165, 233);
+            doc.text('SOHAG PHYSICS', pageW / 2 + 10, 25, { align: 'center' });
+            doc.setFontSize(10); doc.setTextColor(100); doc.setFont('helvetica', 'normal');
+            doc.text('PREMIUM ACADEMIC CARE & GUIDANCE', pageW / 2 + 10, 32, { align: 'center' });
 
-            doc.setFillColor(255, 237, 100); doc.roundedRect(x + w - 35, yStart + 18, 30, 20, 3, 3, 'F');
-            doc.setFontSize(7); doc.setFont('helvetica', 'bold'); doc.text('MERIT POSITION', x + w - 20, yStart + 24, { align: 'center' });
-            doc.setFontSize(18); doc.setTextColor(14, 100, 200); doc.text(`#${result.merit}`, x + w - 20, yStart + 35, { align: 'center' });
+            doc.setDrawColor(230); doc.line(20, 42, pageW - 20, 42);
+            doc.setFontSize(14); doc.setTextColor(30, 41, 59); doc.setFont('helvetica', 'bold');
+            doc.text('OFFICIAL ACADEMIC REPORT', pageW / 2, 52, { align: 'center' });
 
+            // Student Info Box
+            doc.setFillColor(255); doc.setDrawColor(230); doc.roundedRect(15, 60, pageW - 30, 35, 3, 3, 'FD');
+            doc.setFontSize(10); doc.setTextColor(14, 165, 233); doc.text('STUDENT PROFILE', 22, 67);
+
+            doc.setTextColor(51, 65, 85); doc.setFont('helvetica', 'normal');
+            doc.text(`Name:`, 22, 75); doc.setFont('helvetica', 'bold'); doc.text(result.name || 'N/A', 50, 75);
+            doc.setFont('helvetica', 'normal'); doc.text(`Roll ID:`, 22, 82); doc.setFont('helvetica', 'bold'); doc.text(result.id || 'N/A', 50, 82);
+            doc.setFont('helvetica', 'normal'); doc.text(`Batch:`, 22, 89); doc.setFont('helvetica', 'bold'); doc.text(exam.batch || 'N/A', 50, 89);
+
+            doc.setFont('helvetica', 'normal'); doc.text(`Exam Name:`, 110, 75); doc.setFont('helvetica', 'bold'); doc.text(exam.title || 'N/A', 140, 75);
+            doc.setFont('helvetica', 'normal'); doc.text(`Exam Date:`, 110, 82); doc.setFont('helvetica', 'bold'); doc.text(exam.date || 'N/A', 140, 82);
+
+            // Marks Table
             autoTable(doc, {
-                head: [['Component', 'Obtained', 'Total', '%']],
+                head: [['ASSESSMENT COMPONENT', 'FULL MARKS', 'OBTAINED', 'PERCENTAGE']],
                 body: [
-                    ['MCQ', result.mcqMarks, eMcqTotal, eMcqTotal ? `${((result.mcqMarks / eMcqTotal) * 100).toFixed(1)}%` : '0%'],
-                    ['Written', result.writenMarks, eWrittenTotal, eWrittenTotal ? `${((result.writenMarks / eWrittenTotal) * 100).toFixed(1)}%` : '0%'],
-                    ['Total', result.total, eGrandTotal, eGrandTotal ? `${((result.total / eGrandTotal) * 100).toFixed(1)}%` : '0%'],
+                    ['MCQ Assessment', eMcqTotal, result.mcqMarks, eMcqTotal ? `${((result.mcqMarks / eMcqTotal) * 100).toFixed(1)}%` : '0%'],
+                    ['Written Assessment', eWrittenTotal, result.writenMarks, eWrittenTotal ? `${((result.writenMarks / eWrittenTotal) * 100).toFixed(1)}%` : '0%'],
+                    ['Grand Total Outcome', eGrandTotal, result.total, eGrandTotal ? `${((result.total / eGrandTotal) * 100).toFixed(1)}%` : '0%'],
                 ],
-                startY: yStart + 44, theme: 'grid',
-                headStyles: { fillColor: [240, 249, 255], textColor: [14, 100, 200], fontSize: 8, halign: 'center' },
-                bodyStyles: { fontSize: 8, halign: 'center' },
-                columnStyles: { 0: { halign: 'left', cellWidth: 28 } },
-                margin: { left: x + 3, right: x + w - 90 }, tableWidth: w - 40,
+                startY: 105, theme: 'grid',
+                headStyles: { fillColor: [14, 165, 233], textColor: 255, halign: 'center', cellPadding: 4, fontSize: 10 },
+                bodyStyles: { halign: 'center', cellPadding: 4, fontSize: 10, textColor: [51, 65, 85] },
+                columnStyles: { 0: { halign: 'left', cellWidth: 70, fontStyle: 'bold' } },
+                margin: { left: 15, right: 15 }
             });
 
-            if (!isLast) { doc.setDrawColor(180); doc.setLineDash([2, 2]); doc.line(x, yStart + slipH, x + w, yStart + slipH); doc.setLineDash([]); }
+            // Performance Analytics
+            const finalY = doc.lastAutoTable.finalY + 12;
+            doc.setFillColor(255, 248, 240); doc.roundedRect(15, finalY, (pageW - 40) / 2, 35, 4, 4, 'F');
+            doc.setFontSize(9); doc.setTextColor(194, 65, 12); doc.text('MERIT POSITION', 15 + (pageW - 40) / 4, finalY + 8, { align: 'center' });
+            doc.setFontSize(24); doc.setFont('helvetica', 'bold'); doc.text(`#${result.merit}`, 15 + (pageW - 40) / 4, finalY + 25, { align: 'center' });
+
+            doc.setFillColor(240, 253, 244); doc.roundedRect(25 + (pageW - 40) / 2, finalY, (pageW - 40) / 2, 35, 4, 4, 'F');
+            doc.setFontSize(9); doc.setTextColor(21, 128, 61); doc.setFont('helvetica', 'normal');
+            doc.text('CLASS PERFORMANCE', 25 + (pageW - 40) * 0.75, finalY + 8, { align: 'center' });
+            doc.setFontSize(10); doc.setTextColor(51, 65, 85);
+            doc.text(`Highest: ${highest} / ${eGrandTotal}`, 25 + (pageW - 40) / 2 + 8, finalY + 18);
+            doc.text(`Average: ${avg} / ${eGrandTotal}`, 25 + (pageW - 40) / 2 + 8, finalY + 28);
+
+            // Footnote & Signatures
+            const sigY = pageH - 35;
+            doc.setDrawColor(200); doc.setLineWidth(0.1); doc.line(20, sigY, 70, sigY);
+            doc.setTextColor(100); doc.setFontSize(8); doc.text("Guardian's Signature", 45, sigY + 5, { align: 'center' });
+            doc.line(pageW - 70, sigY, pageW - 20, sigY); doc.text("Director’s Signature", pageW - 45, sigY + 5, { align: 'center' });
+
+            doc.setFontSize(7); doc.setTextColor(160);
+            doc.text(`Generated by Sohag Physics Management on ${new Date().toLocaleDateString()}`, pageW / 2, pageH - 12, { align: 'center' });
         };
 
-        ranked.forEach((res, i) => { if (i % 2 === 0 && i > 0) doc.addPage(); drawSlip(res, 10 + (i % 2) * slipH, (i % 2) === 1 || i === ranked.length - 1); });
-        Swal.fire({ title: 'Generating Slips...', didOpen: () => Swal.showLoading() });
-        saveAs(doc.output('blob'), `Slips_${exam.title.replace(/\s+/g, '_')}.pdf`);
+        ranked.forEach((res, i) => { if (i > 0) doc.addPage(); drawCompactCard(res); });
+        Swal.fire({ title: 'Generating Compact Cards...', didOpen: () => Swal.showLoading() });
+        saveAs(doc.output('blob'), `Compact_Reports_${exam.title.replace(/\s+/g, '_')}.pdf`);
         Swal.close();
     };
 
@@ -246,9 +278,14 @@ const ExamPDFExport = ({ exam, results, onClose }) => {
                         <div className="text-left"><p className="font-black text-slate-800 text-sm">Merit List PDF</p><p className="text-slate-500 text-xs">Full ranked list • A4 Portrait</p></div>
                     </button>
 
+                    <button onClick={handleCompactReportPDF} className="w-full flex items-center gap-4 p-4 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl transition-all group">
+                        <div className="w-12 h-12 bg-amber-600 rounded-xl flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform"><MdPictureAsPdf size={24} /></div>
+                        <div className="text-left"><p className="font-black text-slate-800 text-sm">Compact Slip (1/Page)</p><p className="text-slate-500 text-xs">Optimized single page report</p></div>
+                    </button>
+
                     <button onClick={handleReportCardsPDF} className="w-full flex items-center gap-4 p-4 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition-all group">
                         <div className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform"><MdPictureAsPdf size={24} /></div>
-                        <div className="text-left"><p className="font-black text-slate-800 text-sm">Formal Report Cards</p><p className="text-slate-500 text-xs">Individual A4 page per student</p></div>
+                        <div className="text-left"><p className="font-black text-slate-800 text-sm">Formal Report Cards</p><p className="text-slate-500 text-xs">Full detail A4 per student</p></div>
                     </button>
 
                     <button onClick={handleResultSlipsPDF} className="w-full flex items-center gap-4 p-4 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl transition-all group">

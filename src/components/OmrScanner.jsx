@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useContext } from 'react';
+import { motion } from 'framer-motion';
 // pdfjsLib: dynamic import — PDF upload করলেই লোড হবে (lazy)
 import { AuthContext } from '../Provider';
 import {
@@ -19,7 +20,7 @@ const PYTHON_TIMEOUT_MS = 50000; // 50s — Render cold-start can take ~50s
 
 const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuestions }) => {
     const { notifySuccess, notifyFailed } = useContext(AuthContext);
-    const [status, setStatus] = useState('initializing');
+    const [status, setStatus] = useState('idle');
     const [scannedData, setScannedData] = useState(null);
     const [batchHistory, setBatchHistory] = useState([]);
     const [isCvLoaded, setIsCvLoaded] = useState(false);
@@ -138,6 +139,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
             workerRef.current = new Worker('/omrWorker.js');
             workerRef.current.onmessage = (e) => {
                 if (e.data.type === 'ready') {
+                    console.log("[+] OMR Worker Ready");
                     setIsCvLoaded(true);
                     setStatus('ready');
                 } else if (e.data.type === 'detecting') {
@@ -154,6 +156,7 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                     setRealTimeOverlayData(null);
                 }
             };
+            setStatus('initializing');
         } catch (e) {
             console.error('[OMR] Worker creation failed:', e);
             setStatus('error');
@@ -161,6 +164,9 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
     };
 
     useEffect(() => {
+        // ── Auto-init worker on mount (background load for better speed)
+        initWorker();
+
         return () => {
             if (workerRef.current) { workerRef.current.terminate(); workerRef.current = null; }
             stopCamera();
@@ -191,8 +197,9 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
     const startCamera = async (deviceId = null, forceFacing = null) => {
         try {
             stopCamera();
-            // ── Worker-কে এখন init করো (lazy — camera চাপলেই OpenCV লোড হবে)
-            initWorker();
+            // ── Ensure worker is alive
+            if (!workerRef.current) initWorker();
+
             setStatus('initializing');
             const facing = forceFacing || facingMode;
 
@@ -251,7 +258,15 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                 }
             }
 
-            if (videoRef.current) { videoRef.current.srcObject = stream; streamRef.current = stream; }
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+                streamRef.current = stream;
+                try {
+                    await videoRef.current.play();
+                } catch (e) {
+                    console.error("Video play failed:", e);
+                }
+            }
 
             // Enumerate and label all video devices
             const allDevices = await navigator.mediaDevices.enumerateDevices();
@@ -261,8 +276,22 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
             const activeDeviceId = track?.getSettings()?.deviceId || '';
             setSelectedDeviceId(activeDeviceId);
             setIsCameraOn(true);
+
+            // If CV is already loaded from a previous session, jump to ready immediately
+            if (isCvLoaded) {
+                setStatus('ready');
+            } else {
+                // Safety timeout: If worker doesn't say "ready" within 10s, try to force it
+                setTimeout(() => {
+                    if (!isCvLoaded && status === 'initializing') {
+                        setIsCvLoaded(true);
+                        setStatus('ready');
+                    }
+                }, 10000);
+            }
         } catch (err) {
             console.error('Camera start failed:', err);
+            notifyFailed('ক্যামেরা চালু করা যায়নি। ডিভাইসের পারমিশন চেক করুন।');
             setStatus('error');
         }
     };
@@ -717,6 +746,9 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
     const statusText = () => {
         if (isCapturing) return serverWarming ? '🔥 Server Warming Up...' : '⏳ Processing...';
         if (isAligned) return '🟢 Sheet Detected';
+        if (status === 'scanned') return '📝 Review Result';
+        if (status === 'initializing') return '⚙️ Starting Engine...';
+        if (status === 'idle') return '💤 Standby';
         if (status === 'ready') return '📷 Ready';
         return status;
     };
@@ -788,27 +820,46 @@ const OmrScanner = ({ exam, onSave, onClose, externalKey, embedded, activeQuesti
                             </div>
                         )}
 
-                        {/* Start Camera Overlay */}
-                        {status === 'ready' && sourceType === 'camera' && !isCameraOn && (
-                            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-950/40 backdrop-blur-[2px]">
-                                <button
-                                    onClick={() => startCamera()}
-                                    className="group flex flex-col items-center gap-4 p-8 rounded-[3rem] bg-white text-slate-900 shadow-2xl hover:scale-105 transition-all duration-300"
-                                >
-                                    <div className="w-20 h-20 bg-sky-100 rounded-full flex items-center justify-center text-sky-600 group-hover:bg-sky-600 group-hover:text-white transition-colors duration-300">
-                                        <Camera size={40} />
+                        {/* Start Camera / Initializing Overlay */}
+                        {sourceType === 'camera' && !isCameraOn && (
+                            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-950/60 backdrop-blur-[4px] p-8 text-center">
+                                {(status === 'initializing' || !isCvLoaded) ? (
+                                    <div className="flex flex-col items-center gap-6 animate-in fade-in zoom-in duration-500">
+                                        <div className="relative w-24 h-24">
+                                            <div className="absolute inset-0 border-4 border-sky-500/20 rounded-full"></div>
+                                            <div className="absolute inset-0 border-4 border-t-sky-500 rounded-full animate-spin"></div>
+                                            <div className="absolute inset-0 flex items-center justify-center text-sky-400">
+                                                <Target size={32} className="animate-pulse" />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <p className="text-white text-lg font-black uppercase tracking-widest mb-1">Loading Engine</p>
+                                            <p className="text-slate-400 text-xs font-bold">স্ক্যান ইঞ্জিন লোড হচ্ছে, এক মুহূর্ত অপেক্ষা করুন...</p>
+                                        </div>
                                     </div>
-                                    <div className="text-center">
-                                        <p className="text-lg font-black uppercase tracking-tight">Open Camera</p>
-                                        <p className="text-xs font-bold text-slate-400 mt-1">ক্যামেরা চালু করতে এখানে ট্যাপ করুন</p>
-                                    </div>
-                                </button>
+                                ) : (
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => startCamera()}
+                                        className="group flex flex-col items-center gap-5 p-10 rounded-[4rem] bg-white text-slate-900 shadow-2xl transition-all duration-300 border border-white/20"
+                                    >
+                                        <div className="w-24 h-24 bg-sky-100 rounded-full flex items-center justify-center text-sky-600 group-hover:bg-sky-600 group-hover:text-white transition-all duration-500 shadow-lg">
+                                            <Camera size={44} />
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-xl font-black uppercase tracking-tight">Open Camera</p>
+                                            <p className="text-xs font-bold text-slate-400 mt-1">ক্যামেরা চালু করতে এখানে ট্যাপ করুন</p>
+                                        </div>
+                                    </motion.button>
+                                )}
 
-                                <div className="mt-8 px-6 py-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
-                                    <p className="text-white text-[10px] font-black uppercase tracking-widest text-center">
-                                        OR UPLOAD FILE BELOW
-                                    </p>
-                                </div>
+                                {!isCvLoaded && (
+                                    <div className="mt-12 px-8 py-4 bg-emerald-500/10 border border-emerald-500/20 rounded-3xl flex items-center gap-3">
+                                        <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></div>
+                                        <p className="text-emerald-400 text-[10px] font-black uppercase tracking-[0.2em]">Ready to scan in 5..4..3..</p>
+                                    </div>
+                                )}
                             </div>
                         )}
 
